@@ -14,11 +14,12 @@ trait OpportunityModule {
   type ParagraphQuery = Query[ParagraphTable, ParagraphRow, Seq]
   class ParagraphTable(tag: Tag) extends Table[ParagraphRow](tag, "paragraph") {
     def id = column[ParagraphId]("id", O.Length(IdType.length), O.PrimaryKey)
+    def paragraphNumber = column[Int]("paragraph_number")
     def sectionId = column[SectionId]("section_id", O.Length(IdType.length))
     def sectionIdFK = foreignKey("paragraph_section_fk", sectionId, sectionTable)(_.id, onDelete = ForeignKeyAction.Cascade)
     def sectionIdIndex = index("paragraph_section_idx", sectionId)
     def text = column[String]("text", O.Length(255))
-    def * = (id, sectionId, text) <> (ParagraphRow.tupled, ParagraphRow.unapply)
+    def * = (id, paragraphNumber, sectionId, text) <> (ParagraphRow.tupled, ParagraphRow.unapply)
   }
   lazy val paragraphTable = TableQuery[ParagraphTable]
 

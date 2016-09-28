@@ -39,19 +39,16 @@ class OpportunityTables @Inject()(dbConfigProvider: DatabaseConfigProvider)(impl
     opportunityTable.filter(_.id === opportunityId).result.headOption
   }
 
-  def buildSections(rows: Seq[(SectionRow, Option[ParagraphRow])]): Seq[(OpportunityId, OpportunityDescriptionSection)] = {
+  def buildSections(rows: Seq[(SectionRow, Option[ParagraphRow])]): Map[OpportunityId, Seq[OpportunityDescriptionSection]] = {
     val grouped = rows.groupBy(_._1).map { case (s, ops) => s -> ops.flatMap(_._2) }
     grouped.map {
-      case (section, paras) => section.opportunityId -> OpportunityDescriptionSection(section.sectionNumber, section.title, paras.map(_.text))
-    }.toSeq
+      case (section, paras) =>
+        val paragraphTexts: Seq[String] = paras.sortBy(_.paragraphNumber).map(_.text)
+        section.opportunityId -> OpportunityDescriptionSection(section.sectionNumber, section.title, paragraphTexts)
+    }.toSeq.groupBy(_._1).map { case (oid, ss) => oid -> ss.map(_._2) }
   }
 
   override def byIdWithDescription(id: OpportunityId): Future[Option[Opportunity]] = db.run {
-    val q1 = for {
-      o <- opportunityTable if o.id === id
-    } yield o
-
-    // TODO: Finish this off to extract the sections and paragraphs into the Opportunity
     val spQ = for {
       sp <- sectionTable joinLeft paragraphTable on (_.id === _.sectionId)
     } yield sp
@@ -60,16 +57,20 @@ class OpportunityTables @Inject()(dbConfigProvider: DatabaseConfigProvider)(impl
       os <- opportunityTable joinLeft spQ on (_.id === _._1.opportunityId) if os._1.id === id
     } yield os
 
-    q1.result.headOption.map {
-      _.map { o =>
+    q2.result.map { x =>
+      val sectionMap: Map[OpportunityId, Seq[OpportunityDescriptionSection]] = buildSections(x.flatMap(_._2))
+
+      x.map { case (o, _) =>
+        val sections = sectionMap.getOrElse(o.id, Seq())
         val od = for {
           d <- o.duration
           du <- o.durationUnits
         } yield OpportunityDuration(d, du)
-
-        Opportunity(o.id, o.title, o.startDate, od, OpportunityValue(o.value, o.valueUnits), Seq())
-      }
+        Opportunity(o.id, o.title, o.startDate, od, OpportunityValue(o.value, o.valueUnits), sections)
+      }.headOption
     }
+
+
   }
 
   override def open: Future[Seq[OpportunityRow]] = db.run(opportunityTable.result)

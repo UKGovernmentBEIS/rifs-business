@@ -2,7 +2,7 @@ package ifs.models
 
 case class ParagraphId(id: Long) extends AnyVal
 
-case class ParagraphRow(id: ParagraphId, sectionId: SectionId, text: String)
+case class ParagraphRow(id: ParagraphId, paragraphNumber: Int, sectionId: SectionId, text: String)
 
 case class SectionId(id: Long) extends AnyVal
 
