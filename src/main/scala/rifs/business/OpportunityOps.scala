@@ -3,11 +3,12 @@ package rifs.business
 import javax.inject.Inject
 
 import com.google.inject.ImplementedBy
-import ifs.models._
-import ifs.slicks.modules.OpportunityModule
-import ifs.slicks.support.DBBinding
+import rifs.models._
+import rifs.slicks.modules.OpportunityModule
 import play.api.db.slick.DatabaseConfigProvider
 import rifs.business.restmodels._
+import rifs.slicks.modules.OpportunityModule
+import rifs.slicks.support.DBBinding
 import slick.backend.DatabaseConfig
 import slick.driver.JdbcProfile
 

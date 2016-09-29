@@ -1,10 +1,10 @@
 package rifs.business
 
 import com.wellfactored.playbindings.ValueClassFormats
-import ifs.data.restmodels.{Opportunity, OpportunityDescriptionSection, OpportunityDuration, OpportunityValue}
-import ifs.models._
 import org.joda.time.{LocalDate, LocalDateTime}
 import play.api.libs.json._
+import rifs.business.restmodels._
+import rifs.models._
 
 package object controllers extends ValueClassFormats {
   implicit val jodaLocalDateTimeFormat = new Format[LocalDateTime] {

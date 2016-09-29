@@ -1,3 +1,3 @@
 
-GET        /opportunity/open        ifs.data.controllers.OpportunityController.getOpen
-GET        /opportunity/:id         ifs.data.controllers.OpportunityController.byId(id: OpportunityId)
+GET        /opportunity/open        rifs.business.controllers.OpportunityController.getOpen
+GET        /opportunity/:id         rifs.business.controllers.OpportunityController.byId(id: OpportunityId)

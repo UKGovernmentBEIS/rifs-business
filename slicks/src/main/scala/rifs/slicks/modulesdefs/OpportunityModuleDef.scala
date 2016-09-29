@@ -1,7 +1,7 @@
-package ifs.slicks.modulesdefs
+package rifs.slicks.modulesdefs
 
-import ifs.models.{OpportunityRow, ParagraphRow, SectionRow}
-import ifs.slicks.gen.{ModuleDefinition, ModuleSpec}
+import rifs.models.{OpportunityRow, ParagraphRow, SectionRow}
+import rifs.slicks.gen.{ModuleDefinition, ModuleSpec}
 
 object OpportunityModuleDef extends ModuleDefinition {
   val spec = ModuleSpec("OpportunityModule")

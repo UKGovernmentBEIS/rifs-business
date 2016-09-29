@@ -1,8 +1,8 @@
-package ifs.slicks.modules
+package rifs.slicks.modules
 
-import ifs.models._
-import ifs.slicks.gen.IdType
-import ifs.slicks.support.DBBinding
+import rifs.models._
+import rifs.slicks.gen.IdType
+import rifs.slicks.support.DBBinding
 
 trait OpportunityModule {
   self: DBBinding =>

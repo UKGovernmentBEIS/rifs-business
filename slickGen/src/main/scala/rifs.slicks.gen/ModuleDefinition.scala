@@ -1,4 +1,4 @@
-package ifs.slicks.gen
+package rifs.slicks.gen
 
 import com.wellfactored.propertyinfo.PropertyInfoGen
 

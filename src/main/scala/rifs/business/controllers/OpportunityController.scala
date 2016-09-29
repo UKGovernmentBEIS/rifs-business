@@ -2,7 +2,7 @@ package rifs.business.controllers
 
 import javax.inject.Inject
 
-import ifs.models.OpportunityId
+import rifs.models.OpportunityId
 import play.api.libs.json.Json
 import play.api.mvc.{Action, Controller}
 import rifs.business.OpportunityOps

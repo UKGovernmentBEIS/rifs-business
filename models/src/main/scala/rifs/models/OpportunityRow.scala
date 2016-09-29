@@ -1,4 +1,4 @@
-package ifs.models
+package rifs.models
 
 case class ParagraphId(id: Long) extends AnyVal
 
