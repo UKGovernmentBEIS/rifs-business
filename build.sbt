@@ -52,6 +52,10 @@ lazy val `rifs-business` = (project in file("."))
       "org.scalatestplus.play" %% "scalatestplus-play" % "1.5.1" % "test"
     ),
     PlayKeys.devSettings := Seq("play.server.http.port" -> "9100"),
+    routesImport ++= Seq(
+      "rifs.models._",
+      "com.wellfactored.playbindings.ValueClassUrlBinders._"
+    ),
     javaOptions := Seq(
       "-Dconfig.file=src/main/resources/development.application.conf",
       "-Dlogger.file=src/main/resources/development.logger.xml"
