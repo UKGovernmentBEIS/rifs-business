@@ -1,4 +1,4 @@
-package ifs.data.filters
+package rifs.business.filters
 
 import javax.inject.Inject
 

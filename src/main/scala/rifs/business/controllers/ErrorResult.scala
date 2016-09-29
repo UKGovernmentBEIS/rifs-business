@@ -1,4 +1,4 @@
-package ifs.data.controllers
+package rifs.business.controllers
 
 import play.api.libs.json.Json
 

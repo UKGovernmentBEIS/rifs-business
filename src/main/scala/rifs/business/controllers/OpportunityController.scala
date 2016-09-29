@@ -1,11 +1,11 @@
-package ifs.data.controllers
+package rifs.business.controllers
 
 import javax.inject.Inject
 
-import ifs.data.db.OpportunityOps
 import ifs.models.OpportunityId
 import play.api.libs.json.Json
 import play.api.mvc.{Action, Controller}
+import rifs.business.OpportunityOps
 
 import scala.concurrent.ExecutionContext
 

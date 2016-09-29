@@ -1,8 +1,8 @@
-package ifs.data.controllers
+package rifs.business.controllers
 
-import ifs.data.Config
 import play.api.libs.json.{JsObject, Json, Writes}
 import play.api.mvc._
+import rifs.business.Config
 
 import scala.concurrent.ExecutionContext
 

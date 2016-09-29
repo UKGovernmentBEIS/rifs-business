@@ -1,4 +1,4 @@
-package ifs.data
+package rifs.business
 
 case class Config(cache: CachesConfig)
 

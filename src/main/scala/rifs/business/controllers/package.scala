@@ -1,4 +1,4 @@
-package ifs.data
+package rifs.business
 
 import com.wellfactored.playbindings.ValueClassFormats
 import ifs.data.restmodels.{Opportunity, OpportunityDescriptionSection, OpportunityDuration, OpportunityValue}

@@ -1,4 +1,4 @@
-package ifs.data.restmodels
+package rifs.business.restmodels
 
 import ifs.models.OpportunityId
 

@@ -1,13 +1,13 @@
-package ifs.data.db
+package rifs.business
 
 import javax.inject.Inject
 
 import com.google.inject.ImplementedBy
-import ifs.data.restmodels.{Opportunity, OpportunityDescriptionSection, OpportunityDuration, OpportunityValue}
 import ifs.models._
 import ifs.slicks.modules.OpportunityModule
 import ifs.slicks.support.DBBinding
 import play.api.db.slick.DatabaseConfigProvider
+import rifs.business.restmodels._
 import slick.backend.DatabaseConfig
 import slick.driver.JdbcProfile
 
