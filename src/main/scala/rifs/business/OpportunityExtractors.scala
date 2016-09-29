@@ -1,7 +1,7 @@
 package rifs.business
 
 import rifs.business.restmodels.{Opportunity, OpportunityDescriptionSection, OpportunityDuration, OpportunityValue}
-import rifs.models.{OpportunityRow, ParagraphRow, SectionRow}
+import rifs.models._
 
 object OpportunityExtractors {
   /**
@@ -9,30 +9,39 @@ object OpportunityExtractors {
     * builds them up into the REST model.
     *
     * @param joinResults the raw results from the left joins.
-    * @return
     */
   def extractOpportunities(joinResults: Seq[(OpportunityRow, Option[(SectionRow, Option[ParagraphRow])])]): Seq[Opportunity] = {
-    val (opps: Seq[OpportunityRow], y: Seq[Option[(SectionRow, Option[ParagraphRow])]]) = joinResults.unzip
-    val (sections, oparas) = y.flatten.unzip
-    val paras: Seq[ParagraphRow] = oparas.flatten
+    val (os, ss, ps) = splitOutRows(joinResults)
 
-    val paraMap = paras.groupBy(_.sectionId)
-    val sectionMap = sections.distinct.groupBy(_.opportunityId)
-    opps.distinct.map { opp =>
-      val sections: Seq[OpportunityDescriptionSection] = sectionMap.get(opp.id).map { ss =>
-        ss.flatMap { s =>
-          paraMap.get(s.id).map { ps =>
-            OpportunityDescriptionSection(s.sectionNumber, s.title, ps.map(_.text))
-          }
-        }
-      }.getOrElse(Seq())
+    val sectionMap = ss.map { s =>
+      s.opportunityId -> OpportunityDescriptionSection(s.sectionNumber, s.title, ps.filter(_.sectionId == s.id).map(_.text))
+    }.groupBy(_._1)
 
-      val du = for {
-        d <- opp.duration
-        u <- opp.durationUnits
-      } yield OpportunityDuration(d, u)
-
-      Opportunity(opp.id, opp.title, opp.startDate, du, OpportunityValue(opp.value, opp.valueUnits), sections)
+    os.map { o =>
+      Opportunity(o.id, o.title, o.startDate, durationFor(o), OpportunityValue(o.value, o.valueUnits),
+        sectionMap.getOrElse(o.id, Seq()).map(_._2))
     }
+  }
+
+  def durationFor(opp: OpportunityRow): Option[OpportunityDuration] = for {
+    d <- opp.duration
+    u <- opp.durationUnits
+  } yield OpportunityDuration(d, u)
+
+  /**
+    * Take the nested results from the left joins and separate out sequences of the three `Row` types
+    *
+    * @return a triple of `Seq`s of each of the row types. Because the left joins can result in sql `null`s
+    *         (represented as Scala `None`s), the three sequences will generally be of different lengths from
+    *         each other.
+    */
+  def splitOutRows(joinResults: Seq[(OpportunityRow, Option[(SectionRow, Option[ParagraphRow])])]): (Seq[OpportunityRow], Seq[SectionRow], Seq[ParagraphRow]) = {
+    val (os, ss, ps) = joinResults.map {
+      case (o, Some((s, Some(p)))) => (o, Some(s), Some(p))
+      case (o, Some((s, None))) => (o, Some(s), None)
+      case (o, None) => (o, None, None)
+    }.unzip3
+
+    (os.distinct, ss.flatten.distinct, ps.flatten.distinct)
   }
 }
