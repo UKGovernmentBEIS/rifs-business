@@ -47,6 +47,7 @@ lazy val `rifs-business` = (project in file("."))
       "com.wellfactored" %% "play-bindings" % "1.1.0",
       "com.github.melrief" %% "pureconfig" % "0.1.6",
       "org.postgresql" % "postgresql" % "9.4.1211",
+      "mysql" % "mysql-connector-java" % "6.0.3",
       "com.typesafe.play" %% "play-slick" % "2.0.0",
       "com.typesafe.play" %% "play-slick-evolutions" % "2.0.0",
       "org.scalatestplus.play" %% "scalatestplus-play" % "1.5.1" % "test"

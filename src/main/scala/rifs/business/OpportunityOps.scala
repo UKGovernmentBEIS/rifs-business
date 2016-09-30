@@ -30,7 +30,7 @@ class OpportunityTables @Inject()(dbConfigProvider: DatabaseConfigProvider)(impl
 
   override val dbConfig: DatabaseConfig[JdbcProfile] = dbConfigProvider.get[JdbcProfile]
 
-  create.foreach(s => println(s"$s;"))
+  //create.foreach(s => println(s"$s;"))
 
   import driver.api._
 

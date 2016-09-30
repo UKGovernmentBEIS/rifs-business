@@ -1,20 +1,12 @@
 version: '2'
 services:
   user:
-    image: rifs/user-service
-    links:
-    - mysql
+    image: rifs/rifs-business
+#    links:
+#    - mysql
 #    environment:
 #      USER_CACHE_TIMEOUT: 0
 
     ports:
-     - "9000:9000"
+     - "9100:9000"
 
-  mysql:
-    image: mysql
-    volumes:
-     - ~/DockerData/mysql:/var/lib/mysql
-    environment:
-     - MYSQL_ROOT_PASSWORD=password
-    ports:
-     - "3306:3306"
