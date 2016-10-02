@@ -15,6 +15,10 @@ class OpportunityController @Inject()(opportunities: OpportunityOps)(implicit va
     opportunities.byIdWithDescription(id).map(jsonResult(_))
   }
 
+  def getOpenSummaries = Action.async {
+    opportunities.openSummaries.map(os => Ok(Json.toJson(os)))
+  }
+
   def getOpen = Action.async {
     opportunities.open.map(os => Ok(Json.toJson(os)))
   }
