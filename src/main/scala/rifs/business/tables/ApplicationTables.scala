@@ -20,8 +20,6 @@ class ApplicationTables @Inject()(dbConfigProvider: DatabaseConfigProvider)(impl
 
   import driver.api._
 
-  createApplication.foreach(s => println(s"$s;"))
-
   override def byId(id: ApplicationId): Future[Option[ApplicationRow]] = db.run {
     applicationTable.filter(_.id === id).result.headOption
   }
@@ -35,7 +33,7 @@ class ApplicationTables @Inject()(dbConfigProvider: DatabaseConfigProvider)(impl
     q.result.map {
       rs =>
         rs.groupBy(_._1).map { case (k, vs) => k -> vs.map(_._2) }.map {
-          case (a, ss) => Application(a.id, a.opportunityId, ss.map(s => ApplicationSection(s.sectionNumber, s.title)))
+          case (a, ss) => Application(a.id, a.opportunityId, ss.map(s => ApplicationSection(s.sectionNumber, s.title, s.started)))
         }
     }.map(_.headOption)
   }

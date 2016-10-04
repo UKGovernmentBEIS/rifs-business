@@ -33,5 +33,5 @@ trait ApplicationModule {
   }
   lazy val applicationTable = TableQuery[ApplicationTable]
 
-   def createApplication = (applicationSectionTable.schema ++ applicationTable.schema).createStatements
+  def createApplication = (applicationSectionTable.schema ++ applicationTable.schema).createStatements
 }
