@@ -1,4 +1,5 @@
 
-GET        /opportunity/open                  rifs.business.controllers.OpportunityController.getOpen
-GET        /opportunity/open/summaries        rifs.business.controllers.OpportunityController.getOpenSummaries
-GET        /opportunity/:id                   rifs.business.controllers.OpportunityController.byId(id: OpportunityId)
+GET        /opportunity/open                   rifs.business.controllers.OpportunityController.getOpen
+GET        /opportunity/open/summaries         rifs.business.controllers.OpportunityController.getOpenSummaries
+GET        /opportunity/:id                    rifs.business.controllers.OpportunityController.byId(id: OpportunityId)
+GET        /opportunity/:id/application        rifs.business.controllers.ApplicationController.forOpportunity(id: OpportunityId)

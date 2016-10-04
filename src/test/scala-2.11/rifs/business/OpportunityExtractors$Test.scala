@@ -1,6 +1,7 @@
 package rifs.business
 
 import org.scalatest._
+import rifs.business.tables.OpportunityExtractors
 import rifs.models._
 
 class OpportunityExtractors$Test extends WordSpecLike with Matchers with OptionValues{

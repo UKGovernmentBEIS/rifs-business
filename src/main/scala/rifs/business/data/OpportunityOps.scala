@@ -1,7 +1,8 @@
-package rifs.business
+package rifs.business.data
 
 import com.google.inject.ImplementedBy
 import rifs.business.restmodels._
+import rifs.business.tables.OpportunityTables
 import rifs.models._
 
 import scala.concurrent.Future

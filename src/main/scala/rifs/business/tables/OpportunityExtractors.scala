@@ -1,4 +1,4 @@
-package rifs.business
+package rifs.business.tables
 
 import rifs.business.restmodels.{Opportunity, OpportunityDescriptionSection, OpportunityDuration, OpportunityValue}
 import rifs.models._

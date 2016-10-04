@@ -1,8 +1,9 @@
-package rifs.business
+package rifs.business.tables
 
 import javax.inject.Inject
 
 import play.api.db.slick.DatabaseConfigProvider
+import rifs.business.data.OpportunityOps
 import rifs.business.restmodels.{Opportunity, OpportunityValue}
 import rifs.models.{OpportunityId, OpportunityRow}
 import rifs.slicks.modules.OpportunityModule
