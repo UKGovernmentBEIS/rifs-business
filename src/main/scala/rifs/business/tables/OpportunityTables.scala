@@ -27,7 +27,7 @@ class OpportunityTables @Inject()(dbConfigProvider: DatabaseConfigProvider)(impl
   override def byIdWithDescription(id: OpportunityId): Future[Option[Opportunity]] = db.run(oppWithDescC(id).result.map(extractOpportunities(_).headOption))
 
   override def open: Future[Seq[Opportunity]] = db.run {
-    joinedOppsWithSections.result.map(extractOpportunities)
+    joinedOppsWithSectionsC.result.map(extractOpportunities)
   }
 
   override def openSummaries: Future[Seq[Opportunity]] = db.run(opportunityTable.result).map { os =>
@@ -49,6 +49,8 @@ class OpportunityTables @Inject()(dbConfigProvider: DatabaseConfigProvider)(impl
   val joinedOppsWithSections = for {
     os <- opportunityTable joinLeft joinedSectionsWithParas on (_.id === _._1.opportunityId)
   } yield os
+
+  val joinedOppsWithSectionsC = Compiled(joinedOppsWithSections)
 
   def oppWithDescQ(id: Rep[OpportunityId]) = for {
     os <- joinedOppsWithSections if os._1.id === id
