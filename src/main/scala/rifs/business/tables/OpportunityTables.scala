@@ -22,32 +22,38 @@ class OpportunityTables @Inject()(dbConfigProvider: DatabaseConfigProvider)(impl
 
   import driver.api._
 
-  override def byId(opportunityId: OpportunityId): Future[Option[OpportunityRow]] = db.run {
-    opportunityTable.filter(_.id === opportunityId).result.headOption
-  }
+  override def byId(opportunityId: OpportunityId): Future[Option[OpportunityRow]] = db.run(byIdC(opportunityId).result.headOption)
 
-  val joinedSectionsWithParas = for {
-    sp <- sectionTable joinLeft paragraphTable on (_.id === _.sectionId)
-  } yield sp
-
-  override def byIdWithDescription(id: OpportunityId): Future[Option[Opportunity]] = db.run {
-    val joinedOppWithDescription = for {
-      os <- opportunityTable joinLeft joinedSectionsWithParas on (_.id === _._1.opportunityId) if os._1.id === id
-    } yield os
-
-    joinedOppWithDescription.result.map(extractOpportunities(_).headOption)
-  }
-
+  override def byIdWithDescription(id: OpportunityId): Future[Option[Opportunity]] = db.run(oppWithDescC(id).result.map(extractOpportunities(_).headOption))
 
   override def open: Future[Seq[Opportunity]] = db.run {
-    val joinedOppWithDescription = for {
-      os <- opportunityTable joinLeft joinedSectionsWithParas on (_.id === _._1.opportunityId)
-    } yield os
-
-    joinedOppWithDescription.result.map(extractOpportunities)
+    joinedOppsWithSections.result.map(extractOpportunities)
   }
 
   override def openSummaries: Future[Seq[Opportunity]] = db.run(opportunityTable.result).map { os =>
     os.map(o => Opportunity(o.id, o.title, o.startDate, durationFor(o), OpportunityValue(o.value, o.valueUnits), Seq()))
   }
+
+  /*
+ ******************************
+ * Queries and compiled queries
+  */
+  def byIdQ(id: Rep[OpportunityId]) = opportunityTable.filter(_.id === id)
+
+  val byIdC = Compiled(byIdQ _)
+
+  val joinedSectionsWithParas = for {
+    sp <- sectionTable joinLeft paragraphTable on (_.id === _.sectionId)
+  } yield sp
+
+  val joinedOppsWithSections = for {
+    os <- opportunityTable joinLeft joinedSectionsWithParas on (_.id === _._1.opportunityId)
+  } yield os
+
+  def oppWithDescQ(id: Rep[OpportunityId]) = for {
+    os <- joinedOppsWithSections if os._1.id === id
+  } yield os
+
+  val oppWithDescC = Compiled(oppWithDescQ _)
+
 }
