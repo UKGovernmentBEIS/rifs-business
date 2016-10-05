@@ -30,7 +30,7 @@ class OpportunityTables @Inject()(dbConfigProvider: DatabaseConfigProvider)(impl
     joinedOppsWithSectionsC.result.map(extractOpportunities)
   }
 
-  override def openSummaries: Future[Seq[Opportunity]] = db.run(opportunityTable.result).map { os =>
+  override def openSummaries: Future[Seq[Opportunity]] = db.run(opportunityTableC.result).map { os =>
     os.map(o => Opportunity(o.id, o.title, o.startDate, durationFor(o), OpportunityValue(o.value, o.valueUnits), Seq()))
   }
 
@@ -57,5 +57,7 @@ class OpportunityTables @Inject()(dbConfigProvider: DatabaseConfigProvider)(impl
   } yield os
 
   val oppWithDescC = Compiled(oppWithDescQ _)
+
+  val opportunityTableC = Compiled(opportunityTable.pack)
 
 }
