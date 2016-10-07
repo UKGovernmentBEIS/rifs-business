@@ -14,5 +14,5 @@ case class Opportunity(
                         startDate: String,
                         duration: Option[OpportunityDuration],
                         value: OpportunityValue,
-                        description: Seq[OpportunityDescriptionSection]
+                        description: Set[OpportunityDescriptionSection]
                       )

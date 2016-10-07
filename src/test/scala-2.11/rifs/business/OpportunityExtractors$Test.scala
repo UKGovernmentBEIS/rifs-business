@@ -10,8 +10,8 @@ class OpportunityExtractors$Test extends WordSpecLike with Matchers with OptionV
     "extract the right Opportunity objects" in {
       val result = OpportunityExtractors.extractOpportunities(testData)
 
-      result.length shouldBe 1
-      result.head.description.length shouldBe 6
+      result.size shouldBe 1
+      result.head.description.size shouldBe 6
       val section1 = result.head.description.find(_.sectionNumber == 1).value
       section1.paragraphs.length shouldBe 5
     }

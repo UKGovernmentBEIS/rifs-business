@@ -13,8 +13,8 @@ trait OpportunityOps {
 
   def byIdWithDescription(opportunityId: OpportunityId): Future[Option[Opportunity]]
 
-  def open: Future[Seq[Opportunity]]
+  def open: Future[Set[Opportunity]]
 
-  def openSummaries: Future[Seq[Opportunity]]
+  def openSummaries: Future[Set[Opportunity]]
 }
 

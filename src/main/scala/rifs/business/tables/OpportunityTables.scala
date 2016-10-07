@@ -26,12 +26,12 @@ class OpportunityTables @Inject()(dbConfigProvider: DatabaseConfigProvider)(impl
 
   override def byIdWithDescription(id: OpportunityId): Future[Option[Opportunity]] = db.run(oppWithDescC(id).result.map(extractOpportunities(_).headOption))
 
-  override def open: Future[Seq[Opportunity]] = db.run {
+  override def open: Future[Set[Opportunity]] = db.run {
     joinedOppsWithSectionsC.result.map(extractOpportunities)
   }
 
-  override def openSummaries: Future[Seq[Opportunity]] = db.run(opportunityTableC.result).map { os =>
-    os.map(o => Opportunity(o.id, o.title, o.startDate, durationFor(o), OpportunityValue(o.value, o.valueUnits), Seq()))
+  override def openSummaries: Future[Set[Opportunity]] = db.run(opportunityTableC.result).map { os =>
+    os.map(o => Opportunity(o.id, o.title, o.startDate, durationFor(o), OpportunityValue(o.value, o.valueUnits), Set())).toSet
   }
 
   /*
