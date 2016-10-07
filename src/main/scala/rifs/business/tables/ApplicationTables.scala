@@ -24,16 +24,19 @@ class ApplicationTables @Inject()(dbConfigProvider: DatabaseConfigProvider)(impl
 
   override def forOpportunity(opportunityId: OpportunityId): Future[Option[Application]] = db.run {
     applicationByOppIdC(opportunityId).result.map { rs =>
-      rs.groupBy(_._1).map { case (k, vs) => k -> vs.map(_._2) }.map {
-        case (a, ss) => Application(a.id, a.opportunityId, ss.map(s => ApplicationSection(s.sectionNumber, s.title, s.started)))
-      }
+      val (as, asrs) = rs.unzip
+      as.map(a => Application(a.id, a.opportunityId, sectionsFor(a, asrs)))
     }.map(_.headOption)
   }
 
+  def sectionsFor(a: ApplicationRow, asrs: Seq[ApplicationSectionRow]): Seq[ApplicationSection] = {
+    asrs.filter(_.applicationId == a.id).map { s => ApplicationSection(s.sectionNumber, s.title, s.started) }
+  }
+
   /*
-  ******************************
-  * Queries and compiled queries
-   */
+    ******************************
+    * Queries and compiled queries
+     */
   def byIdQ(id: Rep[ApplicationId]): ApplicationQuery = for {a <- applicationTable if a.id == id} yield a
 
   val byIdC = Compiled(byIdQ _)
