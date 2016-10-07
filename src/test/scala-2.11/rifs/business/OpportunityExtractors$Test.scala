@@ -41,7 +41,7 @@ class OpportunityExtractors$Test extends WordSpecLike with Matchers with OptionV
         Some(ParagraphRow(ParagraphId(5), 5, SectionId(1), "Only organisations which receive funding from UK Research Councils may apply."))))),
     (OpportunityRow(OpportunityId(1), "Research priorities in health care", "4 March 2017", None, None, 2000.00, "per event maximum"),
       Some((SectionRow(SectionId(1), 1, OpportunityId(1), "About this opportunity"),
-        Some(ParagraphRow(ParagraphId(4), 4, SectionId(1), "Under the Exploring Innovation Seminars programme, we will pay up to £2, 000 for each event promoting innovation and collaboration.We will not pay for food or drink."))))),
+        Some(ParagraphRow(ParagraphId(4), 4, SectionId(1), "Under the Exploring Innovation Seminars programme, we will pay up to 2,000 for each event promoting innovation and collaboration.We will not pay for food or drink."))))),
     (OpportunityRow(OpportunityId(1), "Research priorities in health care", "4 March 2017", None, None, 2000.00, "per event maximum"),
       Some((SectionRow(SectionId(1), 1, OpportunityId(1), "About this opportunity"),
         Some(ParagraphRow(ParagraphId(3), 3, SectionId(1), "This may be by sharing knowledge, commercialising ideas, exploring social benefits or other ways to increase the impact of your research."))))),
