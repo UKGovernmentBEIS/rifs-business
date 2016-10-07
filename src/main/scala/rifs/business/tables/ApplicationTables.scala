@@ -24,13 +24,13 @@ class ApplicationTables @Inject()(dbConfigProvider: DatabaseConfigProvider)(impl
 
   override def forOpportunity(opportunityId: OpportunityId): Future[Option[Application]] = db.run {
     applicationByOppIdC(opportunityId).result.map { rs =>
-      val (as, asrs) = rs.unzip
-      as.map(a => Application(a.id, a.opportunityId, sectionsFor(a, asrs)))
+      val (as, ss) = rs.unzip
+      as.map(a => Application(a.id, a.opportunityId, sectionsFor(a, ss)))
     }.map(_.headOption)
   }
 
-  def sectionsFor(a: ApplicationRow, asrs: Seq[ApplicationSectionRow]): Seq[ApplicationSection] = {
-    asrs.filter(_.applicationId == a.id).map { s => ApplicationSection(s.sectionNumber, s.title, s.started) }
+  def sectionsFor(applicationRow: ApplicationRow, sectionRows: Seq[ApplicationSectionRow]): Seq[ApplicationSection] = {
+    sectionRows.filter(_.applicationId == applicationRow.id).map { s => ApplicationSection(s.sectionNumber, s.title, s.started) }
   }
 
   /*
