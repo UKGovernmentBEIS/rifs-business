@@ -5,7 +5,7 @@ import javax.inject.Inject
 import play.api.db.slick.DatabaseConfigProvider
 import rifs.business.data.ApplicationOps
 import rifs.business.restmodels.{Application, ApplicationSection}
-import rifs.models.{ApplicationId, ApplicationRow, OpportunityId}
+import rifs.models.{ApplicationId, ApplicationRow, ApplicationSectionRow, OpportunityId}
 import rifs.slicks.modules.{ApplicationModule, OpportunityModule}
 import rifs.slicks.support.DBBinding
 import slick.backend.DatabaseConfig
@@ -34,11 +34,13 @@ class ApplicationTables @Inject()(dbConfigProvider: DatabaseConfigProvider)(impl
   ******************************
   * Queries and compiled queries
    */
-  def byIdQ(id: Rep[ApplicationId]) = for {a <- applicationTable if a.id == id} yield a
+  def byIdQ(id: Rep[ApplicationId]): ApplicationQuery = for {a <- applicationTable if a.id == id} yield a
 
   val byIdC = Compiled(byIdQ _)
 
-  def applicationByOppIdQ(opportunityId: Rep[OpportunityId]) = for {
+  type ApplicationWithSectionsJoin = Query[(ApplicationTable, ApplicationSectionTable), (ApplicationRow, ApplicationSectionRow), Seq]
+
+  def applicationByOppIdQ(opportunityId: Rep[OpportunityId]): ApplicationWithSectionsJoin = for {
     a <- applicationTable if a.opportunityId === opportunityId
     s <- applicationSectionTable if s.applicationId === a.id
   } yield (a, s)
