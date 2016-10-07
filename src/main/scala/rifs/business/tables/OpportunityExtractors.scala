@@ -2,6 +2,8 @@ package rifs.business.tables
 
 import rifs.business.restmodels.{Opportunity, OpportunityDescriptionSection, OpportunityDuration, OpportunityValue}
 import rifs.models._
+import cats.syntax.cartesian._
+import cats.instances.option._
 
 object OpportunityExtractors {
   /**
@@ -32,10 +34,10 @@ object OpportunityExtractors {
     OpportunityDescriptionSection(s.sectionNumber, s.title, ps.filter(_.sectionId == s.id).toSeq.sortBy(_.paragraphNumber).map(_.text))
   }
 
-  def durationFor(opp: OpportunityRow): Option[OpportunityDuration] = for {
-    d <- opp.duration
-    u <- opp.durationUnits
-  } yield OpportunityDuration(d, u)
+  def durationFor(opp: OpportunityRow): Option[OpportunityDuration] = {
+    (opp.duration |@| opp.durationUnits).map(OpportunityDuration.apply)
+
+  }
 
   /**
     * Take the nested results from the left joins and separate out sequences of the three `Row` types

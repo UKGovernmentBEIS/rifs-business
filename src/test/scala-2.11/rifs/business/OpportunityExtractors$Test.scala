@@ -1,10 +1,30 @@
 package rifs.business
 
 import org.scalatest._
+import rifs.business.restmodels.OpportunityDuration
 import rifs.business.tables.OpportunityExtractors
 import rifs.models._
 
-class OpportunityExtractors$Test extends WordSpecLike with Matchers with OptionValues{
+class OpportunityExtractors$Test extends WordSpecLike with Matchers with OptionValues {
+
+  "durationFor" should {
+    import OpportunityExtractors.durationFor
+
+    "return None if duration is None" in {
+      val opp = OpportunityRow(OpportunityId(1), "", "", None, None, 0.0, "")
+      durationFor(opp) shouldBe None
+    }
+
+    "return None if units is None" in {
+      val opp = OpportunityRow(OpportunityId(1), "", "", Some(1), None, 0.0, "")
+      durationFor(opp) shouldBe None
+    }
+
+    "return Some if both duration and units are defined" in {
+      val opp = OpportunityRow(OpportunityId(1), "", "", Some(1), Some("x"), 0.0, "")
+      durationFor(opp).value shouldBe OpportunityDuration(1, "x")
+    }
+  }
 
   "extractOpportunities" should {
     "extract the right Opportunity objects" in {
