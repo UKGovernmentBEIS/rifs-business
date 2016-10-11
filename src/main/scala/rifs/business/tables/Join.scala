@@ -1,4 +1,4 @@
-package rifs.business.controllers
+package rifs.business.tables
 
 import play.api.libs.json._
 

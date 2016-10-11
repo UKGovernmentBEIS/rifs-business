@@ -1,10 +1,8 @@
 package rifs.business
 
-case class Config(cache: CachesConfig)
+case class Config(cache: CacheConfig)
 
-case class CachesConfig(user: CacheConfig)
-
-case class CacheConfig(timeout: Int)
+case class CacheConfig(timeout: Option[Int])
 
 object Config {
 
