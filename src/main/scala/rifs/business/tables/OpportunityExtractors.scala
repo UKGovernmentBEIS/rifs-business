@@ -36,7 +36,6 @@ object OpportunityExtractors {
 
   def durationFor(opp: OpportunityRow): Option[OpportunityDuration] = {
     (opp.duration |@| opp.durationUnits).map(OpportunityDuration.apply)
-
   }
 
   /**

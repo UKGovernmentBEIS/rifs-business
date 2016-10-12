@@ -26,10 +26,10 @@ class package$Test extends WordSpecLike with Matchers {
     }
 
     case object FormFail extends FormRule {
-      override def check(form: Form, answers: Seq[Answer]): Boolean = false
+      override def check(form: Form, answers: Seq[Answer]): Seq[FormError] = Seq(FormError("fail"))
     }
     case object FormPass extends FormRule {
-      override def check(form: Form, answers: Seq[Answer]): Boolean = true
+      override def check(form: Form, answers: Seq[Answer]): Seq[FormError] = Seq()
     }
 
     "accept a form and a Complete event where the rules fail and produce a new form with the answers in unvalidatedAnswers" in {
@@ -38,7 +38,7 @@ class package$Test extends WordSpecLike with Matchers {
       val answers = Seq(Answer("foo", "bar"))
       val event = Validate(answers, epoch)
 
-      handleEvent(form, event) shouldBe Form(formRules = rules, unvalidatedAnswers = Some(answers))
+      handleEvent(form, event) shouldBe Form(errors = Seq(FormError("fail")), formRules = rules, unvalidatedAnswers = Some(answers))
     }
 
     "accept a form and a Complete event where the rules pass and produce a new form the answers in validatedAnswers" in {
