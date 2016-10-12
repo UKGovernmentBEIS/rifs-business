@@ -13,7 +13,7 @@ class package$Test extends WordSpecLike with Matchers {
       val event = Save(answers, epoch)
 
       val expected = Form(unvalidatedAnswers = Some(answers))
-      handleEvent(form, event) shouldBe expected
+      handleEvent(form, Seq(), event) shouldBe expected
     }
 
     "accept a form and a Preview event and produce a new form with the preview answers" in {
@@ -22,32 +22,32 @@ class package$Test extends WordSpecLike with Matchers {
       val event = Preview(answers, epoch)
 
       val expected = Form(previewAnswers = Some(answers))
-      handleEvent(form, event) shouldBe expected
+      handleEvent(form, Seq(), event) shouldBe expected
     }
 
     case object FormFail extends FormRule {
-      override def check(form: Form, answers: Seq[Answer]): Seq[FormError] = Seq(FormError("fail"))
+      override def check(form: Form, answers: Seq[Answer]): Seq[Error] = Seq(FormError("fail"))
     }
     case object FormPass extends FormRule {
-      override def check(form: Form, answers: Seq[Answer]): Seq[FormError] = Seq()
+      override def check(form: Form, answers: Seq[Answer]): Seq[Error] = Seq()
     }
 
     "accept a form and a Complete event where the rules fail and produce a new form with the answers in unvalidatedAnswers" in {
       val rules = Seq(FormFail)
-      val form = Form(formRules = rules)
+      val form = Form()
       val answers = Seq(Answer("foo", "bar"))
       val event = Validate(answers, epoch)
 
-      handleEvent(form, event) shouldBe Form(errors = Seq(FormError("fail")), formRules = rules, unvalidatedAnswers = Some(answers))
+      handleEvent(form, rules, event) shouldBe Form(errors = Seq(FormError("fail")), unvalidatedAnswers = Some(answers))
     }
 
     "accept a form and a Complete event where the rules pass and produce a new form the answers in validatedAnswers" in {
       val rules = Seq(FormPass)
-      val form = Form(formRules = rules)
+      val form = Form()
       val answers = Seq(Answer("foo", "bar"))
       val event = Validate(answers, epoch)
 
-      handleEvent(form, event) shouldBe Form(formRules = rules, validatedAnswers = Some(answers))
+      handleEvent(form, rules, event) shouldBe Form(validatedAnswers = Some(answers))
     }
   }
 
