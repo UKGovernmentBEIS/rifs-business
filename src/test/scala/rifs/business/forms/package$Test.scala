@@ -1,54 +1,39 @@
 package rifs.business.forms
 
-import org.joda.time.DateTime
+import cats.data.NonEmptyList
 import org.scalatest.{Matchers, WordSpecLike}
 
 class package$Test extends WordSpecLike with Matchers {
-  val epoch = new DateTime(0L)
-
   "handleEvent" should {
-    "accept a form and a Save event and produce a new form with the unvalidated answers" in {
-      val form = Form()
-      val answers = Seq(Answer("foo", "bar"))
-      val event = Save(answers, epoch)
+    "accept a Save event and produce an Unvalidated with the answers" in {
+      val answers = Map("foo" -> "bar")
+      val event = Save(answers)
 
-      val expected = Form(unvalidatedAnswers = Some(answers))
-      handleEvent(form, Seq(), event) shouldBe expected
+      val expected = NotValidated(answers)
+      handleEvent(Seq(), event) shouldBe expected
     }
 
-    "accept a form and a Preview event and produce a new form with the preview answers" in {
-      val form = Form()
-      val answers = Seq(Answer("foo", "bar"))
-      val event = Preview(answers, epoch)
-
-      val expected = Form(previewAnswers = Some(answers))
-      handleEvent(form, Seq(), event) shouldBe expected
+    case object FormFail extends Rule {
+      override def check(answers: Answers): Seq[Error] = Seq(Error(None, "fail"))
+    }
+    case object FormPass extends Rule {
+      override def check(answers: Answers): Seq[Error] = Seq()
     }
 
-    case object FormFail extends FormRule {
-      override def check(form: Form, answers: Seq[Answer]): Seq[Error] = Seq(FormError("fail"))
-    }
-    case object FormPass extends FormRule {
-      override def check(form: Form, answers: Seq[Answer]): Seq[Error] = Seq()
-    }
-
-    "accept a form and a Complete event where the rules fail and produce a new form with the answers in unvalidatedAnswers" in {
+    "accept a Complete event where the rules fail and produce an Invalid with the answers and errors" in {
       val rules = Seq(FormFail)
-      val form = Form()
-      val answers = Seq(Answer("foo", "bar"))
-      val event = Validate(answers, epoch)
+      val answers = Map("foo" -> "bar")
+      val event = Validate(answers)
 
-      handleEvent(form, rules, event) shouldBe Form(errors = Seq(FormError("fail")), unvalidatedAnswers = Some(answers))
+      handleEvent(rules, event) shouldBe Invalid(answers, NonEmptyList(Error(None, "fail"), List()))
     }
 
-    "accept a form and a Complete event where the rules pass and produce a new form the answers in validatedAnswers" in {
+    "accept Complete event where the rules pass and produce a Valid with the answers" in {
       val rules = Seq(FormPass)
-      val form = Form()
-      val answers = Seq(Answer("foo", "bar"))
-      val event = Validate(answers, epoch)
+      val answers = Map("foo" -> "bar")
+      val event = Validate(answers)
 
-      handleEvent(form, rules, event) shouldBe Form(validatedAnswers = Some(answers))
+      handleEvent(rules, event) shouldBe Valid(answers)
     }
   }
-
 }
