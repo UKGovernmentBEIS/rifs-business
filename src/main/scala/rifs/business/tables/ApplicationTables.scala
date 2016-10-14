@@ -20,7 +20,12 @@ class ApplicationTables @Inject()(dbConfigProvider: DatabaseConfigProvider)(impl
 
   import driver.api._
 
-  override def byId(id: ApplicationId): Future[Option[ApplicationRow]] = db.run(byIdC(id).result.headOption)
+  override def byId(id: ApplicationId): Future[Option[Application]] = db.run {
+    byIdWithSectionsC(id).result.map { rs =>
+      val (as, ss) = rs.unzip
+      as.map(a => Application(a.id, a.opportunityId, sectionsFor(a, ss)))
+    }.map(_.headOption)
+  }
 
   override def forOpportunity(opportunityId: OpportunityId): Future[Option[Application]] = db.run {
     applicationByOppIdC(opportunityId).result.map { rs =>
@@ -42,6 +47,13 @@ class ApplicationTables @Inject()(dbConfigProvider: DatabaseConfigProvider)(impl
   val byIdC = Compiled(byIdQ _)
 
   type ApplicationWithSectionsJoin = Query[(ApplicationTable, ApplicationSectionTable), (ApplicationRow, ApplicationSectionRow), Seq]
+
+  def byIdWithSectionsQ(id: Rep[ApplicationId]): ApplicationWithSectionsJoin = for {
+    a <- applicationTable if a.id === id
+    s <- applicationSectionTable if s.applicationId === a.id
+  } yield (a, s)
+
+  val byIdWithSectionsC = Compiled(byIdWithSectionsQ _)
 
   def applicationByOppIdQ(opportunityId: Rep[OpportunityId]): ApplicationWithSectionsJoin = for {
     a <- applicationTable if a.opportunityId === opportunityId

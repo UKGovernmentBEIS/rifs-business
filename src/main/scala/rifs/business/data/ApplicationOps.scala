@@ -9,7 +9,7 @@ import scala.concurrent.Future
 
 @ImplementedBy(classOf[ApplicationTables])
 trait ApplicationOps {
-  def byId(id: ApplicationId): Future[Option[ApplicationRow]]
+  def byId(id: ApplicationId): Future[Option[Application]]
 
   def forOpportunity(opportunityId: OpportunityId): Future[Option[Application]]
 }
