@@ -1,9 +1,9 @@
 package rifs.business.tables
 
-import rifs.business.restmodels.{Opportunity, OpportunityDescriptionSection, OpportunityDuration, OpportunityValue}
-import rifs.models._
-import cats.syntax.cartesian._
 import cats.instances.option._
+import cats.syntax.cartesian._
+import rifs.business.models.{OpportunityRow, ParagraphRow, SectionRow}
+import rifs.business.restmodels.{Opportunity, OpportunityDescriptionSection, OpportunityDuration, OpportunityValue}
 
 object OpportunityExtractors {
   /**

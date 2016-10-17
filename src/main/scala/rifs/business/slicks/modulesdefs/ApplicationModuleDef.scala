@@ -1,6 +1,6 @@
-package rifs.slicks.modulesdefs
+package rifs.business.slicks.modulesdefs
 
-import rifs.models._
+import rifs.business.models.{ApplicationRow, ApplicationSectionRow}
 import rifs.slicks.gen.{ModuleDefinition, ModuleSpec}
 
 object ApplicationModuleDef extends ModuleDefinition {

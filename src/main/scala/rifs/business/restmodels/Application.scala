@@ -1,6 +1,6 @@
 package rifs.business.restmodels
 
-import rifs.models.{ApplicationId, OpportunityId}
+import rifs.business.models.{ApplicationId, OpportunityId}
 
 case class ApplicationSection(sectionNumber: Int, title: String, started: Boolean)
 

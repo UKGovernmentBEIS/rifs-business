@@ -8,12 +8,8 @@ headers in ThisBuild := createFrom(MIT, "2016", "Department of Business, Energy 
 git.useGitDescribe in ThisBuild := true
 
 scalaVersion in ThisBuild := "2.11.8"
-lazy val models = (project in file("models"))
-  .enablePlugins(GitVersioning)
-  .enablePlugins(GitBranchPrompt)
 
 lazy val slickGen = (project in file("slickGen"))
-  .dependsOn(models).aggregate(models)
   .settings(libraryDependencies ++= Seq(
     "com.wellfactored" %% "property-info" % "1.0.0",
     "com.typesafe.slick" %% "slick" % "3.1.1"
@@ -22,21 +18,17 @@ lazy val slickGen = (project in file("slickGen"))
   .enablePlugins(GitVersioning)
   .enablePlugins(GitBranchPrompt)
 
-lazy val slicks = (project in file("slicks"))
-  .dependsOn(models).aggregate(models)
-  .dependsOn(slickGen).aggregate(slickGen)
-  .enablePlugins(AutomateHeaderPlugin)
-  .enablePlugins(GitVersioning)
-  .enablePlugins(GitBranchPrompt)
-  .settings(
-    libraryDependencies ++= Seq(
-      "com.typesafe.slick" %% "slick" % "3.1.1",
-      "com.github.tototoshi" %% "slick-joda-mapper" % "2.2.0"
-    )
-  )
+val SLICK_PG_VERSION = "0.14.3"
+
+val slickpgDependencies = Seq(
+  "com.github.tminglei" %% "slick-pg" % SLICK_PG_VERSION,
+  "com.github.tminglei" %% "slick-pg_play-json" % SLICK_PG_VERSION,
+  "com.github.tminglei" %% "slick-pg_date2" % SLICK_PG_VERSION,
+  "com.github.tminglei" %% "slick-pg_joda-time" % SLICK_PG_VERSION
+)
 
 lazy val `rifs-business` = (project in file("."))
-  .dependsOn(slicks).aggregate(slicks)
+  .dependsOn(slickGen).aggregate(slickGen)
   .enablePlugins(PlayScala)
   .disablePlugins(PlayLayoutPlugin)
   .enablePlugins(GitVersioning)
@@ -47,14 +39,17 @@ lazy val `rifs-business` = (project in file("."))
       "com.wellfactored" %% "play-bindings" % "1.1.0",
       "com.github.melrief" %% "pureconfig" % "0.1.6",
       "org.postgresql" % "postgresql" % "9.4.1211",
+      "com.typesafe.slick" %% "slick" % "3.1.1",
+      "com.github.tototoshi" %% "slick-joda-mapper" % "2.2.0",
       "mysql" % "mysql-connector-java" % "6.0.3",
       "com.typesafe.play" %% "play-slick" % "2.0.0",
       "com.typesafe.play" %% "play-slick-evolutions" % "2.0.0",
       "org.scalatestplus.play" %% "scalatestplus-play" % "1.5.1" % "test"
     ),
+    libraryDependencies ++= slickpgDependencies,
     PlayKeys.devSettings := Seq("play.server.http.port" -> "9100"),
     routesImport ++= Seq(
-      "rifs.models._",
+      "rifs.business.models._",
       "com.wellfactored.playbindings.ValueClassUrlBinders._"
     ),
     javaOptions := Seq(

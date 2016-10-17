@@ -3,8 +3,8 @@ package rifs.business
 import com.wellfactored.playbindings.ValueClassFormats
 import org.joda.time.{LocalDate, LocalDateTime}
 import play.api.libs.json._
+import rifs.business.models.{OpportunityRow, ParagraphRow, SectionRow}
 import rifs.business.restmodels._
-import rifs.models._
 
 package object controllers extends ValueClassFormats {
   implicit val jodaLocalDateTimeFormat = new Format[LocalDateTime] {

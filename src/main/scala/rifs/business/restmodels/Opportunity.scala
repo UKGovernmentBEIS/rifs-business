@@ -1,6 +1,6 @@
 package rifs.business.restmodels
 
-import rifs.models.OpportunityId
+import rifs.business.models.OpportunityId
 
 case class OpportunityDescriptionSection(sectionNumber:Int, title: String, paragraphs: Seq[String])
 

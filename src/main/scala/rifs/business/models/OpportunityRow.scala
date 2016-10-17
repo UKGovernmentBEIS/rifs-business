@@ -1,4 +1,4 @@
-package rifs.models
+package rifs.business.models
 
 case class ParagraphId(id: Long) extends AnyVal
 

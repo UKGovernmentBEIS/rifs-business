@@ -1,9 +1,9 @@
 package rifs.business.data
 
 import com.google.inject.ImplementedBy
+import rifs.business.models.{ApplicationId, OpportunityId}
 import rifs.business.restmodels.Application
 import rifs.business.tables.ApplicationTables
-import rifs.models.{ApplicationId, ApplicationRow, OpportunityId}
 
 import scala.concurrent.Future
 

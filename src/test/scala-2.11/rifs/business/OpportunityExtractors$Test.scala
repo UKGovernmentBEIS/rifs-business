@@ -1,6 +1,7 @@
 package rifs.business
 
 import org.scalatest._
+import rifs.business.models._
 import rifs.business.restmodels.OpportunityDuration
 import rifs.business.tables.OpportunityExtractors
 import rifs.models._

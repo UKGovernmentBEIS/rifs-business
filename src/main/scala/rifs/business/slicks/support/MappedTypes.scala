@@ -1,4 +1,4 @@
-package rifs.slicks.support
+package rifs.business.slicks.support
 
 import com.wellfactored.valuewrapper.{ValueWrapper, ValueWrapperGen}
 

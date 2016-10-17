@@ -1,6 +1,6 @@
-package rifs.slicks.modulesdefs
+package rifs.business.slicks.modulesdefs
 
-import rifs.models.{OpportunityRow, ParagraphRow, SectionRow}
+import rifs.business.models.{OpportunityRow, ParagraphRow, SectionRow}
 import rifs.slicks.gen.{ModuleDefinition, ModuleSpec}
 
 object OpportunityModuleDef extends ModuleDefinition {

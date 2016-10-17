@@ -1,4 +1,4 @@
-package rifs.slicks.support
+package rifs.business.slicks.support
 
 import slick.backend.DatabaseConfig
 import slick.driver.JdbcProfile

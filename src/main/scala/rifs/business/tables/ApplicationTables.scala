@@ -4,10 +4,10 @@ import javax.inject.Inject
 
 import play.api.db.slick.DatabaseConfigProvider
 import rifs.business.data.ApplicationOps
+import rifs.business.models.{ApplicationId, ApplicationRow, ApplicationSectionRow, OpportunityId}
 import rifs.business.restmodels.{Application, ApplicationSection}
-import rifs.models.{ApplicationId, ApplicationRow, ApplicationSectionRow, OpportunityId}
-import rifs.slicks.modules.{ApplicationModule, OpportunityModule}
-import rifs.slicks.support.DBBinding
+import rifs.business.slicks.modules.{ApplicationModule, OpportunityModule}
+import rifs.business.slicks.support.DBBinding
 import slick.backend.DatabaseConfig
 import slick.driver.JdbcProfile
 

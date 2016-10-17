@@ -5,7 +5,7 @@ import javax.inject.Inject
 import play.api.cache.Cached
 import play.api.mvc.{Action, Controller}
 import rifs.business.data.ApplicationOps
-import rifs.models.{ApplicationId, OpportunityId}
+import rifs.business.models.{ApplicationId, OpportunityId}
 
 import scala.concurrent.ExecutionContext
 

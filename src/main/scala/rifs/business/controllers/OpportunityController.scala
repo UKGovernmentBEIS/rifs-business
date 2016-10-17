@@ -6,7 +6,7 @@ import play.api.cache.Cached
 import play.api.libs.json.Json
 import play.api.mvc.{Action, Controller}
 import rifs.business.data.OpportunityOps
-import rifs.models.OpportunityId
+import rifs.business.models.OpportunityId
 
 import scala.concurrent.ExecutionContext
 

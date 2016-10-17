@@ -1,8 +1,8 @@
-package rifs.slicks.modules
+package rifs.business.slicks.modules
 
-import rifs.models._
+import rifs.business.models._
 import rifs.slicks.gen.IdType
-import rifs.slicks.support.DBBinding
+import rifs.business.slicks.support.DBBinding
 
 trait OpportunityModule {
   self: DBBinding =>
