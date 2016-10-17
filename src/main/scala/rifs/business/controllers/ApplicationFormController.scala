@@ -4,14 +4,14 @@ import javax.inject.Inject
 
 import play.api.cache.Cached
 import play.api.mvc.{Action, Controller}
-import rifs.business.data.ApplicationOps
-import rifs.business.models.{ApplicationId, OpportunityId}
+import rifs.business.data.ApplicationFormOps
+import rifs.business.models.{ApplicationFormId, OpportunityId}
 
 import scala.concurrent.ExecutionContext
 
-class ApplicationController @Inject()(val cached: Cached, applications: ApplicationOps)(implicit val ec: ExecutionContext) extends Controller with ControllerUtils {
+class ApplicationFormController @Inject()(val cached: Cached, applications: ApplicationFormOps)(implicit val ec: ExecutionContext) extends Controller with ControllerUtils {
 
-  def byId(id: ApplicationId) = cacheOk {
+  def byId(id: ApplicationFormId) = cacheOk {
     Action.async {
       applications.byId(id).map(jsonResult(_))
     }
