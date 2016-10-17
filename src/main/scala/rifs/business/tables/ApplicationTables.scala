@@ -26,17 +26,15 @@ class ApplicationTables @Inject()(dbConfigProvider: DatabaseConfigProvider)(impl
 
   override def forApplicationForm(applicationFormId: ApplicationFormId): Future[Option[ApplicationRow]] = {
     val appFormF = db.run(applicationFormTable.filter(_.id === applicationFormId).result.headOption)
-    val o = for {
+    for {
       appForm <- OptionT(appFormF)
       app <- OptionT.liftF(fetchOrCreate(applicationFormId))
     } yield app
-
-    o.value
-  }
+  }.value
 
   private def fetchOrCreate(applicationFormId: ApplicationFormId): Future[ApplicationRow] = {
     db.run(applicationTable.filter(_.applicationFormId === applicationFormId).result.headOption).flatMap {
-      case None => db.run((applicationTable returning applicationTable.map(_.id) into ((app, id) => app.copy(id=Some(id)))) += ApplicationRow(None, applicationFormId))
+      case None => db.run((applicationTable returning applicationTable.map(_.id) into ((app, id) => app.copy(id = Some(id)))) += ApplicationRow(None, applicationFormId))
       case Some(app) => Future.successful(app)
     }
   }
