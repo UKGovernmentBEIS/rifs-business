@@ -3,7 +3,7 @@ package rifs.business
 import com.wellfactored.playbindings.ValueClassFormats
 import org.joda.time.{LocalDate, LocalDateTime}
 import play.api.libs.json._
-import rifs.business.models.{OpportunityRow, ParagraphRow, SectionRow}
+import rifs.business.models._
 import rifs.business.restmodels._
 
 package object controllers extends ValueClassFormats {
@@ -53,7 +53,7 @@ package object controllers extends ValueClassFormats {
       }
   }
 
-  implicit val paragraphForma = Json.format[ParagraphRow]
+  implicit val paragraphFormat = Json.format[ParagraphRow]
   implicit val sectionFormat = Json.format[SectionRow]
   implicit val opportunityFormat = Json.format[OpportunityRow]
 
@@ -62,6 +62,9 @@ package object controllers extends ValueClassFormats {
   implicit val oppDescFormat = Json.format[OpportunityDescriptionSection]
   implicit val oppFormat = Json.format[Opportunity]
 
-  implicit val appSecFormat = Json.format[ApplicationFormSection]
-  implicit val appFormat = Json.format[ApplicationForm]
+  implicit val appFormSecFormat = Json.format[ApplicationFormSection]
+  implicit val appFormFormat = Json.format[ApplicationForm]
+
+  implicit val appSecFormat = Json.format[ApplicationSectionRow]
+  implicit val appFormat = Json.format[ApplicationRow]
 }

@@ -1,12 +1,12 @@
 package rifs.business.slicks.support
 
 import slick.backend.DatabaseConfig
-import slick.driver.JdbcProfile
+import slick.driver.{JdbcProfile, PostgresDriver}
 
 trait DBBinding {
   def dbConfig: DatabaseConfig[JdbcProfile]
 
-  lazy val db: driver.api.Database = dbConfig.db
+  lazy val driver = PostgresDriver
 
-  lazy val driver = dbConfig.driver
+  lazy val db: driver.api.Database = dbConfig.db
 }

@@ -9,17 +9,17 @@ import rifs.business.models.{ApplicationFormId, OpportunityId}
 
 import scala.concurrent.ExecutionContext
 
-class ApplicationFormController @Inject()(val cached: Cached, applications: ApplicationFormOps)(implicit val ec: ExecutionContext) extends Controller with ControllerUtils {
+class ApplicationFormController @Inject()(val cached: Cached, applicationForms: ApplicationFormOps)(implicit val ec: ExecutionContext) extends Controller with ControllerUtils {
 
   def byId(id: ApplicationFormId) = cacheOk {
     Action.async {
-      applications.byId(id).map(jsonResult(_))
+      applicationForms.byId(id).map(jsonResult(_))
     }
   }
 
   def forOpportunity(id: OpportunityId) = cacheOk {
     Action.async {
-      applications.forOpportunity(id).map(jsonResult(_))
+      applicationForms.forOpportunity(id).map(jsonResult(_))
     }
   }
 }

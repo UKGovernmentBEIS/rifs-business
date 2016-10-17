@@ -13,7 +13,7 @@ import slick.driver.JdbcProfile
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class ApplicationFormFormTables @Inject()(dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext)
+class ApplicationFormTables @Inject()(dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext)
   extends ApplicationFormModule with OpportunityModule with DBBinding with ApplicationFormOps {
 
   override val dbConfig: DatabaseConfig[JdbcProfile] = dbConfigProvider.get[JdbcProfile]
@@ -42,7 +42,7 @@ class ApplicationFormFormTables @Inject()(dbConfigProvider: DatabaseConfigProvid
     ******************************
     * Queries and compiled queries
      */
-  def byIdQ(id: Rep[ApplicationFormId]): ApplicationQuery = for {a <- applicationFormTable if a.id == id} yield a
+  def byIdQ(id: Rep[ApplicationFormId]): ApplicationFormQuery = for {a <- applicationFormTable if a.id == id} yield a
 
   val byIdC = Compiled(byIdQ _)
 
