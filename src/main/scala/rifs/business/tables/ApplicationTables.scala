@@ -5,9 +5,9 @@ import javax.inject.Inject
 import cats.data.OptionT
 import cats.instances.future._
 import com.github.tminglei.slickpg.{ExPostgresDriver, PgDateSupportJoda, PgPlayJsonSupport}
-import org.joda.time.{DateTime, LocalDateTime}
+import org.joda.time.LocalDateTime
 import play.api.db.slick.DatabaseConfigProvider
-import play.api.libs.json.{JsObject, JsValue}
+import play.api.libs.json.JsObject
 import rifs.business.data.ApplicationOps
 import rifs.business.models.{ApplicationFormId, ApplicationId, ApplicationRow, ApplicationSectionRow}
 import rifs.business.restmodels.{ApplicationOverview, ApplicationSectionOverview}
@@ -49,7 +49,12 @@ class ApplicationTables @Inject()(dbConfigProvider: DatabaseConfigProvider)(impl
   }
 
   private def buildOverview(app: ApplicationRow, secs: Seq[ApplicationSectionRow]): ApplicationOverview = {
-    ApplicationOverview(app.id.get, app.applicationFormId, secs.map(s => ApplicationSectionOverview(s.sectionNumber, "In progress", None)))
+    val sectionOverviews: Seq[ApplicationSectionOverview] = secs.map { s =>
+      val status = s.completedAt.map(_ => "Completed").getOrElse("In progress")
+      ApplicationSectionOverview(s.sectionNumber, status, s.completedAt)
+    }
+
+    ApplicationOverview(app.id.get, app.applicationFormId, sectionOverviews)
   }
 
   private def createApplicationForForm(applicationFormId: ApplicationFormId): Future[ApplicationId] = db.run {
