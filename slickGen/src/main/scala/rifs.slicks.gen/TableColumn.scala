@@ -30,7 +30,7 @@ case class TableColumn[T](prop: Property[T], unique: Boolean = false, overrideCo
     case _ => None
   }
 
-  val knownTypes = Seq("Byte", "BigDecimal", "String", "Long", "Boolean", "Int", "Short", "NonBlankString", "PhoneNumber", "LocalDate", "LocalDateTime", "JsObject")
+  val knownTypes = Seq("Byte", "BigDecimal", "String", "Long", "Boolean", "Int", "Short", "NonBlankString", "PhoneNumber", "Date", "DateTime", "LocalDate", "LocalDateTime", "JsObject", "JsValue")
 
   val isOptionOfKnownType: Boolean = tyName.startsWith("Option[") && !needsTypeMapper(tyName.substring(7, tyName.length - 1))
 

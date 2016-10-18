@@ -18,8 +18,7 @@ trait ApplicationFormModule {
     def applicationFormIdIndex = index("applicationformsection_applicationform_idx", applicationFormId)
     def sectionNumber = column[Int]("section_number")
     def title = column[String]("title", O.Length(255))
-    def started = column[Boolean]("started")
-    def * = (id, applicationFormId, sectionNumber, title, started) <> (ApplicationFormSectionRow.tupled, ApplicationFormSectionRow.unapply)
+    def * = (id, applicationFormId, sectionNumber, title) <> (ApplicationFormSectionRow.tupled, ApplicationFormSectionRow.unapply)
   }
   lazy val applicationFormSectionTable = TableQuery[ApplicationFormSectionTable]
 

@@ -4,9 +4,10 @@ import javax.inject.Inject
 
 import cats.data.OptionT
 import cats.instances.future._
-import com.github.tminglei.slickpg.{ExPostgresDriver, PgPlayJsonSupport}
+import com.github.tminglei.slickpg.{ExPostgresDriver, PgDateSupportJoda, PgPlayJsonSupport}
+import org.joda.time.{DateTime, LocalDateTime}
 import play.api.db.slick.DatabaseConfigProvider
-import play.api.libs.json.JsValue
+import play.api.libs.json.{JsObject, JsValue}
 import rifs.business.data.ApplicationOps
 import rifs.business.models.{ApplicationFormId, ApplicationId, ApplicationRow, ApplicationSectionRow}
 import rifs.business.restmodels.{ApplicationOverview, ApplicationSectionOverview}
@@ -18,7 +19,7 @@ import slick.driver.JdbcProfile
 import scala.concurrent.{ExecutionContext, Future}
 
 class ApplicationTables @Inject()(dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext)
-  extends ApplicationOps with ApplicationModule with DBBinding with ApplicationFormModule with OpportunityModule with ExPostgresDriver with PgPlayJsonSupport {
+  extends ApplicationOps with ApplicationModule with DBBinding with ApplicationFormModule with OpportunityModule with ExPostgresDriver with PgPlayJsonSupport with PgDateSupportJoda {
   override val dbConfig: DatabaseConfig[JdbcProfile] = dbConfigProvider.get[JdbcProfile]
 
   import PostgresAPI._
@@ -33,7 +34,7 @@ class ApplicationTables @Inject()(dbConfigProvider: DatabaseConfigProvider)(impl
     } yield app
   }.value
 
-  def applicationWithSectionsQ(formId:Rep[ApplicationFormId]) =
+  def applicationWithSectionsQ(formId: Rep[ApplicationFormId]) =
     (applicationTable joinLeft applicationSectionTable on (_.id === _.applicationId)).filter(_._1.applicationFormId === formId)
 
   val applicationWithSectionsC = Compiled(applicationWithSectionsQ _)
@@ -59,10 +60,10 @@ class ApplicationTables @Inject()(dbConfigProvider: DatabaseConfigProvider)(impl
     appSectionC(id, sectionNumber).result.headOption
   }
 
-  override def saveSection(id: ApplicationId, sectionNumber: Int, answers: JsValue): Future[Int] = {
+  override def saveSection(id: ApplicationId, sectionNumber: Int, answers: JsObject, completedAt: Option[LocalDateTime] = None): Future[Int] = {
     fetchSection(id, sectionNumber).flatMap {
-      case Some(row) => db.run(appSectionC(id, sectionNumber).update(row.copy(answers = answers)))
-      case None => db.run(applicationSectionTable += ApplicationSectionRow(None, id, sectionNumber, answers))
+      case Some(row) => db.run(appSectionC(id, sectionNumber).update(row.copy(answers = answers, completedAt = completedAt)))
+      case None => db.run(applicationSectionTable += ApplicationSectionRow(None, id, sectionNumber, answers, completedAt))
     }
   }
 

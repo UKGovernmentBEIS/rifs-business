@@ -35,7 +35,7 @@ class ApplicationFormTables @Inject()(dbConfigProvider: DatabaseConfigProvider)(
   }
 
   def sectionsFor(applicationRow: ApplicationFormRow, sectionRows: Seq[ApplicationFormSectionRow]): Seq[ApplicationFormSection] = {
-    sectionRows.filter(_.applicationId == applicationRow.id).map { s => ApplicationFormSection(s.sectionNumber, s.title, s.started) }
+    sectionRows.filter(_.applicationId == applicationRow.id).map { s => ApplicationFormSection(s.sectionNumber, s.title) }
   }
 
   /*
