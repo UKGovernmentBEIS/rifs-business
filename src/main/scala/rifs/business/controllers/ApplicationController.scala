@@ -18,13 +18,11 @@ class ApplicationController @Inject()(val cached: Cached, applications: Applicat
     * If an `Application` exists for the `ApplicationForm` then return it, otherwise create one.
     * If the `id` does not match an existing `ApplicationForm` then return a 404
     */
-  def overview(applicationFormId: ApplicationFormId) = cacheOk {
+  def overview(applicationFormId: ApplicationFormId) =
     Action.async(applications.overview(applicationFormId).map(jsonResult(_)))
-  }
 
   def section(id: ApplicationId, sectionNumber: Int) =
     Action.async(applications.fetchSection(id, sectionNumber).map(jsonResult(_)))
-
 
   def saveSection(id: ApplicationId, sectionNumber: Int) = Action.async(parse.json) { implicit request =>
     applications.saveSection(id, sectionNumber, request.body).map(_ => NoContent)
