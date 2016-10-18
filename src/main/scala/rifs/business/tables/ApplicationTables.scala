@@ -33,12 +33,13 @@ class ApplicationTables @Inject()(dbConfigProvider: DatabaseConfigProvider)(impl
     } yield app
   }.value
 
-  private def fetchOrCreate(applicationFormId: ApplicationFormId): Future[ApplicationOverview] = {
-    val q = for {
-      appWithSections <- applicationTable joinLeft applicationSectionTable on (_.id === _.applicationId)
-    } yield appWithSections
+  def applicationWithSectionsQ(formId:Rep[ApplicationFormId]) =
+    (applicationTable joinLeft applicationSectionTable on (_.id === _.applicationId)).filter(_._1.applicationFormId === formId)
 
-    db.run(q.filter(_._1.applicationFormId === applicationFormId).result).flatMap {
+  val applicationWithSectionsC = Compiled(applicationWithSectionsQ _)
+
+  private def fetchOrCreate(applicationFormId: ApplicationFormId): Future[ApplicationOverview] = {
+    db.run(applicationWithSectionsC(applicationFormId).result).flatMap {
       case Seq() => createApplicationForForm(applicationFormId).map { id => ApplicationOverview(id, applicationFormId, Seq()) }
       case ps =>
         val (as, ss) = ps.unzip
