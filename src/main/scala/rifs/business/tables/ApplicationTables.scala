@@ -9,6 +9,7 @@ import play.api.db.slick.DatabaseConfigProvider
 import play.api.libs.json.JsValue
 import rifs.business.data.ApplicationOps
 import rifs.business.models.{ApplicationFormId, ApplicationId, ApplicationRow, ApplicationSectionRow}
+import rifs.business.restmodels.{ApplicationOverview, ApplicationSectionOverview}
 import rifs.business.slicks.modules.{ApplicationFormModule, ApplicationModule, OpportunityModule}
 import rifs.business.slicks.support.DBBinding
 import slick.backend.DatabaseConfig
@@ -24,7 +25,7 @@ class ApplicationTables @Inject()(dbConfigProvider: DatabaseConfigProvider)(impl
 
   override def byId(id: ApplicationId): Future[Option[ApplicationRow]] = db.run(applicationTable.filter(_.id === id).result.headOption)
 
-  override def forApplicationForm(applicationFormId: ApplicationFormId): Future[Option[ApplicationRow]] = {
+  override def overview(applicationFormId: ApplicationFormId): Future[Option[ApplicationOverview]] = {
     val appFormF = db.run(applicationFormTable.filter(_.id === applicationFormId).result.headOption)
     for {
       appForm <- OptionT(appFormF)
@@ -32,11 +33,25 @@ class ApplicationTables @Inject()(dbConfigProvider: DatabaseConfigProvider)(impl
     } yield app
   }.value
 
-  private def fetchOrCreate(applicationFormId: ApplicationFormId): Future[ApplicationRow] = {
-    db.run(applicationTable.filter(_.applicationFormId === applicationFormId).result.headOption).flatMap {
-      case None => db.run((applicationTable returning applicationTable.map(_.id) into ((app, id) => app.copy(id = Some(id)))) += ApplicationRow(None, applicationFormId))
-      case Some(app) => Future.successful(app)
+  private def fetchOrCreate(applicationFormId: ApplicationFormId): Future[ApplicationOverview] = {
+    val q = for {
+      appWithSections <- applicationTable joinLeft applicationSectionTable on (_.id === _.applicationId)
+    } yield appWithSections
+
+    db.run(q.filter(_._1.applicationFormId === applicationFormId).result).flatMap {
+      case Seq() => createApplicationForForm(applicationFormId).map { id => ApplicationOverview(id, applicationFormId, Seq()) }
+      case ps =>
+        val (as, ss) = ps.unzip
+        Future.successful(as.map(a => buildOverview(a, ss.flatten)).head)
     }
+  }
+
+  private def buildOverview(app: ApplicationRow, secs: Seq[ApplicationSectionRow]): ApplicationOverview = {
+    ApplicationOverview(app.id.get, app.applicationFormId, secs.map(s => ApplicationSectionOverview(s.sectionNumber, "In progress", None)))
+  }
+
+  private def createApplicationForForm(applicationFormId: ApplicationFormId): Future[ApplicationId] = db.run {
+    (applicationTable returning applicationTable.map(_.id)) += ApplicationRow(None, applicationFormId)
   }
 
   override def fetchSection(id: ApplicationId, sectionNumber: Int): Future[Option[ApplicationSectionRow]] = db.run {

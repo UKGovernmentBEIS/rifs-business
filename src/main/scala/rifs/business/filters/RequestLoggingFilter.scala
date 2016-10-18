@@ -15,7 +15,7 @@ class RequestLoggingFilter @Inject()(implicit val mat: Materializer, ec: Executi
 
     val startTime = System.currentTimeMillis
 
-    Logger.debug(s"${requestHeader.method} ${requestHeader.uri} received...")
+    Logger.trace(s"${requestHeader.method} ${requestHeader.uri} received...")
 
     nextFilter(requestHeader).map { result =>
 
