@@ -13,7 +13,9 @@ import scala.concurrent.Future
 trait ApplicationOps {
   def byId(id: ApplicationId): Future[Option[ApplicationRow]]
 
-  def overview(applicationFormId: ApplicationFormId): Future[Option[ApplicationOverview]]
+  def forForm(applicationFormId: ApplicationFormId): Future[Option[ApplicationRow]]
+
+  def overview(applicationFormId: ApplicationId): Future[Option[ApplicationOverview]]
 
   def fetchSection(id: ApplicationId, sectionNumber: Int): Future[Option[ApplicationSectionRow]]
 

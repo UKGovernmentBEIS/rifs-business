@@ -26,21 +26,34 @@ class ApplicationTables @Inject()(dbConfigProvider: DatabaseConfigProvider)(impl
 
   override def byId(id: ApplicationId): Future[Option[ApplicationRow]] = db.run(applicationTable.filter(_.id === id).result.headOption)
 
-  override def overview(applicationFormId: ApplicationFormId): Future[Option[ApplicationOverview]] = {
+  override def forForm(applicationFormId: ApplicationFormId): Future[Option[ApplicationRow]] = {
     val appFormF = db.run(applicationFormTable.filter(_.id === applicationFormId).result.headOption)
+
     for {
-      appForm <- OptionT(appFormF)
+      _ <- OptionT(appFormF)
       app <- OptionT.liftF(fetchOrCreate(applicationFormId))
-    } yield app
+    } yield ApplicationRow(Some(app.id), app.applicationFormId)
   }.value
 
-  def applicationWithSectionsQ(formId: Rep[ApplicationFormId]) =
-    (applicationTable joinLeft applicationSectionTable on (_.id === _.applicationId)).filter(_._1.applicationFormId === formId)
+  override def overview(applicationId: ApplicationId): Future[Option[ApplicationOverview]] = db.run {
+    applicationWithSectionsC(applicationId).result
+  }.map { ps =>
+    val (as, ss) = ps.unzip
+    as.map(a => buildOverview(a, ss.flatten)).headOption
+  }
+
+  def applicationWithSectionsQ(id: Rep[ApplicationId]) =
+    (applicationTable joinLeft applicationSectionTable on (_.id === _.applicationId)).filter(_._1.id === id)
 
   val applicationWithSectionsC = Compiled(applicationWithSectionsQ _)
 
+  def applicationWithSectionsForFormQ(id: Rep[ApplicationFormId]) =
+    (applicationTable joinLeft applicationSectionTable on (_.id === _.applicationId)).filter(_._1.applicationFormId === id)
+
+  val applicationWithSectionsForFormC = Compiled(applicationWithSectionsForFormQ _)
+
   private def fetchOrCreate(applicationFormId: ApplicationFormId): Future[ApplicationOverview] = {
-    db.run(applicationWithSectionsC(applicationFormId).result).flatMap {
+    db.run(applicationWithSectionsForFormC(applicationFormId).result).flatMap {
       case Seq() => createApplicationForForm(applicationFormId).map { id => ApplicationOverview(id, applicationFormId, Seq()) }
       case ps =>
         val (as, ss) = ps.unzip

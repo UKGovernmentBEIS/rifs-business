@@ -5,7 +5,10 @@ GET         /opportunity/:id                              rifs.business.controll
 GET         /opportunity/:id/application_form             rifs.business.controllers.ApplicationFormController.forOpportunity(id: OpportunityId)
 GET         /application_form/:id                         rifs.business.controllers.ApplicationFormController.byId(id: ApplicationFormId)
 
-GET         /application_form/:id/overview                rifs.business.controllers.ApplicationController.overview(id: ApplicationFormId)
+GET         /application_form/:id/application             rifs.business.controllers.ApplicationController.applicationForForm(id: ApplicationFormId)
+
+GET         /application/:id                              rifs.business.controllers.ApplicationController.byId(id: ApplicationId)
+GET         /application/:id/overview                     rifs.business.controllers.ApplicationController.overview(id: ApplicationId)
 
 GET         /application/:id/section/:num                 rifs.business.controllers.ApplicationController.section(id: ApplicationId, num:Int)
 POST        /application/:id/section/:num                 rifs.business.controllers.ApplicationController.saveSection(id: ApplicationId, num:Int)
