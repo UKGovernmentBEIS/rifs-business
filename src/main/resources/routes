@@ -14,6 +14,9 @@ GET         /application/:id/section/:num                 rifs.business.controll
 POST        /application/:id/section/:num                 rifs.business.controllers.ApplicationController.saveSection(id: ApplicationId, num:Int)
 POST        /application/:id/section/:num/complete        rifs.business.controllers.ApplicationController.completeSection(id: ApplicationId, num:Int)
 
+GET         /keystore/:id                                 rifs.business.controllers.KeystoreController.get(id:KeystoreId)
+PUT         /keystore                                     rifs.business.controllers.KeystoreController.put(ttl:Option[Int])
+
 
 # Health check
 GET         /ping                                         rifs.business.controllers.HealthCheckController.ping()

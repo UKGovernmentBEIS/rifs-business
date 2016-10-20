@@ -9,6 +9,8 @@ import rifs.slicks.gen.IdType
 import slick.jdbc.JdbcType
 import slick.lifted.Rep
 
+import scala.language.implicitConversions
+
 trait KeystoreModule {
   self:  ExPostgresDriver with PgPlayJsonSupport with PgDateSupportJoda with DBBinding =>
 
@@ -39,9 +41,9 @@ trait KeystoreModule {
   type KeystoreQuery = Query[KeystoreTable, KeystoreRow, Seq]
   class KeystoreTable(tag: Tag) extends Table[KeystoreRow](tag, "keystore") {
     def id = column[KeystoreId]("id", O.Length(IdType.length), O.PrimaryKey)
-    def expiry = column[LocalDateTime]("expiry")
-    def doc = column[JsObject]("doc")
-    def * = (id, expiry, doc) <> (KeystoreRow.tupled, KeystoreRow.unapply)
+    def expiry = column[LocalDateTime]("expiry_dtime")
+    def document = column[JsObject]("document")
+    def * = (id, expiry, document) <> (KeystoreRow.tupled, KeystoreRow.unapply)
   }
   lazy val keystoreTable = TableQuery[KeystoreTable]
 }

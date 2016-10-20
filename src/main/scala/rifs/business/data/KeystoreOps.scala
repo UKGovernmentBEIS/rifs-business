@@ -1,14 +1,18 @@
 package rifs.business.data
 
+import com.google.inject.ImplementedBy
 import play.api.libs.json.JsObject
-import rifs.business.models.KeystoreId
+import rifs.business.models.{KeystoreId, KeystoreRow}
+import rifs.business.tables.KeystoreTables
 
 import scala.concurrent.Future
 
+@ImplementedBy(classOf[KeystoreTables])
 trait KeystoreOps {
-  def get(id: KeystoreId): Future[Option[JsObject]]
+  /**
+    * Find an entry by Id, but ignore any expired rows
+    */
+  def byId(id: KeystoreId): Future[Option[KeystoreRow]]
 
-  def put(doc: JsObject, ttl: Long): Future[KeystoreId]
-
-  def delete(id: KeystoreId): Future[Unit]
+  def put(doc: JsObject, ttl: Int): Future[KeystoreId]
 }
