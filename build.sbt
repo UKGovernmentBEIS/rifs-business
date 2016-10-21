@@ -59,7 +59,8 @@ lazy val `rifs-business` = (project in file("."))
       "-Dlogger.file=src/main/resources/development.logger.xml"
     ),
     buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion),
-    buildInfoPackage := "rifs.business.buildinfo"
+    buildInfoPackage := "rifs.business.buildinfo",
+    buildInfoOptions += BuildInfoOption.ToJson
   )
   .enablePlugins(AutomateHeaderPlugin)
 
