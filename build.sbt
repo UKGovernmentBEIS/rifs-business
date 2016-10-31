@@ -1,5 +1,6 @@
 import de.heikoseeberger.sbtheader.CommentStyleMapping._
 import de.heikoseeberger.sbtheader.license.MIT
+import sbtbuildinfo.BuildInfoPlugin.autoImport._
 
 
 name := "rifs-business"
@@ -33,6 +34,7 @@ lazy val `rifs-business` = (project in file("."))
   .disablePlugins(PlayLayoutPlugin)
   .enablePlugins(GitVersioning)
   .enablePlugins(GitBranchPrompt)
+  .enablePlugins(BuildInfoPlugin)
   .settings(
     libraryDependencies ++= Seq(
       cache,
@@ -55,7 +57,10 @@ lazy val `rifs-business` = (project in file("."))
     javaOptions := Seq(
       "-Dconfig.file=src/main/resources/development.application.conf",
       "-Dlogger.file=src/main/resources/development.logger.xml"
-    )
+    ),
+    buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion),
+    buildInfoPackage := "rifs.business.buildinfo",
+    buildInfoOptions += BuildInfoOption.ToJson
   )
   .enablePlugins(AutomateHeaderPlugin)
 
