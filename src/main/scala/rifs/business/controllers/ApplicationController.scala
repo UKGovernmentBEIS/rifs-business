@@ -52,7 +52,7 @@ class ApplicationController @Inject()(val cached: Cached, applications: Applicat
         }
         val remainingItems = items.filterNot(o => hasItemNumber(o, itemNumber))
         val newItem = request.body + ("itemNumber" -> JsNumber(itemNumber))
-        val updated = doc + ("items" -> JsArray(newItem +: items))
+        val updated = doc + ("items" -> JsArray(newItem +: remainingItems))
         applications.saveSection(id, sectionNumber, updated).map(_ => NoContent)
 
       case None => Future.successful(NotFound)
