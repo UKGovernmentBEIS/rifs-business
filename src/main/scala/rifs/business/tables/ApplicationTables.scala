@@ -74,16 +74,29 @@ class ApplicationTables @Inject()(dbConfigProvider: DatabaseConfigProvider)(impl
     (applicationTable returning applicationTable.map(_.id)) += ApplicationRow(None, applicationFormId)
   }
 
+  override def fetchAppWithSection(id: ApplicationId, sectionNumber: Int): Future[Option[(ApplicationRow, Option[ApplicationSectionRow])]] = db.run {
+    appWithSectionC(id, sectionNumber).result.headOption
+  }
+
   override def fetchSection(id: ApplicationId, sectionNumber: Int): Future[Option[ApplicationSectionRow]] = db.run {
     appSectionC(id, sectionNumber).result.headOption
   }
 
   override def saveSection(id: ApplicationId, sectionNumber: Int, answers: JsObject, completedAt: Option[LocalDateTime] = None): Future[Int] = {
-    fetchSection(id, sectionNumber).flatMap {
-      case Some(row) => db.run(appSectionC(id, sectionNumber).update(row.copy(answers = answers, completedAt = completedAt)))
-      case None => db.run(applicationSectionTable += ApplicationSectionRow(None, id, sectionNumber, answers, completedAt))
+    fetchAppWithSection(id, sectionNumber).flatMap {
+      case Some((app, Some(section))) => db.run(appSectionC(id, sectionNumber).update(section.copy(answers = answers, completedAt = completedAt)))
+      case Some((app, None)) => db.run(applicationSectionTable += ApplicationSectionRow(None, id, sectionNumber, answers, completedAt))
+      case None => Future.successful(0)
     }
   }
+
+  def joinedAppWithSection(id: Rep[ApplicationId], sectionNumber: Rep[Int]) = for {
+    as <- applicationTable joinLeft applicationSectionTable on ((a, s) => a.id === s.applicationId && s.sectionNumber == sectionNumber) if as._1.id === id
+  } yield as
+
+  def appWithSectionQ(id: Rep[ApplicationId], sectionNumber: Rep[Int]) = joinedAppWithSection(id, sectionNumber)
+
+  lazy val appWithSectionC = Compiled(appWithSectionQ _)
 
   def appSectionQ(id: Rep[ApplicationId], sectionNumber: Rep[Int]) = applicationSectionTable.filter(a => a.applicationId === id && a.sectionNumber === sectionNumber)
 
