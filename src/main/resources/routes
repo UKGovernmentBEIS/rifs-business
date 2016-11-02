@@ -14,8 +14,8 @@ GET         /application/:id/section/:num                      rifs.business.con
 POST        /application/:id/section/:num                      rifs.business.controllers.ApplicationController.saveSection(id: ApplicationId, num:Int)
 POST        /application/:id/section/:num/complete             rifs.business.controllers.ApplicationController.completeSection(id: ApplicationId, num:Int)
 
-POST        /application/:id/section/:num/items                rifs.business.controllers.ApplicationController.createSectionItem(id: ApplicationId, num:Int)
-PUT         /application/:id/section/:num/item/:itemNum        rifs.business.controllers.ApplicationController.updateSectionItem(id: ApplicationId, num:Int, itemNum:Int)
+POST        /application/:id/section/:num/items                rifs.business.controllers.ApplicationController.postSectionItem(id: ApplicationId, num:Int)
+PUT         /application/:id/section/:num/item/:itemNum        rifs.business.controllers.ApplicationController.putSectionItem(id: ApplicationId, num:Int, itemNum:Int)
 
 # Health check
 GET         /ping                                              rifs.business.controllers.HealthCheckController.ping()

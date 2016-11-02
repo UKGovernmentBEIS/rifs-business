@@ -6,6 +6,7 @@ import cats.data.OptionT
 import cats.instances.future._
 import com.github.tminglei.slickpg.{ExPostgresDriver, PgDateSupportJoda, PgPlayJsonSupport}
 import org.joda.time.LocalDateTime
+import play.api.Logger
 import play.api.db.slick.DatabaseConfigProvider
 import play.api.libs.json.JsObject
 import rifs.business.data.ApplicationOps
@@ -91,7 +92,7 @@ class ApplicationTables @Inject()(dbConfigProvider: DatabaseConfigProvider)(impl
   }
 
   def joinedAppWithSection(id: Rep[ApplicationId], sectionNumber: Rep[Int]) = for {
-    as <- applicationTable joinLeft applicationSectionTable on ((a, s) => a.id === s.applicationId && s.sectionNumber == sectionNumber) if as._1.id === id
+    as <- applicationTable joinLeft applicationSectionTable on ((a, s) => a.id === s.applicationId && s.sectionNumber === sectionNumber) if as._1.id === id
   } yield as
 
   def appWithSectionQ(id: Rep[ApplicationId], sectionNumber: Rep[Int]) = joinedAppWithSection(id, sectionNumber)

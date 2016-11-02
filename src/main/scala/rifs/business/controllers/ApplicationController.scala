@@ -36,7 +36,7 @@ class ApplicationController @Inject()(val cached: Cached, applications: Applicat
     applications.saveSection(id, sectionNumber, request.body).map(_ => NoContent)
   }
 
-  def updateSectionItem(id: ApplicationId, sectionNumber: Int, itemNumber: Int) = Action.async(parse.json[JsObject]) { implicit request =>
+  def putSectionItem(id: ApplicationId, sectionNumber: Int, itemNumber: Int) = Action.async(parse.json[JsObject]) { implicit request =>
     def hasItemNumber(o: JsObject, num: Int) = o \ "itemNumber" match {
       case JsDefined(JsNumber(n)) if n == num => true
       case _ => false
@@ -59,7 +59,7 @@ class ApplicationController @Inject()(val cached: Cached, applications: Applicat
     }
   }
 
-  def createSectionItem(id: ApplicationId, sectionNumber: Int) = Action.async(parse.json[JsObject]) { implicit request =>
+  def postSectionItem(id: ApplicationId, sectionNumber: Int) = Action.async(parse.json[JsObject]) { implicit request =>
     applications.fetchAppWithSection(id, sectionNumber).flatMap {
       case Some((app, os)) =>
         val doc = os.map(_.answers).getOrElse(JsObject(Seq()))
