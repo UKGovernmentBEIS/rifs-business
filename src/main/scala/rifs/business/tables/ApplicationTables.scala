@@ -87,13 +87,17 @@ class ApplicationTables @Inject()(dbConfigProvider: DatabaseConfigProvider)(impl
           case `answers` if completedAt.isDefined =>
             db.run(appSectionC(id, sectionNumber).update(row.copy(answers = answers, completedAt = completedAt)))
           case `answers` if completedAt.isEmpty =>
-                Future.successful(1)
+            Future.successful(1)
           case _ =>
             db.run(appSectionC(id, sectionNumber).update(row.copy(answers = answers, completedAt = completedAt)))
         }
       case None =>
         db.run(applicationSectionTable += ApplicationSectionRow(None, id, sectionNumber, answers, completedAt))
     }
+  }
+
+  override def deleteSection(id: ApplicationId, sectionNumber: Int): Future[Int] = db.run {
+    appSectionC(id, sectionNumber).delete
   }
 
   def appSectionQ(id: Rep[ApplicationId], sectionNumber: Rep[Int]) = applicationSectionTable.filter(a => a.applicationId === id && a.sectionNumber === sectionNumber)

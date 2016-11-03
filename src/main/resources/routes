@@ -12,6 +12,7 @@ GET         /application/:id                              rifs.business.controll
 GET         /application/:id/section/:num                 rifs.business.controllers.ApplicationController.section(id: ApplicationId, num:Int)
 POST        /application/:id/section/:num                 rifs.business.controllers.ApplicationController.saveSection(id: ApplicationId, num:Int)
 POST        /application/:id/section/:num/complete        rifs.business.controllers.ApplicationController.completeSection(id: ApplicationId, num:Int)
+DELETE      /application/:id/section/:num                 rifs.business.controllers.ApplicationController.deleteSection(id: ApplicationId, num:Int)
 
 # Health check
 GET         /ping                                         rifs.business.controllers.HealthCheckController.ping()

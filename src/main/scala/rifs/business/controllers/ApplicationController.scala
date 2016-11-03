@@ -33,4 +33,8 @@ class ApplicationController @Inject()(val cached: Cached, applications: Applicat
   def completeSection(id: ApplicationId, sectionNumber: Int) = Action.async(parse.json[JsObject]) { implicit request =>
     applications.saveSection(id, sectionNumber, request.body, Some(LocalDateTime.now())).map(_ => NoContent)
   }
+
+  def deleteSection(id: ApplicationId, sectionNumber: Int) = Action.async { implicit request =>
+    applications.deleteSection(id, sectionNumber).map(_ => NoContent)
+  }
 }

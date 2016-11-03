@@ -21,4 +21,6 @@ trait ApplicationOps {
 
   def saveSection(id: ApplicationId, sectionNumber: Int, answers: JsObject, completedAt: Option[LocalDateTime] = None): Future[Int]
 
+  def deleteSection(id: ApplicationId, sectionNumber: Int): Future[Int]
+
 }
