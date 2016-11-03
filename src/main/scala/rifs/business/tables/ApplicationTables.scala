@@ -83,6 +83,8 @@ class ApplicationTables @Inject()(dbConfigProvider: DatabaseConfigProvider)(impl
     appSectionC(id, sectionNumber).result.headOption
   }
 
+  override def fetchSections(id: ApplicationId): Future[Set[ApplicationSectionRow]] = db.run(appSectionsC(id).result).map(_.toSet)
+
   override def saveSection(id: ApplicationId, sectionNumber: Int, answers: JsObject, completedAt: Option[LocalDateTime] = None): Future[Int] = {
     fetchAppWithSection(id, sectionNumber).flatMap {
       case Some((app, Some(section))) => db.run(appSectionC(id, sectionNumber).update(section.copy(answers = answers, completedAt = completedAt)))
@@ -103,5 +105,7 @@ class ApplicationTables @Inject()(dbConfigProvider: DatabaseConfigProvider)(impl
 
   lazy val appSectionC = Compiled(appSectionQ _)
 
+  def appSectionsQ(id: Rep[ApplicationId]) = applicationSectionTable.filter(_.applicationId === id)
 
+  lazy val appSectionsC = Compiled(appSectionsQ _)
 }
