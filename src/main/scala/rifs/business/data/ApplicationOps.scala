@@ -19,6 +19,8 @@ trait ApplicationOps {
 
   def fetchSection(id: ApplicationId, sectionNumber: Int): Future[Option[ApplicationSectionRow]]
 
+  def fetchSections(id: ApplicationId): Future[Set[ApplicationSectionRow]]
+
   def saveSection(id: ApplicationId, sectionNumber: Int, answers: JsObject, completedAt: Option[LocalDateTime] = None): Future[Int]
 
 }
