@@ -8,6 +8,7 @@ import com.github.tminglei.slickpg.{ExPostgresDriver, PgDateSupportJoda, PgPlayJ
 import org.joda.time.LocalDateTime
 import play.api.db.slick.DatabaseConfigProvider
 import play.api.libs.json.JsObject
+import rifs.business.controllers.JsonHelpers
 import rifs.business.data.ApplicationOps
 import rifs.business.models.{ApplicationFormId, ApplicationId, ApplicationRow, ApplicationSectionRow}
 import rifs.business.restmodels.{ApplicationOverview, ApplicationSectionOverview}
@@ -63,8 +64,7 @@ class ApplicationTables @Inject()(dbConfigProvider: DatabaseConfigProvider)(impl
 
   private def buildOverview(app: ApplicationRow, secs: Seq[ApplicationSectionRow]): ApplicationOverview = {
     val sectionOverviews: Seq[ApplicationSectionOverview] = secs.map { s =>
-      val status = s.completedAt.map(_ => "Completed").getOrElse("In progress")
-      ApplicationSectionOverview(s.sectionNumber, status, s.completedAt)
+      ApplicationSectionOverview(s.sectionNumber, s.completedAt)
     }
 
     ApplicationOverview(app.id.get, app.applicationFormId, sectionOverviews)
@@ -79,9 +79,19 @@ class ApplicationTables @Inject()(dbConfigProvider: DatabaseConfigProvider)(impl
   }
 
   override def saveSection(id: ApplicationId, sectionNumber: Int, answers: JsObject, completedAt: Option[LocalDateTime] = None): Future[Int] = {
+
     fetchSection(id, sectionNumber).flatMap {
-      case Some(row) => db.run(appSectionC(id, sectionNumber).update(row.copy(answers = answers, completedAt = completedAt)))
-      case None => db.run(applicationSectionTable += ApplicationSectionRow(None, id, sectionNumber, answers, completedAt))
+      case Some(row) =>
+        row.answers match {
+          case `answers` if completedAt.isDefined =>
+            db.run(appSectionC(id, sectionNumber).update(row.copy(answers = answers, completedAt = completedAt)))
+          case `answers` if completedAt.isEmpty =>
+                Future.successful(1)
+          case _ =>
+            db.run(appSectionC(id, sectionNumber).update(row.copy(answers = answers, completedAt = completedAt)))
+        }
+      case None =>
+        db.run(applicationSectionTable += ApplicationSectionRow(None, id, sectionNumber, answers, completedAt))
     }
   }
 
@@ -89,5 +99,6 @@ class ApplicationTables @Inject()(dbConfigProvider: DatabaseConfigProvider)(impl
 
   lazy val appSectionC = Compiled(appSectionQ _)
 
+  val applicationSectionTableC = Compiled(applicationSectionTable.pack)
 
 }
