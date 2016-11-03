@@ -4,7 +4,7 @@ import com.google.inject.ImplementedBy
 import org.joda.time.LocalDateTime
 import play.api.libs.json.JsObject
 import rifs.business.models.{ApplicationFormId, ApplicationId, ApplicationRow, ApplicationSectionRow}
-import rifs.business.restmodels.ApplicationOverview
+import rifs.business.restmodels.Application
 import rifs.business.tables.ApplicationTables
 
 import scala.concurrent.Future
@@ -15,7 +15,7 @@ trait ApplicationOps {
 
   def forForm(applicationFormId: ApplicationFormId): Future[Option[ApplicationRow]]
 
-  def overview(applicationFormId: ApplicationId): Future[Option[ApplicationOverview]]
+  def application(applicationId: ApplicationId): Future[Option[Application]]
 
   def fetchSection(id: ApplicationId, sectionNumber: Int): Future[Option[ApplicationSectionRow]]
 
