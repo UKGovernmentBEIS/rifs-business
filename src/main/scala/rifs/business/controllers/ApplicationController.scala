@@ -5,6 +5,7 @@ import javax.inject.Inject
 import org.joda.time.LocalDateTime
 import play.api.cache.Cached
 import play.api.libs.json.JsObject
+import play.api.libs.json.Json
 import play.api.mvc.{Action, Controller}
 import rifs.business.data.ApplicationOps
 import rifs.business.models.{ApplicationFormId, ApplicationId}
@@ -26,6 +27,9 @@ class ApplicationController @Inject()(val cached: Cached, applications: Applicat
   def section(id: ApplicationId, sectionNumber: Int) =
     Action.async(applications.fetchSection(id, sectionNumber).map(jsonResult(_)))
 
+  def sections(id: ApplicationId) =
+    Action.async(applications.fetchSections(id).map(os => Ok(Json.toJson(os))))
+
   def saveSection(id: ApplicationId, sectionNumber: Int) = Action.async(parse.json[JsObject]) { implicit request =>
     applications.saveSection(id, sectionNumber, request.body).map(_ => NoContent)
   }
@@ -37,4 +41,5 @@ class ApplicationController @Inject()(val cached: Cached, applications: Applicat
   def deleteSection(id: ApplicationId, sectionNumber: Int) = Action.async { implicit request =>
     applications.deleteSection(id, sectionNumber).map(_ => NoContent)
   }
+
 }
