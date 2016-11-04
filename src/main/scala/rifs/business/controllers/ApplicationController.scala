@@ -5,9 +5,7 @@ import javax.inject.Inject
 import org.joda.time.LocalDateTime
 import play.api.Logger
 import play.api.cache.Cached
-import play.api.libs.json.JsObject
-import play.api.libs.json.Json
-import play.api.libs.json._
+import play.api.libs.json.{JsObject, Json, _}
 import play.api.mvc.{Action, Controller}
 import rifs.business.data.ApplicationOps
 import rifs.business.models.{ApplicationFormId, ApplicationId}
@@ -29,7 +27,7 @@ class ApplicationController @Inject()(val cached: Cached, applications: Applicat
     * If the `id` does not match an existing `ApplicationForm` then return a 404
     */
   def overview(applicationId: ApplicationId) =
-  Action.async(applications.overview(applicationId).map(jsonResult(_)))
+    Action.async(applications.overview(applicationId).map(jsonResult(_)))
 
   def section(id: ApplicationId, sectionNumber: Int) =
     Action.async(applications.fetchSection(id, sectionNumber).map(jsonResult(_)))
@@ -39,6 +37,28 @@ class ApplicationController @Inject()(val cached: Cached, applications: Applicat
 
   def saveSection(id: ApplicationId, sectionNumber: Int) = Action.async(parse.json[JsObject]) { implicit request =>
     applications.saveSection(id, sectionNumber, request.body).map(_ => NoContent)
+  }
+
+  def deleteSectionItem(id: ApplicationId, sectionNumber: Int, itemNumber: Int) = Action.async { implicit request =>
+    def hasItemNumber(o: JsObject, num: Int) = o \ "itemNumber" match {
+      case JsDefined(JsNumber(n)) if n == num => true
+      case _ => false
+    }
+
+    applications.fetchAppWithSection(id, sectionNumber).flatMap {
+      case Some((app, os)) =>
+        Logger.debug(app.toString)
+        val doc = os.map(_.answers).getOrElse(JsObject(Seq()))
+        val items = doc \ "items" match {
+          case JsDefined(JsArray(is)) => is.collect { case o: JsObject => o }
+          case _ => Seq()
+        }
+        val remainingItems = items.filterNot(o => hasItemNumber(o, itemNumber))
+        val updated = doc + ("items" -> JsArray(remainingItems))
+        applications.saveSection(id, sectionNumber, updated).map(_ => NoContent)
+
+      case None => Future.successful(NotFound)
+    }
   }
 
   def putSectionItem(id: ApplicationId, sectionNumber: Int, itemNumber: Int) = Action.async(parse.json[JsObject]) { implicit request =>
