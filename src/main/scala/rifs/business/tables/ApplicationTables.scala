@@ -62,7 +62,6 @@ class ApplicationTables @Inject()(dbConfigProvider: DatabaseConfigProvider)(impl
     }
   }
 
-
   private def buildApplication(app: ApplicationRow, secs: Seq[ApplicationSectionRow]): Application = {
     val sectionOverviews: Seq[ApplicationSection] = secs.map { s =>
       ApplicationSection(s.sectionNumber, s.answers, s.completedAt)
@@ -79,17 +78,14 @@ class ApplicationTables @Inject()(dbConfigProvider: DatabaseConfigProvider)(impl
     appSectionC(id, sectionNumber).result.headOption
   }
 
+
   override def saveSection(id: ApplicationId, sectionNumber: Int, answers: JsObject, completedAt: Option[LocalDateTime] = None): Future[Int] = {
 
     fetchSection(id, sectionNumber).flatMap {
       case Some(row) =>
-        row.answers match {
-          case `answers` if completedAt.isDefined =>
-            db.run(appSectionC(id, sectionNumber).update(row.copy(answers = answers, completedAt = completedAt)))
-          case `answers` if completedAt.isEmpty =>
-            Future.successful(1)
-          case _ =>
-            db.run(appSectionC(id, sectionNumber).update(row.copy(answers = answers, completedAt = completedAt)))
+        preCheckSaveAnswers(row.answers, answers, completedAt) match {
+          case true => db.run(appSectionC(id, sectionNumber).update(row.copy(answers = answers, completedAt = completedAt)))
+          case false => Future.successful(1)
         }
       case None =>
         db.run(applicationSectionTable += ApplicationSectionRow(None, id, sectionNumber, answers, completedAt))
@@ -98,6 +94,12 @@ class ApplicationTables @Inject()(dbConfigProvider: DatabaseConfigProvider)(impl
 
   override def deleteSection(id: ApplicationId, sectionNumber: Int): Future[Int] = db.run {
     appSectionC(id, sectionNumber).delete
+  }
+
+  def preCheckSaveAnswers(obj1: JsObject, obj2: JsObject, completedAt: Option[LocalDateTime]): Boolean = {
+    !(JsonHelpers.flatten("", obj1).filter(_._2.isEmpty == false).toList.sortBy(_._2)
+      .equals(JsonHelpers.flatten("", obj2).filter(_._2.isEmpty == false).toList.sortBy(_._2)) &&
+      completedAt.isEmpty)
   }
 
   def appSectionQ(id: Rep[ApplicationId], sectionNumber: Rep[Int]) = applicationSectionTable.filter(a => a.applicationId === id && a.sectionNumber === sectionNumber)
