@@ -97,9 +97,13 @@ class ApplicationTables @Inject()(dbConfigProvider: DatabaseConfigProvider)(impl
   }
 
   def preCheckSaveAnswers(obj1: JsObject, obj2: JsObject, completedAt: Option[LocalDateTime]): Boolean = {
-    !(JsonHelpers.flatten("", obj1).filter(_._2.isEmpty == false).toList.sortBy(_._2)
-      .equals(JsonHelpers.flatten("", obj2).filter(_._2.isEmpty == false).toList.sortBy(_._2)) &&
-      completedAt.isEmpty)
+
+    val areTheSame = JsonHelpers.flatten("", obj1).filter(_._2.isEmpty == false).toList.sortBy(_._2)
+      .equals(JsonHelpers.flatten("", obj2).filter(_._2.isEmpty == false).toList.sortBy(_._2))
+
+    val markedCompleted = completedAt.isEmpty
+
+    !(areTheSame && markedCompleted)
   }
 
   def appSectionQ(id: Rep[ApplicationId], sectionNumber: Rep[Int]) = applicationSectionTable.filter(a => a.applicationId === id && a.sectionNumber === sectionNumber)
