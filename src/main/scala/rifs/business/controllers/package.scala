@@ -36,8 +36,8 @@ package object controllers extends ValueClassFormats {
   implicit val appFormSecFormat = Json.format[ApplicationFormSection]
   implicit val appFormFormat = Json.format[ApplicationForm]
 
-  implicit val appSecFormat = Json.format[ApplicationSectionRow]
-  implicit val appFormat = Json.format[ApplicationRow]
-  implicit val appSecOvFormat = Json.format[ApplicationSectionOverview]
-  implicit val appOvFormat = Json.format[ApplicationOverview]
+  implicit val appRowSecFormat = Json.format[ApplicationSectionRow]
+  implicit val appRowFormat = Json.format[ApplicationRow]
+  implicit val appSecFormat = Json.format[ApplicationSection]
+  implicit val appFormat = Json.format[Application]
 }

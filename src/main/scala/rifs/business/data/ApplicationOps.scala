@@ -4,7 +4,7 @@ import com.google.inject.ImplementedBy
 import org.joda.time.LocalDateTime
 import play.api.libs.json.JsObject
 import rifs.business.models.{ApplicationFormId, ApplicationId, ApplicationRow, ApplicationSectionRow}
-import rifs.business.restmodels.ApplicationOverview
+import rifs.business.restmodels.Application
 import rifs.business.tables.ApplicationTables
 
 import scala.concurrent.Future
@@ -15,7 +15,7 @@ trait ApplicationOps {
 
   def forForm(applicationFormId: ApplicationFormId): Future[Option[ApplicationRow]]
 
-  def overview(applicationFormId: ApplicationId): Future[Option[ApplicationOverview]]
+  def application(applicationId: ApplicationId): Future[Option[Application]]
 
   /**
     * @return `Some[ApplicationSectionRow]` if the application with the given `id` was found and it had a
@@ -38,5 +38,7 @@ trait ApplicationOps {
   def fetchSections(id: ApplicationId): Future[Set[ApplicationSectionRow]]
 
   def saveSection(id: ApplicationId, sectionNumber: Int, answers: JsObject, completedAt: Option[LocalDateTime] = None): Future[Int]
+
+  def deleteSection(id: ApplicationId, sectionNumber: Int): Future[Int]
 
 }
