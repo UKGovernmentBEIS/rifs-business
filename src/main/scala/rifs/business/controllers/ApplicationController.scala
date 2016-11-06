@@ -3,7 +3,6 @@ package rifs.business.controllers
 import javax.inject.Inject
 
 import org.joda.time.LocalDateTime
-import play.api.Logger
 import play.api.cache.Cached
 import play.api.libs.json._
 import play.api.mvc.{Action, Controller}
@@ -56,7 +55,6 @@ class ApplicationController @Inject()(val cached: Cached, applications: Applicat
 
     applications.fetchAppWithSection(id, sectionNumber).flatMap {
       case Some((app, os)) =>
-        Logger.debug(app.toString)
         val doc = os.map(_.answers).getOrElse(JsObject(Seq()))
         val items = doc \ "items" match {
           case JsDefined(JsArray(is)) => is.collect { case o: JsObject => o }
@@ -78,7 +76,6 @@ class ApplicationController @Inject()(val cached: Cached, applications: Applicat
 
     applications.fetchAppWithSection(id, sectionNumber).flatMap {
       case Some((app, os)) =>
-        Logger.debug(app.toString)
         val doc = os.map(_.answers).getOrElse(JsObject(Seq()))
         val items = doc \ "items" match {
           case JsDefined(JsArray(is)) => is.collect { case o: JsObject => o }

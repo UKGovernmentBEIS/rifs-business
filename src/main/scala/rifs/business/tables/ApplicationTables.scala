@@ -87,19 +87,19 @@ class ApplicationTables @Inject()(dbConfigProvider: DatabaseConfigProvider)(impl
 
   override def saveSection(id: ApplicationId, sectionNumber: Int, answers: JsObject, completedAt: Option[LocalDateTime] = None): Future[Int] = {
     fetchAppWithSection(id, sectionNumber).flatMap {
-      case Some((app, Some(section))) => db.run(appSectionC(id, sectionNumber).update(section.copy(answers = answers, completedAt = completedAt)))
+      case Some((app, Some(section))) => areDifferent(section.answers, answers) || completedAt.isDefined match {
+        case true => db.run(appSectionC(id, sectionNumber).update(section.copy(answers = answers, completedAt = completedAt)))
+        case false => Future.successful(1)
+      }
       case Some((app, None)) => db.run(applicationSectionTable += ApplicationSectionRow(None, id, sectionNumber, answers, completedAt))
       case None => Future.successful(0)
-
-    fetchSection(id, sectionNumber).flatMap {
-      case Some(row) =>
-        preCheckSaveAnswers(row.answers, answers, completedAt) match {
-          case true => db.run(appSectionC(id, sectionNumber).update(row.copy(answers = answers, completedAt = completedAt)))
-          case false => Future.successful(1)
-        }
-      case None =>
-        db.run(applicationSectionTable += ApplicationSectionRow(None, id, sectionNumber, answers, completedAt))
     }
+  }
+
+  def areDifferent(obj1: JsObject, obj2: JsObject): Boolean = {
+    val flat1 = JsonHelpers.flatten("", obj1).filter(_._2.trim != "")
+    val flat2 = JsonHelpers.flatten("", obj2).filter(_._2.trim != "")
+    flat1 != flat2
   }
 
   def joinedAppWithSection(id: Rep[ApplicationId], sectionNumber: Rep[Int]) = for {
@@ -112,13 +112,6 @@ class ApplicationTables @Inject()(dbConfigProvider: DatabaseConfigProvider)(impl
 
   override def deleteSection(id: ApplicationId, sectionNumber: Int): Future[Int] = db.run {
     appSectionC(id, sectionNumber).delete
-  }
-
-  def preCheckSaveAnswers(obj1: JsObject, obj2: JsObject, completedAt: Option[LocalDateTime]): Boolean = {
-
-    !(JsonHelpers.flatten("", obj1).filter(_._2.isEmpty == false).toList.sortBy(_._2)
-      .equals(JsonHelpers.flatten("", obj2).filter(_._2.isEmpty == false).toList.sortBy(_._2)) &&
-      completedAt.isEmpty)
   }
 
   def appSectionQ(id: Rep[ApplicationId], sectionNumber: Rep[Int]) = applicationSectionTable.filter(a => a.applicationId === id && a.sectionNumber === sectionNumber)
