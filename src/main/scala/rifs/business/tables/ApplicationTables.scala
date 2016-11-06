@@ -8,9 +8,10 @@ import com.github.tminglei.slickpg.{ExPostgresDriver, PgDateSupportJoda, PgPlayJ
 import org.joda.time.LocalDateTime
 import play.api.db.slick.DatabaseConfigProvider
 import play.api.libs.json.JsObject
+import rifs.business.controllers.JsonHelpers
 import rifs.business.data.ApplicationOps
 import rifs.business.models.{ApplicationFormId, ApplicationId, ApplicationRow, ApplicationSectionRow}
-import rifs.business.restmodels.{ApplicationOverview, ApplicationSectionOverview}
+import rifs.business.restmodels.{Application, ApplicationSection}
 import rifs.business.slicks.modules.{ApplicationFormModule, ApplicationModule, OpportunityModule}
 import rifs.business.slicks.support.DBBinding
 import slick.backend.DatabaseConfig
@@ -35,11 +36,11 @@ class ApplicationTables @Inject()(dbConfigProvider: DatabaseConfigProvider)(impl
     } yield ApplicationRow(Some(app.id), app.applicationFormId)
   }.value
 
-  override def overview(applicationId: ApplicationId): Future[Option[ApplicationOverview]] = db.run {
+  override def application(applicationId: ApplicationId): Future[Option[Application]] = db.run {
     applicationWithSectionsC(applicationId).result
   }.map { ps =>
     val (as, ss) = ps.unzip
-    as.map(a => buildOverview(a, ss.flatten)).headOption
+    as.map(a => buildApplication(a, ss.flatten)).headOption
   }
 
   def applicationWithSectionsQ(id: Rep[ApplicationId]) =
@@ -52,22 +53,21 @@ class ApplicationTables @Inject()(dbConfigProvider: DatabaseConfigProvider)(impl
 
   val applicationWithSectionsForFormC = Compiled(applicationWithSectionsForFormQ _)
 
-  private def fetchOrCreate(applicationFormId: ApplicationFormId): Future[ApplicationOverview] = {
+  private def fetchOrCreate(applicationFormId: ApplicationFormId): Future[Application] = {
     db.run(applicationWithSectionsForFormC(applicationFormId).result).flatMap {
-      case Seq() => createApplicationForForm(applicationFormId).map { id => ApplicationOverview(id, applicationFormId, Seq()) }
+      case Seq() => createApplicationForForm(applicationFormId).map { id => Application(id, applicationFormId, Seq()) }
       case ps =>
         val (as, ss) = ps.unzip
-        Future.successful(as.map(a => buildOverview(a, ss.flatten)).head)
+        Future.successful(as.map(a => buildApplication(a, ss.flatten)).head)
     }
   }
 
-  private def buildOverview(app: ApplicationRow, secs: Seq[ApplicationSectionRow]): ApplicationOverview = {
-    val sectionOverviews: Seq[ApplicationSectionOverview] = secs.map { s =>
-      val status = s.completedAt.map(_ => "Completed").getOrElse("In progress")
-      ApplicationSectionOverview(s.sectionNumber, status, s.completedAt)
+  private def buildApplication(app: ApplicationRow, secs: Seq[ApplicationSectionRow]): Application = {
+    val sectionOverviews: Seq[ApplicationSection] = secs.map { s =>
+      ApplicationSection(s.sectionNumber, s.answers, s.completedAt)
     }
 
-    ApplicationOverview(app.id.get, app.applicationFormId, sectionOverviews)
+    Application(app.id.get, app.applicationFormId, sectionOverviews)
   }
 
   private def createApplicationForForm(applicationFormId: ApplicationFormId): Future[ApplicationId] = db.run {
@@ -81,10 +81,27 @@ class ApplicationTables @Inject()(dbConfigProvider: DatabaseConfigProvider)(impl
   override def fetchSections(id: ApplicationId): Future[Set[ApplicationSectionRow]] = db.run(appSectionsC(id).result).map(_.toSet)
 
   override def saveSection(id: ApplicationId, sectionNumber: Int, answers: JsObject, completedAt: Option[LocalDateTime] = None): Future[Int] = {
+
     fetchSection(id, sectionNumber).flatMap {
-      case Some(row) => db.run(appSectionC(id, sectionNumber).update(row.copy(answers = answers, completedAt = completedAt)))
-      case None => db.run(applicationSectionTable += ApplicationSectionRow(None, id, sectionNumber, answers, completedAt))
+      case Some(row) =>
+        preCheckSaveAnswers(row.answers, answers, completedAt) match {
+          case true => db.run(appSectionC(id, sectionNumber).update(row.copy(answers = answers, completedAt = completedAt)))
+          case false => Future.successful(1)
+        }
+      case None =>
+        db.run(applicationSectionTable += ApplicationSectionRow(None, id, sectionNumber, answers, completedAt))
     }
+  }
+
+  override def deleteSection(id: ApplicationId, sectionNumber: Int): Future[Int] = db.run {
+    appSectionC(id, sectionNumber).delete
+  }
+
+  def preCheckSaveAnswers(obj1: JsObject, obj2: JsObject, completedAt: Option[LocalDateTime]): Boolean = {
+
+    !(JsonHelpers.flatten("", obj1).filter(_._2.isEmpty == false).toList.sortBy(_._2)
+      .equals(JsonHelpers.flatten("", obj2).filter(_._2.isEmpty == false).toList.sortBy(_._2)) &&
+      completedAt.isEmpty)
   }
 
   def appSectionQ(id: Rep[ApplicationId], sectionNumber: Rep[Int]) = applicationSectionTable.filter(a => a.applicationId === id && a.sectionNumber === sectionNumber)

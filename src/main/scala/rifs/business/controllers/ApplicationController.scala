@@ -4,8 +4,7 @@ import javax.inject.Inject
 
 import org.joda.time.LocalDateTime
 import play.api.cache.Cached
-import play.api.libs.json.JsObject
-import play.api.libs.json.Json
+import play.api.libs.json.{JsObject, Json}
 import play.api.mvc.{Action, Controller}
 import rifs.business.data.ApplicationOps
 import rifs.business.models.{ApplicationFormId, ApplicationId}
@@ -21,12 +20,21 @@ class ApplicationController @Inject()(val cached: Cached, applications: Applicat
     applications.forForm(applicationFormId).map(jsonResult(_))
   }
 
+  def application(applicationId: ApplicationId) =
+    Action.async(applications.application(applicationId).map(jsonResult(_)))
+
+  val emptyJsObject: JsObject = JsObject(Seq())
+
   /**
-    * If an `Application` exists for the `ApplicationForm` then return it, otherwise create one.
-    * If the `id` does not match an existing `ApplicationForm` then return a 404
+    * Returns the structure of application with its sections, but without any answers.
+    * Useful for situations where the client is just looking for the status of the
+    * application and sections without needing the full content.
     */
-  def overview(applicationId: ApplicationId) =
-    Action.async(applications.overview(applicationId).map(jsonResult(_)))
+  def overview(applicationId: ApplicationId) = Action.async {
+    applications.application(applicationId).map {
+      _.map(app => app.copy(sections = app.sections.map(_.copy(answers = emptyJsObject))))
+    }.map(jsonResult(_))
+  }
 
   def section(id: ApplicationId, sectionNumber: Int) =
     Action.async(applications.fetchSection(id, sectionNumber).map(jsonResult(_)))
@@ -42,5 +50,8 @@ class ApplicationController @Inject()(val cached: Cached, applications: Applicat
     applications.saveSection(id, sectionNumber, request.body, Some(LocalDateTime.now())).map(_ => NoContent)
   }
 
+  def deleteSection(id: ApplicationId, sectionNumber: Int) = Action.async { implicit request =>
+    applications.deleteSection(id, sectionNumber).map(_ => NoContent)
+  }
 
 }
