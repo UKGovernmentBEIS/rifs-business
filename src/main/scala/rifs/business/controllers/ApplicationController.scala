@@ -2,7 +2,7 @@ package rifs.business.controllers
 
 import javax.inject.Inject
 
-import org.joda.time.LocalDateTime
+import org.joda.time.{DateTimeZone, LocalDateTime}
 import play.api.cache.Cached
 import play.api.libs.json._
 import play.api.mvc.{Action, Controller}
@@ -42,7 +42,7 @@ class ApplicationController @Inject()(val cached: Cached, applications: Applicat
   }
 
   def deleteAll = Action.async { implicit request =>
-    applications.deleteAll.map(_=>NoContent)
+    applications.deleteAll.map(_ => NoContent)
   }
 
   def section(id: ApplicationId, sectionNumber: Int) =
@@ -119,13 +119,17 @@ class ApplicationController @Inject()(val cached: Cached, applications: Applicat
     }
   }
 
+  /**
+    * TODO: use a db sequence for this
+    *
+    * @return
+    */
   def allocateItemNumber(): Future[Int] = Future {
     Random.nextInt().abs
   }
 
-  def completeSection(id: ApplicationId, sectionNumber: Int) = Action.async(parse.json[JsObject]) {
-    implicit request =>
-      applications.saveSection(id, sectionNumber, request.body, Some(LocalDateTime.now())).map(_ => NoContent)
+  def completeSection(id: ApplicationId, sectionNumber: Int) = Action.async(parse.json[JsObject]) { implicit request =>
+    applications.saveSection(id, sectionNumber, request.body, Some(LocalDateTime.now(DateTimeZone.UTC))).map(_ => NoContent)
   }
 
   def deleteSection(id: ApplicationId, sectionNumber: Int) = Action.async { implicit request =>
