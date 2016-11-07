@@ -13,15 +13,17 @@ import scala.concurrent.Future
 trait ApplicationOps {
   def byId(id: ApplicationId): Future[Option[ApplicationRow]]
 
+  def delete(id: ApplicationId): Future[Unit]
+
   def forForm(applicationFormId: ApplicationFormId): Future[Option[ApplicationRow]]
 
   def application(applicationId: ApplicationId): Future[Option[Application]]
 
   /**
     * @return `Some[ApplicationSectionRow]` if the application with the given `id` was found and it had a
-    *        section with number `sectionNumber`. If there is no section, or if there is no application with
-    *        the given `id` then this returns `None`. If you need to know whether it was the application
-    *        or the section that was missing then use `fetchAppWithSection`.
+    *         section with number `sectionNumber`. If there is no section, or if there is no application with
+    *         the given `id` then this returns `None`. If you need to know whether it was the application
+    *         or the section that was missing then use `fetchAppWithSection`.
     */
   def fetchSection(id: ApplicationId, sectionNumber: Int): Future[Option[ApplicationSectionRow]]
 

@@ -6,7 +6,6 @@ import cats.data.OptionT
 import cats.instances.future._
 import com.github.tminglei.slickpg.{ExPostgresDriver, PgDateSupportJoda, PgPlayJsonSupport}
 import org.joda.time.LocalDateTime
-import play.api.Logger
 import play.api.db.slick.DatabaseConfigProvider
 import play.api.libs.json.JsObject
 import rifs.business.controllers.JsonHelpers
@@ -42,6 +41,13 @@ class ApplicationTables @Inject()(dbConfigProvider: DatabaseConfigProvider)(impl
   }.map { ps =>
     val (as, ss) = ps.unzip
     as.map(a => buildApplication(a, ss.flatten)).headOption
+  }
+
+  override def delete(id: ApplicationId): Future[Unit] = db.run {
+    for {
+      _ <- applicationSectionTable.filter(_.applicationId === id).delete
+      _ <- applicationTable.filter(_.id === id).delete
+    } yield ()
   }
 
   def applicationWithSectionsQ(id: Rep[ApplicationId]) =

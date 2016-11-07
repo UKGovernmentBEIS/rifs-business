@@ -37,6 +37,10 @@ class ApplicationController @Inject()(val cached: Cached, applications: Applicat
     }.map(jsonResult(_))
   }
 
+  def delete(id: ApplicationId) = Action.async { implicit request =>
+    applications.delete(id).map(_ => NoContent)
+  }
+
   def section(id: ApplicationId, sectionNumber: Int) =
     Action.async(applications.fetchSection(id, sectionNumber).map(jsonResult(_)))
 
