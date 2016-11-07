@@ -43,6 +43,20 @@ class ApplicationTables @Inject()(dbConfigProvider: DatabaseConfigProvider)(impl
     as.map(a => buildApplication(a, ss.flatten)).headOption
   }
 
+  override def delete(id: ApplicationId): Future[Unit] = db.run {
+    for {
+      _ <- applicationSectionTable.filter(_.applicationId === id).delete
+      _ <- applicationTable.filter(_.id === id).delete
+    } yield ()
+  }
+
+  override def deleteAll: Future[Unit] = db.run {
+    for {
+      _ <- applicationSectionTable.delete
+      _ <- applicationTable.delete
+    } yield ()
+  }
+
   def applicationWithSectionsQ(id: Rep[ApplicationId]) =
     (applicationTable joinLeft applicationSectionTable on (_.id === _.applicationId)).filter(_._1.id === id)
 
@@ -74,6 +88,10 @@ class ApplicationTables @Inject()(dbConfigProvider: DatabaseConfigProvider)(impl
     (applicationTable returning applicationTable.map(_.id)) += ApplicationRow(None, applicationFormId)
   }
 
+  override def fetchAppWithSection(id: ApplicationId, sectionNumber: Int): Future[Option[(ApplicationRow, Option[ApplicationSectionRow])]] = db.run {
+    appWithSectionC(id, sectionNumber).result.headOption
+  }
+
   override def fetchSection(id: ApplicationId, sectionNumber: Int): Future[Option[ApplicationSectionRow]] = db.run {
     appSectionC(id, sectionNumber).result.headOption
   }
@@ -81,27 +99,32 @@ class ApplicationTables @Inject()(dbConfigProvider: DatabaseConfigProvider)(impl
   override def fetchSections(id: ApplicationId): Future[Set[ApplicationSectionRow]] = db.run(appSectionsC(id).result).map(_.toSet)
 
   override def saveSection(id: ApplicationId, sectionNumber: Int, answers: JsObject, completedAt: Option[LocalDateTime] = None): Future[Int] = {
-
-    fetchSection(id, sectionNumber).flatMap {
-      case Some(row) =>
-        preCheckSaveAnswers(row.answers, answers, completedAt) match {
-          case true => db.run(appSectionC(id, sectionNumber).update(row.copy(answers = answers, completedAt = completedAt)))
-          case false => Future.successful(1)
-        }
-      case None =>
-        db.run(applicationSectionTable += ApplicationSectionRow(None, id, sectionNumber, answers, completedAt))
+    fetchAppWithSection(id, sectionNumber).flatMap {
+      case Some((app, Some(section))) => areDifferent(section.answers, answers) || completedAt.isDefined match {
+        case true => db.run(appSectionC(id, sectionNumber).update(section.copy(answers = answers, completedAt = completedAt)))
+        case false => Future.successful(1)
+      }
+      case Some((app, None)) => db.run(applicationSectionTable += ApplicationSectionRow(None, id, sectionNumber, answers, completedAt))
+      case None => Future.successful(0)
     }
   }
 
-  override def deleteSection(id: ApplicationId, sectionNumber: Int): Future[Int] = db.run {
-    appSectionC(id, sectionNumber).delete
+  def areDifferent(obj1: JsObject, obj2: JsObject): Boolean = {
+    val flat1 = JsonHelpers.flatten("", obj1).filter { case (_, v) => v.trim != "" }
+    val flat2 = JsonHelpers.flatten("", obj2).filter { case (_, v) => v.trim != "" }
+    flat1 != flat2
   }
 
-  def preCheckSaveAnswers(obj1: JsObject, obj2: JsObject, completedAt: Option[LocalDateTime]): Boolean = {
+  def joinedAppWithSection(id: Rep[ApplicationId], sectionNumber: Rep[Int]) = for {
+    as <- applicationTable joinLeft applicationSectionTable on ((a, s) => a.id === s.applicationId && s.sectionNumber === sectionNumber) if as._1.id === id
+  } yield as
 
-    !(JsonHelpers.flatten("", obj1).filter(_._2.isEmpty == false).toList.sortBy(_._2)
-      .equals(JsonHelpers.flatten("", obj2).filter(_._2.isEmpty == false).toList.sortBy(_._2)) &&
-      completedAt.isEmpty)
+  def appWithSectionQ(id: Rep[ApplicationId], sectionNumber: Rep[Int]) = joinedAppWithSection(id, sectionNumber)
+
+  lazy val appWithSectionC = Compiled(appWithSectionQ _)
+
+  override def deleteSection(id: ApplicationId, sectionNumber: Int): Future[Int] = db.run {
+    appSectionC(id, sectionNumber).delete
   }
 
   def appSectionQ(id: Rep[ApplicationId], sectionNumber: Rep[Int]) = applicationSectionTable.filter(a => a.applicationId === id && a.sectionNumber === sectionNumber)
