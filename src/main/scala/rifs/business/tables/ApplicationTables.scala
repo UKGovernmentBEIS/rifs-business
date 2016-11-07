@@ -110,8 +110,8 @@ class ApplicationTables @Inject()(dbConfigProvider: DatabaseConfigProvider)(impl
   }
 
   def areDifferent(obj1: JsObject, obj2: JsObject): Boolean = {
-    val flat1 = JsonHelpers.flatten("", obj1).filter(_._2.trim != "")
-    val flat2 = JsonHelpers.flatten("", obj2).filter(_._2.trim != "")
+    val flat1 = JsonHelpers.flatten("", obj1).filter { case (_, v) => v.trim != "" }
+    val flat2 = JsonHelpers.flatten("", obj2).filter { case (_, v) => v.trim != "" }
     flat1 != flat2
   }
 
