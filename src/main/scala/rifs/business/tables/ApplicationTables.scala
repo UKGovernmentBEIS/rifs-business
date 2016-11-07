@@ -50,6 +50,13 @@ class ApplicationTables @Inject()(dbConfigProvider: DatabaseConfigProvider)(impl
     } yield ()
   }
 
+  override def deleteAll: Future[Unit] = db.run {
+    for {
+      _ <- applicationSectionTable.delete
+      _ <- applicationTable.delete
+    } yield ()
+  }
+
   def applicationWithSectionsQ(id: Rep[ApplicationId]) =
     (applicationTable joinLeft applicationSectionTable on (_.id === _.applicationId)).filter(_._1.id === id)
 

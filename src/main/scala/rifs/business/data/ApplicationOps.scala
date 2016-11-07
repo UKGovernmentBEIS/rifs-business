@@ -15,6 +15,8 @@ trait ApplicationOps {
 
   def delete(id: ApplicationId): Future[Unit]
 
+  def deleteAll: Future[Unit]
+
   def forForm(applicationFormId: ApplicationFormId): Future[Option[ApplicationRow]]
 
   def application(applicationId: ApplicationId): Future[Option[Application]]

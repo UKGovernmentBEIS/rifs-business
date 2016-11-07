@@ -10,6 +10,7 @@ GET           /application_form/:id/application                  rifs.business.c
 GET           /application/:id                                   rifs.business.controllers.ApplicationController.application(id: ApplicationId)
 GET           /application/:id/overview                          rifs.business.controllers.ApplicationController.overview(id: ApplicationId)
 DELETE        /application/:id                                   rifs.business.controllers.ApplicationController.delete(id: ApplicationId)
+DELETE        /application                                       rifs.business.controllers.ApplicationController.deleteAll
 
 GET           /application/:id/section/:num                      rifs.business.controllers.ApplicationController.section(id: ApplicationId, num:Int)
 POST          /application/:id/section/:num                      rifs.business.controllers.ApplicationController.saveSection(id: ApplicationId, num:Int)
