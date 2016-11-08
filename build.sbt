@@ -46,6 +46,7 @@ lazy val `rifs-business` = (project in file("."))
       "mysql" % "mysql-connector-java" % "6.0.3",
       "com.typesafe.play" %% "play-slick" % "2.0.0",
       "com.typesafe.play" %% "play-slick-evolutions" % "2.0.0",
+      "com.typesafe.play" %% "play-mailer" % "5.0.0",
       "org.scalatestplus.play" %% "scalatestplus-play" % "1.5.1" % "test"
     ),
     libraryDependencies ++= slickpgDependencies,

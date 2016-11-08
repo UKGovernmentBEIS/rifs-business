@@ -9,14 +9,14 @@ import org.joda.time.LocalDateTime
 import play.api.db.slick.DatabaseConfigProvider
 import play.api.libs.json.JsObject
 import rifs.business.data.ApplicationOps
-import rifs.business.models.{ApplicationFormId, ApplicationId, ApplicationRow, ApplicationSectionRow}
+import rifs.business.models._
 import rifs.business.restmodels.{ApplicationOverview, ApplicationSectionOverview}
 import rifs.business.slicks.modules.{ApplicationFormModule, ApplicationModule, OpportunityModule}
 import rifs.business.slicks.support.DBBinding
 import slick.backend.DatabaseConfig
 import slick.driver.JdbcProfile
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.{ExecutionContext, Future, Promise}
 
 class ApplicationTables @Inject()(dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext)
   extends ApplicationOps with ApplicationModule with DBBinding with ApplicationFormModule with OpportunityModule with ExPostgresDriver with PgPlayJsonSupport with PgDateSupportJoda {
@@ -84,6 +84,15 @@ class ApplicationTables @Inject()(dbConfigProvider: DatabaseConfigProvider)(impl
     fetchSection(id, sectionNumber).flatMap {
       case Some(row) => db.run(appSectionC(id, sectionNumber).update(row.copy(answers = answers, completedAt = completedAt)))
       case None => db.run(applicationSectionTable += ApplicationSectionRow(None, id, sectionNumber, answers, completedAt))
+    }
+  }
+
+  override def submit(id: ApplicationId): Future[SubmittedApplicationRef] = {
+    // dummy method
+    play.api.Logger.info(s"Dummy application submission for $id")
+    byId(id).flatMap {
+      case Some(appRow) => Future{ id }
+      case None => Promise.failed(new NoSuchElementException("Application ID")).future
     }
   }
 
