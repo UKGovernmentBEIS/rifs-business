@@ -12,7 +12,7 @@ import rifs.business.notifications.Notifications.EmailId
 import rifs.business.notifications.{NotificationService, Notifications}
 
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.Random
+import scala.util.{Random, Success}
 
 class ApplicationController @Inject()(val cached: Cached, applications: ApplicationOps, notifications: NotificationService)
                                      (implicit val ec: ExecutionContext) extends Controller with ControllerUtils {
@@ -143,9 +143,9 @@ class ApplicationController @Inject()(val cached: Cached, applications: Applicat
     val submission = applications.submit(id).flatMap { submissionRef =>
 
       val notify = Seq( notifications.notifyPortfolioManager(submissionRef, Notifications.ApplicationSubmitted) )
-      val submissionJs = JsObject( Seq( ("ref"/* Todo */, JsString(submissionRef.id.toString) ) ) )
+      val submissionJs = JsObject( Seq( ("applicationRef", JsonHelpers.try2JSon( Success(submissionRef)  )  ) ) )
       val res = notify.foldLeft( Future { submissionJs  } ){
-        case (jsFut, act) =>  jsFut.flatMap( js=> jsonFuture(act,{jsv=> js + ("e",jsv) })  )
+        case (jsFut, act) =>  jsFut.flatMap( js=> jsonFuture(act, {jsv=> js + ("emailRef",jsv) })  )
       }
 
       res

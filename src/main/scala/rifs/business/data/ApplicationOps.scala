@@ -3,7 +3,7 @@ package rifs.business.data
 import com.google.inject.ImplementedBy
 import org.joda.time.LocalDateTime
 import play.api.libs.json.JsObject
-import rifs.business.models.{ApplicationFormId, ApplicationId, ApplicationRow, ApplicationSectionRow}
+import rifs.business.models._
 import rifs.business.restmodels.Application
 import rifs.business.tables.ApplicationTables
 

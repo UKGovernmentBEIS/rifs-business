@@ -6,6 +6,7 @@ import play.api.mvc._
 import rifs.business.Config
 
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.{Failure, Success}
 
 
 trait ControllerUtils {
@@ -23,7 +24,7 @@ trait ControllerUtils {
   }
 
   def jsonResult[T](t: Future[T])(implicit w: Writes[T]) =  {
-    t.map {result => Ok(Json.toJson(result))}
+    t.map {result => Ok( Json.toJson(result) )}
       .recover {
       case nf: NoSuchElementException =>
         NotFound(JsObject(Seq("errors" -> Json.toJson(Seq(ErrorResult(nf.getMessage, Seq("", "", "404")))))))
@@ -31,11 +32,10 @@ trait ControllerUtils {
   }
 
   def jsonFuture[T](t: Future[T], func: JsValue => JsObject)(implicit w: Writes[T]): Future[JsObject] =  {
-    t.map {result => func( Json.toJson(result) )}
+    t.map {result => func( JsonHelpers.try2JSon(Success(result)) )}
       .recover {
         case ex: RuntimeException =>
-          //TODO: handle more errors in more coherent way
-          func( JsObject(Seq("errors" -> Json.toJson(Seq(ErrorResult(ex))))) )
+          func( JsObject(Seq("errors" -> JsonHelpers.try2JSon[T](Failure(ex)) )) )
       }
   }
 

@@ -44,16 +44,23 @@ class EmailNotifications  @Inject() (mailerClient : play.api.libs.mailer.MailerC
   override def notifyPortfolioManager(applicationId: ApplicationId, event: ApplicationEvent): Future[EmailId] = {
 
     def createEmail(appForm: ApplicationForm, opportunity: OpportunityRow) = {
+
       val emailSubject = "Application submitted"
       val applicantEMail = "todo@todo.com"
-      val portFolioMgrName = "Portfolio"
-      val applicantTitle = "Mr"
       val applicantLastName = "?"
       val applicantFirstName = "Eric"
-      val applicantOrg = "Association of Medical Research Charities"
-      val applicationRefNum = appForm.id
-      val opportunityRefNumber = appForm.opportunityId.id
-      val opportunityTitle = opportunity.title
+
+      val text = emails.txt.applicationSubmittedToPortfolioMgr(
+        portFolioMgrName = "Portfolio",
+        applicantTitle = "Mr",
+        applicantLastName,
+        applicantFirstName,
+        applicantOrg = "Association of Medical Research Charities",
+        applicationRefNum = appForm.id.id.toString,
+        opportunityRefNumber = appForm.opportunityId.id.toString,
+        opportunityTitle = opportunity.title,
+        submissionLink = "http://todo.link"
+      )
 
       val email = Email(
         subject = emailSubject,
@@ -62,12 +69,7 @@ class EmailNotifications  @Inject() (mailerClient : play.api.libs.mailer.MailerC
         // adds attachment
         attachments = Nil,
         // sends text, HTML or both...
-        bodyText = Some(
-          s"""Dear portfolio manager $portFolioMgrName,
-                          This is to let you know that $applicantTitle $applicantFirstName $applicantLastName of $applicantOrg has submitted an application $applicationRefNum for your opportunity $opportunityTitle opportunity reference number ${opportunityRefNumber}.
-                          You can view this application on RIFS http://todo.link.
-                          Kind regards
-                          RIFS"""),
+        bodyText = Some(text.body),
         bodyHtml = None
       )
       email

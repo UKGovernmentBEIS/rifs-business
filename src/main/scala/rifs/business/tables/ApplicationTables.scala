@@ -11,7 +11,7 @@ import play.api.libs.json.JsObject
 import rifs.business.controllers.JsonHelpers
 import rifs.business.data.ApplicationOps
 import rifs.business.models._
-import rifs.business.restmodels.{ApplicationOverview, ApplicationSectionOverview, Application, ApplicationSection}
+import rifs.business.restmodels.{Application, ApplicationSection}
 import rifs.business.slicks.modules.{ApplicationFormModule, ApplicationModule, OpportunityModule}
 import rifs.business.slicks.support.DBBinding
 import slick.backend.DatabaseConfig
