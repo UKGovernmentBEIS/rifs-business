@@ -19,14 +19,4 @@ object JsonHelpers {
       case (n, _) => Map[String, String]()
     }.fold(Map[String, String]())(_ combine _)
   }
-
-  def try2JSon[T](v: Try[T])(implicit w: Writes[T]): JsValue = {
-      v match {
-        case Success(x) =>
-           JsObject( Seq( ("value", w.writes(x))) )
-        case Failure(ex) =>
-            val exJs = JsObject( Seq( ("type", JsString(ex.getClass.getName)), ("message", JsString(ex.getMessage)) ) )
-            JsObject( Seq( ("error", exJs )) )
-      }
-  }
 }

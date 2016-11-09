@@ -31,14 +31,6 @@ trait ControllerUtils {
     }
   }
 
-  def jsonFuture[T](t: Future[T], func: JsValue => JsObject)(implicit w: Writes[T]): Future[JsObject] =  {
-    t.map {result => func( JsonHelpers.try2JSon(Success(result)) )}
-      .recover {
-        case ex: RuntimeException =>
-          func( JsObject(Seq("errors" -> JsonHelpers.try2JSon[T](Failure(ex)) )) )
-      }
-  }
-
   def cacheOk[T](action: Action[T]) =
     if (cacheTimeout > 0) cached.status(rh => rh.uri, 200, cacheTimeout)(action)
     else action

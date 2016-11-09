@@ -3,16 +3,16 @@ package rifs.business.controllers
 import javax.inject.Inject
 
 import org.joda.time.{DateTimeZone, LocalDateTime}
+import play.api.Logger
 import play.api.cache.Cached
 import play.api.libs.json._
 import play.api.mvc.{Action, Controller}
 import rifs.business.data.ApplicationOps
 import rifs.business.models.{ApplicationFormId, ApplicationId}
-import rifs.business.notifications.Notifications.EmailId
 import rifs.business.notifications.{NotificationService, Notifications}
 
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Random, Success}
+import scala.util.Random
 
 class ApplicationController @Inject()(val cached: Cached, applications: ApplicationOps, notifications: NotificationService)
                                      (implicit val ec: ExecutionContext) extends Controller with ControllerUtils {
@@ -140,17 +140,14 @@ class ApplicationController @Inject()(val cached: Cached, applications: Applicat
   }
 
   def submit(id: ApplicationId) = Action.async { _ =>
-    val submission = applications.submit(id).flatMap { submissionRef =>
-
-      val notify = Seq( notifications.notifyPortfolioManager(submissionRef, Notifications.ApplicationSubmitted) )
-      val submissionJs = JsObject( Seq( ("applicationRef", JsonHelpers.try2JSon( Success(submissionRef)  )  ) ) )
-      val res = notify.foldLeft( Future { submissionJs  } ){
-        case (jsFut, act) =>  jsFut.flatMap( js=> jsonFuture(act, {jsv=> js + ("emailRef",jsv) })  )
+    applications.submit(id).flatMap { submissionRef =>
+      notifications.notifyPortfolioManager(submissionRef, Notifications.ApplicationSubmitted).map {
+        _.map { ref => JsObject(Seq("applicationRef" -> JsNumber(submissionRef.id))) }
+      }.map(jsonResult(_)).recover {
+        case t =>
+          Logger.error("Failed to send email on application submission", t)
+          Ok(JsObject(Seq("applicationRef" -> JsNumber(submissionRef.id))))
       }
-
-      res
     }
-    jsonResult(submission)
   }
-
 }
