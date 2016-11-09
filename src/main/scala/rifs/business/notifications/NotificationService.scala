@@ -3,6 +3,7 @@ package rifs.business.notifications
 import javax.inject.Inject
 
 import cats.data.OptionT
+import cats.instances.future._
 import com.google.inject.ImplementedBy
 import play.api.libs.json.{JsObject, JsString, JsValue, Writes}
 import rifs.business.data.{ApplicationFormOps, ApplicationOps, OpportunityOps}
