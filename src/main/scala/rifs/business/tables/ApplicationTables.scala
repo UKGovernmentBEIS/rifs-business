@@ -8,9 +8,10 @@ import com.github.tminglei.slickpg.{ExPostgresDriver, PgDateSupportJoda, PgPlayJ
 import org.joda.time.LocalDateTime
 import play.api.db.slick.DatabaseConfigProvider
 import play.api.libs.json.JsObject
+import rifs.business.controllers.JsonHelpers
 import rifs.business.data.ApplicationOps
 import rifs.business.models._
-import rifs.business.restmodels.{ApplicationOverview, ApplicationSectionOverview}
+import rifs.business.restmodels.{ApplicationOverview, ApplicationSectionOverview, Application, ApplicationSection}
 import rifs.business.slicks.modules.{ApplicationFormModule, ApplicationModule, OpportunityModule}
 import rifs.business.slicks.support.DBBinding
 import slick.backend.DatabaseConfig
@@ -35,11 +36,25 @@ class ApplicationTables @Inject()(dbConfigProvider: DatabaseConfigProvider)(impl
     } yield ApplicationRow(Some(app.id), app.applicationFormId)
   }.value
 
-  override def overview(applicationId: ApplicationId): Future[Option[ApplicationOverview]] = db.run {
+  override def application(applicationId: ApplicationId): Future[Option[Application]] = db.run {
     applicationWithSectionsC(applicationId).result
   }.map { ps =>
     val (as, ss) = ps.unzip
-    as.map(a => buildOverview(a, ss.flatten)).headOption
+    as.map(a => buildApplication(a, ss.flatten)).headOption
+  }
+
+  override def delete(id: ApplicationId): Future[Unit] = db.run {
+    for {
+      _ <- applicationSectionTable.filter(_.applicationId === id).delete
+      _ <- applicationTable.filter(_.id === id).delete
+    } yield ()
+  }
+
+  override def deleteAll: Future[Unit] = db.run {
+    for {
+      _ <- applicationSectionTable.delete
+      _ <- applicationTable.delete
+    } yield ()
   }
 
   def applicationWithSectionsQ(id: Rep[ApplicationId]) =
@@ -52,26 +67,29 @@ class ApplicationTables @Inject()(dbConfigProvider: DatabaseConfigProvider)(impl
 
   val applicationWithSectionsForFormC = Compiled(applicationWithSectionsForFormQ _)
 
-  private def fetchOrCreate(applicationFormId: ApplicationFormId): Future[ApplicationOverview] = {
+  private def fetchOrCreate(applicationFormId: ApplicationFormId): Future[Application] = {
     db.run(applicationWithSectionsForFormC(applicationFormId).result).flatMap {
-      case Seq() => createApplicationForForm(applicationFormId).map { id => ApplicationOverview(id, applicationFormId, Seq()) }
+      case Seq() => createApplicationForForm(applicationFormId).map { id => Application(id, applicationFormId, Seq()) }
       case ps =>
         val (as, ss) = ps.unzip
-        Future.successful(as.map(a => buildOverview(a, ss.flatten)).head)
+        Future.successful(as.map(a => buildApplication(a, ss.flatten)).head)
     }
   }
 
-  private def buildOverview(app: ApplicationRow, secs: Seq[ApplicationSectionRow]): ApplicationOverview = {
-    val sectionOverviews: Seq[ApplicationSectionOverview] = secs.map { s =>
-      val status = s.completedAt.map(_ => "Completed").getOrElse("In progress")
-      ApplicationSectionOverview(s.sectionNumber, status, s.completedAt)
+  private def buildApplication(app: ApplicationRow, secs: Seq[ApplicationSectionRow]): Application = {
+    val sectionOverviews: Seq[ApplicationSection] = secs.map { s =>
+      ApplicationSection(s.sectionNumber, s.answers, s.completedAt)
     }
 
-    ApplicationOverview(app.id.get, app.applicationFormId, sectionOverviews)
+    Application(app.id.get, app.applicationFormId, sectionOverviews)
   }
 
   private def createApplicationForForm(applicationFormId: ApplicationFormId): Future[ApplicationId] = db.run {
     (applicationTable returning applicationTable.map(_.id)) += ApplicationRow(None, applicationFormId)
+  }
+
+  override def fetchAppWithSection(id: ApplicationId, sectionNumber: Int): Future[Option[(ApplicationRow, Option[ApplicationSectionRow])]] = db.run {
+    appWithSectionC(id, sectionNumber).result.headOption
   }
 
   override def fetchSection(id: ApplicationId, sectionNumber: Int): Future[Option[ApplicationSectionRow]] = db.run {
@@ -81,10 +99,32 @@ class ApplicationTables @Inject()(dbConfigProvider: DatabaseConfigProvider)(impl
   override def fetchSections(id: ApplicationId): Future[Set[ApplicationSectionRow]] = db.run(appSectionsC(id).result).map(_.toSet)
 
   override def saveSection(id: ApplicationId, sectionNumber: Int, answers: JsObject, completedAt: Option[LocalDateTime] = None): Future[Int] = {
-    fetchSection(id, sectionNumber).flatMap {
-      case Some(row) => db.run(appSectionC(id, sectionNumber).update(row.copy(answers = answers, completedAt = completedAt)))
-      case None => db.run(applicationSectionTable += ApplicationSectionRow(None, id, sectionNumber, answers, completedAt))
+    fetchAppWithSection(id, sectionNumber).flatMap {
+      case Some((app, Some(section))) => areDifferent(section.answers, answers) || completedAt.isDefined match {
+        case true => db.run(appSectionC(id, sectionNumber).update(section.copy(answers = answers, completedAt = completedAt)))
+        case false => Future.successful(1)
+      }
+      case Some((app, None)) => db.run(applicationSectionTable += ApplicationSectionRow(None, id, sectionNumber, answers, completedAt))
+      case None => Future.successful(0)
     }
+  }
+
+  def areDifferent(obj1: JsObject, obj2: JsObject): Boolean = {
+    val flat1 = JsonHelpers.flatten("", obj1).filter { case (_, v) => v.trim != "" }
+    val flat2 = JsonHelpers.flatten("", obj2).filter { case (_, v) => v.trim != "" }
+    flat1 != flat2
+  }
+
+  def joinedAppWithSection(id: Rep[ApplicationId], sectionNumber: Rep[Int]) = for {
+    as <- applicationTable joinLeft applicationSectionTable on ((a, s) => a.id === s.applicationId && s.sectionNumber === sectionNumber) if as._1.id === id
+  } yield as
+
+  def appWithSectionQ(id: Rep[ApplicationId], sectionNumber: Rep[Int]) = joinedAppWithSection(id, sectionNumber)
+
+  lazy val appWithSectionC = Compiled(appWithSectionQ _)
+
+  override def deleteSection(id: ApplicationId, sectionNumber: Int): Future[Int] = db.run {
+    appSectionC(id, sectionNumber).delete
   }
 
   override def submit(id: ApplicationId): Future[SubmittedApplicationRef] = {
