@@ -9,9 +9,13 @@ import rifs.business.tables.ApplicationTables
 
 import scala.concurrent.Future
 
+case class ApplicationDetails(app:ApplicationRow, form:ApplicationFormRow, opp:OpportunityRow)
+
 @ImplementedBy(classOf[ApplicationTables])
 trait ApplicationOps {
   def byId(id: ApplicationId): Future[Option[ApplicationRow]]
+
+  def gatherDetails(id: ApplicationId): Future[Option[ApplicationDetails]]
 
   def delete(id: ApplicationId): Future[Unit]
 

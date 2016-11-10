@@ -9,7 +9,7 @@ import org.joda.time.LocalDateTime
 import play.api.db.slick.DatabaseConfigProvider
 import play.api.libs.json.JsObject
 import rifs.business.controllers.JsonHelpers
-import rifs.business.data.ApplicationOps
+import rifs.business.data.{ApplicationDetails, ApplicationOps}
 import rifs.business.models._
 import rifs.business.restmodels.{Application, ApplicationSection}
 import rifs.business.slicks.modules.{ApplicationFormModule, ApplicationModule, OpportunityModule}
@@ -26,6 +26,16 @@ class ApplicationTables @Inject()(dbConfigProvider: DatabaseConfigProvider)(impl
   import PostgresAPI._
 
   override def byId(id: ApplicationId): Future[Option[ApplicationRow]] = db.run(applicationTable.filter(_.id === id).result.headOption)
+
+  override def gatherDetails(id: ApplicationId): Future[Option[ApplicationDetails]] = db.run {
+    val q = for {
+      a <- applicationTable.filter(_.id === id)
+      f <- applicationFormTable.filter(_.id === a.applicationFormId)
+      o <- opportunityTable.filter(_.id === f.opportunityId)
+    } yield (a, f, o)
+
+    q.result.headOption.map(_.map(ApplicationDetails.tupled))
+  }
 
   override def forForm(applicationFormId: ApplicationFormId): Future[Option[ApplicationRow]] = {
     val appFormF = db.run(applicationFormTable.filter(_.id === applicationFormId).result.headOption)

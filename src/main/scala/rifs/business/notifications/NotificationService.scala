@@ -7,7 +7,7 @@ import cats.instances.future._
 import com.google.inject.ImplementedBy
 import play.api.libs.json.{JsObject, JsString, JsValue, Writes}
 import rifs.business.data.{ApplicationFormOps, ApplicationOps, OpportunityOps}
-import rifs.business.models.{ApplicationId, OpportunityRow}
+import rifs.business.models.{ApplicationFormRow, ApplicationId, OpportunityRow}
 import rifs.business.restmodels.ApplicationForm
 
 import scala.concurrent.{ExecutionContext, Future, Promise}
@@ -52,7 +52,7 @@ class EmailNotifications @Inject()(mailerClient: play.api.libs.mailer.MailerClie
 
   override def notifyPortfolioManager(applicationId: ApplicationId, event: ApplicationEvent): Future[Option[EmailId]] = {
 
-    def createEmail(appForm: ApplicationForm, opportunity: OpportunityRow) = {
+    def createEmail(appForm: ApplicationFormRow, opportunity: OpportunityRow) = {
 
       val emailSubject = "Application submitted"
       val applicantEMail = configuration.underlying.getString(RIFS_DUMMY_APPLICANT_EMAIL)
@@ -83,12 +83,8 @@ class EmailNotifications @Inject()(mailerClient: play.api.libs.mailer.MailerClie
       )
     }
 
-    {
-      for {
-        a <- OptionT(applicationOps.byId(applicationId))
-        appForm <- OptionT(applicationFormOps.byId(a.applicationFormId))
-        opportunity <- OptionT(opportunityOps.byId(appForm.opportunityId))
-      } yield EmailId(mailerClient.send(createEmail(appForm, opportunity)))
-    }.value
+    applicationOps.gatherDetails(applicationId).map {
+      _.map(d => EmailId(mailerClient.send(createEmail(d.form, d.opp))))
+    }
   }
 }
