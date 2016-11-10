@@ -48,23 +48,17 @@ class NotificationsTest extends WordSpecLike with Matchers with OptionValues wit
 
     "create a notification ID upon success" in {
       val MAIL_ID = "yey"
-      notification.synchronized {
-
-        setupMailer()
-        Mockito.when(mailerClient.send(ArgumentMatchers.any[Email]())).thenReturn(MAIL_ID)
-        val res = notification.notifyPortfolioManager(APP_ID, Notifications.ApplicationSubmitted)
-        res.futureValue.value.id shouldBe MAIL_ID
-      }
+      setupMailer()
+      Mockito.when(mailerClient.send(ArgumentMatchers.any[Email]())).thenReturn(MAIL_ID)
+      val res = notification.notifyPortfolioManager(APP_ID, Notifications.ApplicationSubmitted)
+      res.futureValue.value.id shouldBe MAIL_ID
     }
 
     "return error if e-mailer throws" in {
-      notification.synchronized {
-        setupMailer()
-
-        Mockito.when(mailerClient.send(ArgumentMatchers.any[Email]())).thenThrow(classOf[RuntimeException])
-        val res = notification.notifyPortfolioManager(APP_ID, Notifications.ApplicationSubmitted)
-        whenReady(res) { ex => ex shouldBe a[RuntimeException] }
-      }
+      setupMailer()
+      Mockito.when(mailerClient.send(ArgumentMatchers.any[Email]())).thenThrow(classOf[RuntimeException])
+      val res = notification.notifyPortfolioManager(APP_ID, Notifications.ApplicationSubmitted)
+      whenReady(res.failed) { ex => ex shouldBe a[RuntimeException] }
     }
   }
 }
