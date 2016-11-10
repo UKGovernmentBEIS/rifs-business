@@ -46,7 +46,9 @@ lazy val `rifs-business` = (project in file("."))
       "com.typesafe.play" %% "play-slick" % "2.0.0",
       "com.typesafe.play" %% "play-slick-evolutions" % "2.0.0",
       "com.typesafe.play" %% "play-mailer" % "5.0.0",
-      "org.scalatestplus.play" %% "scalatestplus-play" % "1.5.1" % "test"
+      "org.scalatestplus.play" %% "scalatestplus-play" % "1.5.1" % "test",
+      "org.mockito" % "mockito-core" % "2.2.15" % "test"
+
     ),
     libraryDependencies ++= slickpgDependencies,
     PlayKeys.devSettings := Seq("play.server.http.port" -> "9100"),
