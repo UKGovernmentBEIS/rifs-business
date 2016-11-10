@@ -10,14 +10,14 @@ import play.api.db.slick.DatabaseConfigProvider
 import play.api.libs.json.JsObject
 import rifs.business.controllers.JsonHelpers
 import rifs.business.data.ApplicationOps
-import rifs.business.models.{ApplicationFormId, ApplicationId, ApplicationRow, ApplicationSectionRow}
+import rifs.business.models._
 import rifs.business.restmodels.{Application, ApplicationSection}
 import rifs.business.slicks.modules.{ApplicationFormModule, ApplicationModule, OpportunityModule}
 import rifs.business.slicks.support.DBBinding
 import slick.backend.DatabaseConfig
 import slick.driver.JdbcProfile
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.{ExecutionContext, Future, Promise}
 
 class ApplicationTables @Inject()(dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext)
   extends ApplicationOps with ApplicationModule with DBBinding with ApplicationFormModule with OpportunityModule with ExPostgresDriver with PgPlayJsonSupport with PgDateSupportJoda {
@@ -125,6 +125,12 @@ class ApplicationTables @Inject()(dbConfigProvider: DatabaseConfigProvider)(impl
 
   override def deleteSection(id: ApplicationId, sectionNumber: Int): Future[Int] = db.run {
     appSectionC(id, sectionNumber).delete
+  }
+
+  override def submit(id: ApplicationId): Future[Option[SubmittedApplicationRef]] = {
+    // dummy method
+    play.api.Logger.info(s"Dummy application submission for $id")
+    byId(id).flatMap{appRow => Future{ appRow.flatMap{ar=> ar.id} } }
   }
 
   def appSectionQ(id: Rep[ApplicationId], sectionNumber: Rep[Int]) = applicationSectionTable.filter(a => a.applicationId === id && a.sectionNumber === sectionNumber)
