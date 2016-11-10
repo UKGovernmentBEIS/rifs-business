@@ -2,33 +2,33 @@ package rifs.business
 
 import org.scalatest._
 import play.api.db.evolutions.ApplicationEvolutions
-import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.inject.bind
+import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.mailer.{Email, MailerClient}
 import rifs.business.data.{ApplicationFormOps, ApplicationOps, OpportunityOps}
 import rifs.business.models._
 import rifs.business.notifications.{EmailNotifications, Notifications}
 import rifs.business.restmodels.ApplicationForm
 
-import scala.concurrent.{Await, Future}
 import scala.concurrent.duration._
+import scala.concurrent.{Await, Future}
 import scala.reflect._
 import scala.util.{Failure, Success}
 
 class NotificationsTest extends WordSpecLike with Matchers with OptionValues {
 
-import org.mockito.{Mockito, ArgumentMatchers}
+  import org.mockito.{ArgumentMatchers, Mockito}
 
-  def checkSuccessFut[T](f: Future[T])(func: T=>Unit) = {
+  def checkSuccessFut[T](f: Future[T])(func: T => Unit) = {
     Await.result(f, 3.seconds)
     f.value.isDefined shouldBe true
     f.value.foreach { v =>
-        v.isSuccess shouldBe true
-        func(v.get)
+      v.isSuccess shouldBe true
+      func(v.get)
     }
   }
 
-  def checkFailedFut[E : ClassTag](f: Future[_]) = {
+  def checkFailedFut[E: ClassTag](f: Future[_]) = {
     val f1 = Await.ready(f, 3.seconds)
     f1.value.isDefined shouldBe true
     f1.value.foreach { v =>
@@ -61,18 +61,20 @@ import org.mockito.{Mockito, ArgumentMatchers}
 
     "return empty notification ID for a missing application ID" in {
 
-      Mockito.when(appOps.byId(APP_ID)).thenReturn( Future.successful(None) )
-      val res = notification.notifyPortfolioManager( APP_ID, Notifications.ApplicationSubmitted )
-      checkSuccessFut(res){ _ shouldBe None }
+      Mockito.when(appOps.byId(APP_ID)).thenReturn(Future.successful(None))
+      val res = notification.notifyPortfolioManager(APP_ID, Notifications.ApplicationSubmitted)
+      checkSuccessFut(res) {
+        _ shouldBe None
+      }
     }
 
     def setupMailer() = {
       val APP_FORM_ID = ApplicationFormId(1)
       val OPPORTUNITY_ID = OpportunityId(1)
-      Mockito.when(appOps.byId(APP_ID)).thenReturn( Future.successful(Some(ApplicationRow(Some(APP_ID), APP_FORM_ID))) )
-      Mockito.when(formOps.byId(APP_FORM_ID)).thenReturn( Future.successful(Some(ApplicationForm(APP_FORM_ID,OPPORTUNITY_ID,Nil))) )
-      val opp =  OpportunityRow( OPPORTUNITY_ID, "oz1", "", None, None, 0, "")
-      Mockito.when(oppOps.byId(OPPORTUNITY_ID)).thenReturn( Future.successful( Some(opp) ) )
+      Mockito.when(appOps.byId(APP_ID)).thenReturn(Future.successful(Some(ApplicationRow(Some(APP_ID), APP_FORM_ID))))
+      Mockito.when(formOps.byId(APP_FORM_ID)).thenReturn(Future.successful(Some(ApplicationForm(APP_FORM_ID, OPPORTUNITY_ID, Nil))))
+      val opp = OpportunityRow(OPPORTUNITY_ID, "oz1", "", None, None, 0, "")
+      Mockito.when(oppOps.byId(OPPORTUNITY_ID)).thenReturn(Future.successful(Some(opp)))
     }
 
     "create a notification ID upon success" in {

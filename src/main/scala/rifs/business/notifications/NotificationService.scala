@@ -39,8 +39,6 @@ trait NotificationService {
 
 class EmailNotifications @Inject()(mailerClient: play.api.libs.mailer.MailerClient,
                                    applicationOps: ApplicationOps,
-                                   opportunityOps: OpportunityOps,
-                                   applicationFormOps: ApplicationFormOps,
                                    configuration: play.api.Configuration)(implicit ec: ExecutionContext) extends NotificationService {
 
   import Notifications._
