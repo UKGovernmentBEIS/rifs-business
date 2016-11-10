@@ -85,8 +85,7 @@ class NotificationsTest extends WordSpecLike with Matchers with OptionValues {
         Mockito.when(mailerClient.send(ArgumentMatchers.any[Email]())).thenReturn(MAIL_ID)
         val res = notification.notifyPortfolioManager(APP_ID, Notifications.ApplicationSubmitted)
         checkSuccessFut(res) { nid =>
-          nid.isDefined shouldBe true
-          nid.get.id shouldBe MAIL_ID
+          nid.value shouldBe MAIL_ID
         }
       }
     }
