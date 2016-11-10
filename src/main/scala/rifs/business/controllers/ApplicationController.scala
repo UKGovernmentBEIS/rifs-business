@@ -140,14 +140,20 @@ class ApplicationController @Inject()(val cached: Cached, applications: Applicat
   }
 
   def submit(id: ApplicationId) = Action.async { _ =>
-    applications.submit(id).flatMap { submissionRef =>
-      notifications.notifyPortfolioManager(submissionRef, Notifications.ApplicationSubmitted).map {
-        _.map { ref => JsObject(Seq("applicationRef" -> JsNumber(submissionRef.id))) }
-      }.map(jsonResult(_)).recover {
-        case t =>
-          Logger.error("Failed to send email on application submission", t)
-          Ok(JsObject(Seq("applicationRef" -> JsNumber(submissionRef.id))))
-      }
+
+      applications.submit(id).flatMap {
+        case Some(submissionRef) =>
+          val res = JsObject( Seq("applicationRef" -> Json.toJson(submissionRef) ) )
+          notifications.notifyPortfolioManager(submissionRef, Notifications.ApplicationSubmitted).map {
+            _.map { _ => res } // this would wait for e-mail to be sent, we can just put it onto threadpool
+          }.map {
+            jsonResult(_)
+          }.recover {
+            case t =>
+              Logger.error ("Failed to send email on application submission", t)
+              Ok(res) // we return OK, as the application was submitted
+          }
+        case None => Future { jsonResult[ApplicationId]( None ) }
     }
   }
 }

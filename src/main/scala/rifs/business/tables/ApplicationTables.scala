@@ -127,13 +127,10 @@ class ApplicationTables @Inject()(dbConfigProvider: DatabaseConfigProvider)(impl
     appSectionC(id, sectionNumber).delete
   }
 
-  override def submit(id: ApplicationId): Future[SubmittedApplicationRef] = {
+  override def submit(id: ApplicationId): Future[Option[SubmittedApplicationRef]] = {
     // dummy method
     play.api.Logger.info(s"Dummy application submission for $id")
-    byId(id).flatMap {
-      case Some(appRow) => Future{ id }
-      case None => Promise.failed(new NoSuchElementException("Application ID")).future
-    }
+    byId(id).flatMap{appRow => Future{ appRow.flatMap{ar=> ar.id} } }
   }
 
   def appSectionQ(id: Rep[ApplicationId], sectionNumber: Rep[Int]) = applicationSectionTable.filter(a => a.applicationId === id && a.sectionNumber === sectionNumber)

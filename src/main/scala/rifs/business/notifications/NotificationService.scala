@@ -27,7 +27,6 @@ object Notifications {
   }
 
   case class EmailId(id: String) extends NotificationId
-
 }
 
 @ImplementedBy(classOf[EmailNotifications])
@@ -41,17 +40,22 @@ trait NotificationService {
 class EmailNotifications @Inject()(mailerClient: play.api.libs.mailer.MailerClient,
                                    applicationOps: ApplicationOps,
                                    opportunityOps: OpportunityOps,
-                                   applicationFormOps: ApplicationFormOps)(implicit ec: ExecutionContext) extends NotificationService {
+                                   applicationFormOps: ApplicationFormOps,
+                                   configuration: play.api.Configuration)(implicit ec: ExecutionContext) extends NotificationService {
 
   import Notifications._
   import play.api.libs.mailer._
+
+  val RIFS_EMAIL = "rifs.email"
+  val RIFS_DUMMY_APPLICANT_EMAIL = s"$RIFS_EMAIL.dummyapplicant"
+  val RIFS_REPLY_TO_EMAIL = s"$RIFS_EMAIL.replyto"
 
   override def notifyPortfolioManager(applicationId: ApplicationId, event: ApplicationEvent): Future[Option[EmailId]] = {
 
     def createEmail(appForm: ApplicationForm, opportunity: OpportunityRow) = {
 
       val emailSubject = "Application submitted"
-      val applicantEMail = "todo@todo.com"
+      val applicantEMail = configuration.underlying.getString(RIFS_DUMMY_APPLICANT_EMAIL)
       val applicantLastName = "?"
       val applicantFirstName = "Eric"
 
@@ -69,7 +73,7 @@ class EmailNotifications @Inject()(mailerClient: play.api.libs.mailer.MailerClie
 
       Email(
         subject = emailSubject,
-        from = "No Reply <from@email.com>",
+        from = configuration.underlying.getString(RIFS_REPLY_TO_EMAIL),
         to = Seq(s"$applicantFirstName $applicantLastName <$applicantEMail>"),
         // adds attachment
         attachments = Nil,

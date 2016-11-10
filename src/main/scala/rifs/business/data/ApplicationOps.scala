@@ -45,6 +45,6 @@ trait ApplicationOps {
 
   def deleteSection(id: ApplicationId, sectionNumber: Int): Future[Int]
 
-  def submit(id: ApplicationId) : Future[SubmittedApplicationRef]
+  def submit(id: ApplicationId) : Future[Option[SubmittedApplicationRef]]
 
 }
