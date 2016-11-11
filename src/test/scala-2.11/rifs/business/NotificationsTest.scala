@@ -1,6 +1,7 @@
 package rifs.business
 
 import org.scalatest._
+import org.scalatest.concurrent.ScalaFutures
 import play.api.db.evolutions.ApplicationEvolutions
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
@@ -10,38 +11,13 @@ import rifs.business.models._
 import rifs.business.notifications.Notifications.EmailId
 import rifs.business.notifications.{EmailNotifications, Notifications}
 
-import scala.concurrent.duration._
-import scala.concurrent.{Await, Future}
-import scala.reflect._
-import scala.util.{Failure, Success}
+import scala.concurrent.Future
 
-class NotificationsTest extends WordSpecLike with Matchers with OptionValues {
+class NotificationsTest extends WordSpecLike with Matchers with OptionValues with ScalaFutures {
 
   import org.mockito.{ArgumentMatchers, Mockito}
 
-  def checkSuccessFut[T](f: Future[T])(func: T => Unit) = {
-    Await.result(f, 3.seconds)
-    f.value.isDefined shouldBe true
-    f.value.foreach { v =>
-      v.isSuccess shouldBe true
-      func(v.get)
-    }
-  }
-
-  def checkFailedFut[E: ClassTag](f: Future[_]) = {
-    val f1 = Await.ready(f, 3.seconds)
-    f1.value.isDefined shouldBe true
-    f1.value.foreach { v =>
-      v.isSuccess shouldBe false
-      v match {
-        case Failure(e) => classTag[E].runtimeClass.isAssignableFrom(e.getClass) shouldBe true
-        case Success(_) => fail()
-      }
-    }
-  }
-
-  "notification should" {
-
+  "notification" should {
     val APP_ID = ApplicationId(1)
     val appOps = mock.MockitoSugar.mock[ApplicationOps]
     val evolAPi = mock.MockitoSugar.mock[ApplicationEvolutions]
@@ -56,12 +32,9 @@ class NotificationsTest extends WordSpecLike with Matchers with OptionValues {
     val notification = application.injector.instanceOf[EmailNotifications]
 
     "return empty notification ID for a missing application ID" in {
-
       Mockito.when(appOps.gatherDetails(APP_ID)).thenReturn(Future.successful(None))
       val res = notification.notifyPortfolioManager(APP_ID, Notifications.ApplicationSubmitted)
-      checkSuccessFut(res) {
-        _ shouldBe None
-      }
+      res.futureValue shouldBe None
     }
 
     def setupMailer() = {
@@ -76,28 +49,17 @@ class NotificationsTest extends WordSpecLike with Matchers with OptionValues {
 
     "create a notification ID upon success" in {
       val MAIL_ID = "yey"
-      notification.synchronized {
-
-        setupMailer()
-        Mockito.when(mailerClient.send(ArgumentMatchers.any[Email]())).thenReturn(MAIL_ID)
-        val res = notification.notifyPortfolioManager(APP_ID, Notifications.ApplicationSubmitted)
-        checkSuccessFut(res) { nid =>
-          nid.value shouldBe EmailId(MAIL_ID)
-        }
-      }
+      setupMailer()
+      Mockito.when(mailerClient.send(ArgumentMatchers.any[Email]())).thenReturn(MAIL_ID)
+      val res = notification.notifyPortfolioManager(APP_ID, Notifications.ApplicationSubmitted)
+      res.futureValue.value.id shouldBe MAIL_ID
     }
 
     "return error if e-mailer throws" in {
-      notification.synchronized {
-        setupMailer()
-
-        Mockito.when(mailerClient.send(ArgumentMatchers.any[Email]())).thenThrow(classOf[RuntimeException])
-        val res = notification.notifyPortfolioManager(APP_ID, Notifications.ApplicationSubmitted)
-        checkFailedFut[RuntimeException](res)
-      }
+      setupMailer()
+      Mockito.when(mailerClient.send(ArgumentMatchers.any[Email]())).thenThrow(classOf[RuntimeException])
+      val res = notification.notifyPortfolioManager(APP_ID, Notifications.ApplicationSubmitted)
+      whenReady(res.failed) { ex => ex shouldBe a[RuntimeException] }
     }
-
-    1
   }
-
 }

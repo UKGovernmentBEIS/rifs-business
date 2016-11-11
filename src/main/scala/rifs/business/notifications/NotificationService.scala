@@ -31,7 +31,6 @@ object Notifications {
 
 @ImplementedBy(classOf[EmailNotifications])
 trait NotificationService {
-
   import Notifications._
 
   def notifyPortfolioManager(applicationFormId: ApplicationId, event: ApplicationEvent): Future[Option[NotificationId]]
