@@ -121,9 +121,8 @@ class ApplicationTables @Inject()(dbConfigProvider: DatabaseConfigProvider)(impl
 
   override def clearSectionCompletedDate(id: ApplicationId, sectionNumber: Int): Future[Int] = {
     fetchAppWithSection(id, sectionNumber).flatMap {
-      case Some((app, Some(section))) => db.run(appSectionC(id, sectionNumber).update(section.copy(completedAt = null)))
-      //TODO: do we need a ormal approach for such failures ?
-      case _ => Future.failed(new Throwable(s"Section $sectionNumber in applicaton $id not found"))
+      case Some((app, Some(section))) =>  db.run(appSectionC(id, sectionNumber).update(section.copy(completedAt = null)))
+      case _ => Future.successful(0)
     }
   }
 

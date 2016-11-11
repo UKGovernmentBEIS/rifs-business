@@ -59,7 +59,9 @@ class ApplicationController @Inject()(val cached: Cached, applications: Applicat
   }
 
   def clearSectionCompletedDate(id: ApplicationId, sectionNumber: Int) = Action.async { implicit request =>
-    applications.clearSectionCompletedDate(id, sectionNumber).map(_ => NoContent)
+    applications.clearSectionCompletedDate(id, sectionNumber).map { count =>
+      if (count > 0) NoContent else NotFound
+    }
   }
 
   def deleteSectionItem(id: ApplicationId, sectionNumber: Int, itemNumber: Int) = Action.async { implicit request =>
