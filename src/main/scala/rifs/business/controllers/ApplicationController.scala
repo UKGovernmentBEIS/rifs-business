@@ -144,16 +144,27 @@ class ApplicationController @Inject()(val cached: Cached, applications: Applicat
       applications.submit(id).flatMap {
         case Some(submissionRef) =>
           val res = JsObject( Seq("applicationRef" -> Json.toJson(submissionRef) ) )
-          notifications.notifyPortfolioManager(submissionRef, Notifications.ApplicationSubmitted).map {
-            _.map { _ => res } // this would wait for e-mail to be sent, we can just put it onto threadpool
-          }.map {
-            jsonResult(_)
-          }.recover {
-            case t =>
-              Logger.error ("Failed to send email on application submission", t)
-              Ok(res) // we return OK, as the application was submitted
+          // now send notifications
+          Seq(
+              ("Manager", notifications.notifyPortfolioManager(submissionRef, Notifications.ApplicationSubmitted) ),
+              ("Applicant", notifications.notifyApplicant(submissionRef, Notifications.ApplicationSubmitted) )
+          )
+          .foldLeft(Future.successful(res)) {
+            case (resFut, (who, nF)) =>
+              resFut.flatMap { resJson =>
+                nF.map{ s => resJson }
+                  .recover {
+                    case t =>
+                      Logger.error(s"Failed to send email to $who on an application submission", t)
+                      resJson // we return OK, as the application was submitted
+                  }
+              }
           }
-        case None => Future { jsonResult[ApplicationId]( None ) }
+          .map{ Ok(_) }
+          // the required app ID is not found
+        case None =>
+          Logger.warn(s"An attempt to submit a non-existent application $id")
+          Future.successful(jsonResult[ApplicationId]( None ) )
     }
   }
 }
