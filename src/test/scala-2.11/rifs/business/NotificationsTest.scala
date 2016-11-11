@@ -5,10 +5,10 @@ import play.api.db.evolutions.ApplicationEvolutions
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.mailer.{Email, MailerClient}
-import rifs.business.data.{ApplicationFormOps, ApplicationOps, OpportunityOps}
+import rifs.business.data.{ApplicationDetails, ApplicationOps}
 import rifs.business.models._
+import rifs.business.notifications.Notifications.EmailId
 import rifs.business.notifications.{EmailNotifications, Notifications}
-import rifs.business.restmodels.ApplicationForm
 
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
@@ -44,15 +44,11 @@ class NotificationsTest extends WordSpecLike with Matchers with OptionValues {
 
     val APP_ID = ApplicationId(1)
     val appOps = mock.MockitoSugar.mock[ApplicationOps]
-    val formOps = mock.MockitoSugar.mock[ApplicationFormOps]
-    val oppOps = mock.MockitoSugar.mock[OpportunityOps]
     val evolAPi = mock.MockitoSugar.mock[ApplicationEvolutions]
     val mailerClient = mock.MockitoSugar.mock[MailerClient]
 
     val application = new GuiceApplicationBuilder()
       .overrides(bind[ApplicationOps].to(appOps))
-      .overrides(bind[ApplicationFormOps].to(formOps))
-      .overrides(bind[OpportunityOps].to(oppOps))
       .overrides(bind[ApplicationEvolutions].to(evolAPi))
       .overrides(bind[MailerClient].to(mailerClient))
       .build()
@@ -61,7 +57,7 @@ class NotificationsTest extends WordSpecLike with Matchers with OptionValues {
 
     "return empty notification ID for a missing application ID" in {
 
-      Mockito.when(appOps.byId(APP_ID)).thenReturn(Future.successful(None))
+      Mockito.when(appOps.gatherDetails(APP_ID)).thenReturn(Future.successful(None))
       val res = notification.notifyPortfolioManager(APP_ID, Notifications.ApplicationSubmitted)
       checkSuccessFut(res) {
         _ shouldBe None
@@ -71,10 +67,11 @@ class NotificationsTest extends WordSpecLike with Matchers with OptionValues {
     def setupMailer() = {
       val APP_FORM_ID = ApplicationFormId(1)
       val OPPORTUNITY_ID = OpportunityId(1)
-      Mockito.when(appOps.byId(APP_ID)).thenReturn(Future.successful(Some(ApplicationRow(Some(APP_ID), APP_FORM_ID))))
-      Mockito.when(formOps.byId(APP_FORM_ID)).thenReturn(Future.successful(Some(ApplicationForm(APP_FORM_ID, OPPORTUNITY_ID, Nil))))
       val opp = OpportunityRow(OPPORTUNITY_ID, "oz1", "", None, None, 0, "")
-      Mockito.when(oppOps.byId(OPPORTUNITY_ID)).thenReturn(Future.successful(Some(opp)))
+      val appDetails = ApplicationDetails( ApplicationRow(Some(APP_ID), APP_FORM_ID),
+                                            ApplicationFormRow(APP_FORM_ID, OPPORTUNITY_ID), opp)
+      Mockito.when(appOps.gatherDetails(APP_ID)).thenReturn(Future.successful(Some(appDetails)))
+
     }
 
     "create a notification ID upon success" in {
@@ -85,7 +82,7 @@ class NotificationsTest extends WordSpecLike with Matchers with OptionValues {
         Mockito.when(mailerClient.send(ArgumentMatchers.any[Email]())).thenReturn(MAIL_ID)
         val res = notification.notifyPortfolioManager(APP_ID, Notifications.ApplicationSubmitted)
         checkSuccessFut(res) { nid =>
-          nid.value shouldBe MAIL_ID
+          nid.value shouldBe EmailId(MAIL_ID)
         }
       }
     }
