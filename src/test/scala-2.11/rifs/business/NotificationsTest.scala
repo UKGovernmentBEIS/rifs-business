@@ -8,6 +8,7 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.mailer.{Email, MailerClient}
 import rifs.business.data.{ApplicationDetails, ApplicationOps}
 import rifs.business.models._
+import rifs.business.notifications.Notifications.EmailId
 import rifs.business.notifications.{EmailNotifications, Notifications}
 
 import scala.concurrent.Future
@@ -39,11 +40,11 @@ class NotificationsTest extends WordSpecLike with Matchers with OptionValues wit
     def setupMailer() = {
       val APP_FORM_ID = ApplicationFormId(1)
       val OPPORTUNITY_ID = OpportunityId(1)
-      Mockito.when(appOps.gatherDetails(APP_ID)).thenReturn(Future.successful(Some(
-        ApplicationDetails(ApplicationRow(Some(APP_ID), APP_FORM_ID),
-          ApplicationFormRow(APP_FORM_ID, OPPORTUNITY_ID),
-          OpportunityRow(OPPORTUNITY_ID, "oz1", "", None, None, 0, "")
-        ))))
+      val opp = OpportunityRow(OPPORTUNITY_ID, "oz1", "", None, None, 0, "")
+      val appDetails = ApplicationDetails( ApplicationRow(Some(APP_ID), APP_FORM_ID),
+                                            ApplicationFormRow(APP_FORM_ID, OPPORTUNITY_ID), opp)
+      Mockito.when(appOps.gatherDetails(APP_ID)).thenReturn(Future.successful(Some(appDetails)))
+
     }
 
     "create a notification ID upon success" in {
