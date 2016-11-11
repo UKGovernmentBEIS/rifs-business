@@ -45,4 +45,7 @@ trait ApplicationOps {
 
   def deleteSection(id: ApplicationId, sectionNumber: Int): Future[Int]
 
+  def clearSectionCompletedDate(id: ApplicationId, sectionNumber: Int): Future[Int]
+
+
 }

@@ -134,4 +134,16 @@ class ApplicationTables @Inject()(dbConfigProvider: DatabaseConfigProvider)(impl
   def appSectionsQ(id: Rep[ApplicationId]) = applicationSectionTable.filter(_.applicationId === id)
 
   lazy val appSectionsC = Compiled(appSectionsQ _)
+
+
+  //Slot in
+
+  override def clearSectionCompletedDate(id: ApplicationId, sectionNumber: Int): Future[Int] = {
+    fetchAppWithSection(id, sectionNumber).flatMap {
+      case Some((app, Some(section))) => db.run(appSectionC(id, sectionNumber).update(section.copy(completedAt = null)))
+        //Not successful surely - no row found
+      case None => Future.successful(0)
+    }
+  }
 }
+
