@@ -3,16 +3,19 @@ package rifs.business.controllers
 import javax.inject.Inject
 
 import org.joda.time.{DateTimeZone, LocalDateTime}
+import play.api.Logger
 import play.api.cache.Cached
 import play.api.libs.json._
 import play.api.mvc.{Action, Controller}
 import rifs.business.data.ApplicationOps
 import rifs.business.models.{ApplicationFormId, ApplicationId}
+import rifs.business.notifications.{NotificationService, Notifications}
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Random
 
-class ApplicationController @Inject()(val cached: Cached, applications: ApplicationOps)(implicit val ec: ExecutionContext) extends Controller with ControllerUtils {
+class ApplicationController @Inject()(val cached: Cached, applications: ApplicationOps, notifications: NotificationService)
+                                     (implicit val ec: ExecutionContext) extends Controller with ControllerUtils {
   def byId(id: ApplicationId) = cacheOk {
     Action.async(applications.byId(id).map(jsonResult(_)))
   }
@@ -140,4 +143,21 @@ class ApplicationController @Inject()(val cached: Cached, applications: Applicat
     applications.deleteSection(id, sectionNumber).map(_ => NoContent)
   }
 
+  def submit(id: ApplicationId) = Action.async { _ =>
+
+      applications.submit(id).flatMap {
+        case Some(submissionRef) =>
+          val res = JsObject( Seq("applicationRef" -> Json.toJson(submissionRef) ) )
+          notifications.notifyPortfolioManager(submissionRef, Notifications.ApplicationSubmitted).map {
+            _.map { _ => res } // this would wait for e-mail to be sent, we can just put it onto threadpool
+          }.map {
+            jsonResult(_)
+          }.recover {
+            case t =>
+              Logger.error ("Failed to send email on application submission", t)
+              Ok(res) // we return OK, as the application was submitted
+          }
+        case None => Future { jsonResult[ApplicationId]( None ) }
+    }
+  }
 }
