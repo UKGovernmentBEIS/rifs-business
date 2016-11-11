@@ -3,10 +3,10 @@ package rifs.business.controllers
 import javax.inject.Inject
 
 import org.joda.time.{DateTimeZone, LocalDateTime}
-import play.api.Logger
 import play.api.cache.Cached
 import play.api.libs.json._
 import play.api.mvc.{Action, Controller}
+import play.api.{Configuration, Logger}
 import rifs.business.data.ApplicationOps
 import rifs.business.models.{ApplicationFormId, ApplicationId}
 import rifs.business.notifications.{NotificationService, Notifications}
@@ -14,7 +14,7 @@ import rifs.business.notifications.{NotificationService, Notifications}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Random
 
-class ApplicationController @Inject()(val cached: Cached, applications: ApplicationOps, notifications: NotificationService)
+class ApplicationController @Inject()(val cached: Cached, applications: ApplicationOps, notifications: NotificationService, config: Configuration)
                                      (implicit val ec: ExecutionContext) extends Controller with ControllerUtils {
   def byId(id: ApplicationId) = cacheOk {
     Action.async(applications.byId(id).map(jsonResult(_)))
@@ -153,12 +153,18 @@ class ApplicationController @Inject()(val cached: Cached, applications: Applicat
     applications.deleteSection(id, sectionNumber).map(_ => NoContent)
   }
 
-  def submit(id: ApplicationId) = Action.async { _ =>
+  val RIFS_EMAIL = "rifs.email"
+  val RIFS_DUMMY_APPLICANT_EMAIL = s"$RIFS_EMAIL.dummyapplicant"
+  val RIFS_REPLY_TO_EMAIL = s"$RIFS_EMAIL.replyto"
 
+  def submit(id: ApplicationId) = Action.async { _ =>
     applications.submit(id).flatMap {
       case Some(submissionRef) =>
         val res = JsObject(Seq("applicationRef" -> Json.toJson(submissionRef)))
-        notifications.notifyPortfolioManager(submissionRef, Notifications.ApplicationSubmitted).map {
+        val from = config.underlying.getString(RIFS_REPLY_TO_EMAIL)
+        val to = config.underlying.getString(RIFS_DUMMY_APPLICANT_EMAIL)
+
+        notifications.notifyPortfolioManager(submissionRef, Notifications.ApplicationSubmitted, from, to).map {
           _.map { _ => res } // this would wait for e-mail to be sent, we can just put it onto threadpool
         }.map {
           jsonResult(_)
