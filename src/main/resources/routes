@@ -28,3 +28,4 @@ POST          /application/:id/submit                            rifs.business.c
 
 # Health check
 GET           /ping                                              rifs.business.controllers.HealthCheckController.ping()
+GET           /version                                           rifs.business.controllers.HealthCheckController.version()
