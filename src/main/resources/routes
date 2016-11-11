@@ -10,7 +10,7 @@ GET           /application_form/:id/application                  rifs.business.c
 GET           /application/:id                                   rifs.business.controllers.ApplicationController.application(id: ApplicationId)
 GET           /application/:id/overview                          rifs.business.controllers.ApplicationController.overview(id: ApplicationId)
 DELETE        /application/:id                                   rifs.business.controllers.ApplicationController.delete(id: ApplicationId)
-DELETE        /application                                       rifs.business.controllers.ApplicationController.deleteAll
+DELETE        /application                                       rifs.business.controllers.ApplicationController.deleteAll()
 
 GET           /application/:id/section/:num                      rifs.business.controllers.ApplicationController.section(id: ApplicationId, num:Int)
 POST          /application/:id/section/:num                      rifs.business.controllers.ApplicationController.saveSection(id: ApplicationId, num:Int)
@@ -20,10 +20,11 @@ DELETE        /application/:id/section/:num                      rifs.business.c
 GET           /application/:id/sections                          rifs.business.controllers.ApplicationController.sections(id: ApplicationId)
 
 POST          /application/:id/section/:num/items                rifs.business.controllers.ApplicationController.postSectionItem(id: ApplicationId, num:Int)
+GET           /application/:id/section/:num/item/:itemNum        rifs.business.controllers.ApplicationController.getSectionItem(id: ApplicationId, num:Int, itemNum:Int)
 PUT           /application/:id/section/:num/item/:itemNum        rifs.business.controllers.ApplicationController.putSectionItem(id: ApplicationId, num:Int, itemNum:Int)
 DELETE        /application/:id/section/:num/item/:itemNum        rifs.business.controllers.ApplicationController.deleteSectionItem(id: ApplicationId, num:Int, itemNum:Int)
 # Submit application
-POST        /application/:id/submit                       rifs.business.controllers.ApplicationController.submit(id: ApplicationId)
+POST          /application/:id/submit                            rifs.business.controllers.ApplicationController.submit(id: ApplicationId)
 
 # Health check
 GET           /ping                                              rifs.business.controllers.HealthCheckController.ping()
