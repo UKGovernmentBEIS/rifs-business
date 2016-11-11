@@ -164,7 +164,7 @@ class ApplicationController @Inject()(val cached: Cached, applications: Applicat
         val from = config.underlying.getString(RIFS_REPLY_TO_EMAIL)
         val to = config.underlying.getString(RIFS_DUMMY_APPLICANT_EMAIL)
 
-        notifications.notifyPortfolioManager(submissionRef, Notifications.ApplicationSubmitted, from, to).map {
+        notifications.notifyPortfolioManager(submissionRef, from, to).map {
           _.map { _ => res } // this would wait for e-mail to be sent, we can just put it onto threadpool
         }.map {
           jsonResult(_)

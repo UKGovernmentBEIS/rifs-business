@@ -18,7 +18,7 @@ class NotificationsTest extends WordSpecLike with Matchers with OptionValues wit
     "return no notification ID for a missing application ID" in {
       val notification = new EmailNotifications(new DummyEmailSender(""), new DummyApplicationOps(Future.successful(None)))
 
-      val res = notification.notifyPortfolioManager(APP_ID, Notifications.ApplicationSubmitted, "from", "to")
+      val res = notification.notifyPortfolioManager(APP_ID, "from", "to")
       res.futureValue shouldBe None
     }
 
@@ -27,7 +27,7 @@ class NotificationsTest extends WordSpecLike with Matchers with OptionValues wit
       val sender = new DummyEmailSender(MAIL_ID)
 
       val notification = new EmailNotifications(sender, appOps)
-      val res = notification.notifyPortfolioManager(APP_ID, Notifications.ApplicationSubmitted, "from", "to")
+      val res = notification.notifyPortfolioManager(APP_ID, "from", "to")
       res.futureValue.value.id shouldBe MAIL_ID
     }
 
@@ -35,7 +35,7 @@ class NotificationsTest extends WordSpecLike with Matchers with OptionValues wit
       val sender = new DummyEmailSender(throw new RuntimeException())
 
       val notification = new EmailNotifications(sender, appOps)
-      val res = notification.notifyPortfolioManager(APP_ID, Notifications.ApplicationSubmitted, "from", "to")
+      val res = notification.notifyPortfolioManager(APP_ID, "from", "to")
       whenReady(res.failed) { ex => ex shouldBe a[RuntimeException] }
     }
   }

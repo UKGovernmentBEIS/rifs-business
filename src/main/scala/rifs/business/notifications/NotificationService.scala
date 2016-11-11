@@ -3,7 +3,6 @@ package rifs.business.notifications
 import javax.inject.Inject
 
 import com.google.inject.ImplementedBy
-import play.api.libs.json.{JsObject, JsString, JsValue, Writes}
 import play.api.libs.mailer.{Email, MailerClient}
 import rifs.business.data.ApplicationOps
 import rifs.business.models.{ApplicationFormRow, ApplicationId, OpportunityRow}
@@ -11,29 +10,11 @@ import rifs.business.models.{ApplicationFormRow, ApplicationId, OpportunityRow}
 import scala.concurrent.{ExecutionContext, Future}
 
 object Notifications {
-
-  sealed trait ApplicationEvent
-
-  case object ApplicationSubmitted extends ApplicationEvent
-
   trait NotificationId {
     def id: String
   }
 
-  implicit val NotificationIDJSon = new Writes[Notifications.NotificationId] {
-    override def writes(o: Notifications.NotificationId): JsValue = JsObject(Seq(("id", JsString(o.id))))
-  }
-
   case class EmailId(id: String) extends NotificationId
-
-}
-
-@ImplementedBy(classOf[EmailNotifications])
-trait NotificationService {
-
-  import Notifications._
-
-  def notifyPortfolioManager(applicationFormId: ApplicationId, event: ApplicationEvent, from: String, to: String): Future[Option[NotificationId]]
 }
 
 @ImplementedBy(classOf[EmailSenderImpl])
@@ -45,12 +26,20 @@ class EmailSenderImpl @Inject()(mailerClient: MailerClient) extends EmailSender{
   override def send(email: Email): String = mailerClient.send(email)
 }
 
+@ImplementedBy(classOf[EmailNotifications])
+trait NotificationService {
+
+  import Notifications._
+
+  def notifyPortfolioManager(applicationFormId: ApplicationId, from: String, to: String): Future[Option[NotificationId]]
+}
+
 class EmailNotifications @Inject()(sender: EmailSender, applications: ApplicationOps)(implicit ec: ExecutionContext) extends NotificationService {
 
   import Notifications._
   import play.api.libs.mailer._
 
-  override def notifyPortfolioManager(applicationId: ApplicationId, event: ApplicationEvent, from: String, to: String): Future[Option[EmailId]] = {
+  override def notifyPortfolioManager(applicationId: ApplicationId, from: String, to: String): Future[Option[EmailId]] = {
 
     def createEmail(appForm: ApplicationFormRow, opportunity: OpportunityRow) = {
       val emailSubject = "Application submitted"
