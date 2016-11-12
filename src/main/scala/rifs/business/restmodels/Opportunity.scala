@@ -2,7 +2,7 @@ package rifs.business.restmodels
 
 import rifs.business.models.OpportunityId
 
-case class OpportunityDescriptionSection(sectionNumber:Int, title: String, paragraphs: Seq[String])
+case class OpportunitySection(sectionNumber: Int, title: String, text: Option[String])
 
 case class OpportunityValue(amount: BigDecimal, unit: String)
 
@@ -14,5 +14,5 @@ case class Opportunity(
                         startDate: String,
                         duration: Option[OpportunityDuration],
                         value: OpportunityValue,
-                        description: Set[OpportunityDescriptionSection]
+                        sections: Set[OpportunitySection]
                       )
