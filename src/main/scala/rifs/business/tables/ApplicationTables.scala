@@ -119,6 +119,13 @@ class ApplicationTables @Inject()(dbConfigProvider: DatabaseConfigProvider)(impl
     }
   }
 
+  override def clearSectionCompletedDate(id: ApplicationId, sectionNumber: Int): Future[Int] = {
+    fetchAppWithSection(id, sectionNumber).flatMap {
+      case Some((app, Some(section))) =>  db.run(appSectionC(id, sectionNumber).update(section.copy(completedAt = null)))
+      case _ => Future.successful(0)
+    }
+  }
+
   def areDifferent(obj1: JsObject, obj2: JsObject): Boolean = {
     val flat1 = JsonHelpers.flatten("", obj1).filter { case (_, v) => v.trim != "" }
     val flat2 = JsonHelpers.flatten("", obj2).filter { case (_, v) => v.trim != "" }
@@ -140,7 +147,10 @@ class ApplicationTables @Inject()(dbConfigProvider: DatabaseConfigProvider)(impl
   override def submit(id: ApplicationId): Future[Option[SubmittedApplicationRef]] = {
     // dummy method
     play.api.Logger.info(s"Dummy application submission for $id")
-    byId(id).flatMap{appRow => Future{ appRow.flatMap{ar=> ar.id} } }
+    byId(id).flatMap { appRow => Future {
+      appRow.flatMap { ar => ar.id }
+    }
+    }
   }
 
   def appSectionQ(id: Rep[ApplicationId], sectionNumber: Rep[Int]) = applicationSectionTable.filter(a => a.applicationId === id && a.sectionNumber === sectionNumber)
@@ -150,4 +160,6 @@ class ApplicationTables @Inject()(dbConfigProvider: DatabaseConfigProvider)(impl
   def appSectionsQ(id: Rep[ApplicationId]) = applicationSectionTable.filter(_.applicationId === id)
 
   lazy val appSectionsC = Compiled(appSectionsQ _)
+
 }
+

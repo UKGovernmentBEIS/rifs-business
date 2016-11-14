@@ -32,4 +32,6 @@ class StubApplicationOps extends ApplicationOps{
   override def deleteSection(id: ApplicationId, sectionNumber: Int): Future[Int] = ???
 
   override def submit(id: ApplicationId): Future[Option[SubmittedApplicationRef]] = ???
+
+  override def clearSectionCompletedDate(id: SubmittedApplicationRef, sectionNumber: Int): Future[Int] = ???
 }

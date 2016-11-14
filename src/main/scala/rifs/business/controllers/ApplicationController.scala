@@ -58,6 +58,12 @@ class ApplicationController @Inject()(val cached: Cached, applications: Applicat
     applications.saveSection(id, sectionNumber, request.body).map(_ => NoContent)
   }
 
+  def clearSectionCompletedDate(id: ApplicationId, sectionNumber: Int) = Action.async { implicit request =>
+    applications.clearSectionCompletedDate(id, sectionNumber).map { count =>
+      if (count > 0) NoContent else NotFound
+    }
+  }
+
   def hasItemNumber(o: JsObject, num: Int) = o \ "itemNumber" match {
     case JsDefined(JsNumber(n)) if n == num => true
     case _ => false
