@@ -2,14 +2,14 @@ package rifs.business.controllers
 
 import javax.inject.Inject
 
-import org.joda.time.{DateTimeZone, LocalDateTime}
+import org.joda.time.{DateTime, DateTimeZone, LocalDateTime}
 import play.api.cache.Cached
 import play.api.libs.json._
 import play.api.mvc.{Action, Controller}
 import play.api.{Configuration, Logger}
 import rifs.business.data.ApplicationOps
 import rifs.business.models.{ApplicationFormId, ApplicationId}
-import rifs.business.notifications.{NotificationService, Notifications}
+import rifs.business.notifications.NotificationService
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Random
@@ -162,26 +162,32 @@ class ApplicationController @Inject()(val cached: Cached, applications: Applicat
   val RIFS_EMAIL = "rifs.email"
   val RIFS_DUMMY_APPLICANT_EMAIL = s"$RIFS_EMAIL.dummyapplicant"
   val RIFS_REPLY_TO_EMAIL = s"$RIFS_EMAIL.replyto"
+  val RIFS_DUMMY_MANAGER_EMAIL = s"$RIFS_EMAIL.dummymanager"
 
   def submit(id: ApplicationId) = Action.async { _ =>
+
     applications.submit(id).flatMap {
       case Some(submissionRef) =>
-        val res = JsObject(Seq("applicationRef" -> Json.toJson(submissionRef)))
         val from = config.underlying.getString(RIFS_REPLY_TO_EMAIL)
         val to = config.underlying.getString(RIFS_DUMMY_APPLICANT_EMAIL)
+        val mgrEmail = config.underlying.getString(RIFS_DUMMY_MANAGER_EMAIL)
 
-        notifications.notifyPortfolioManager(submissionRef, from, to).map {
-          _.map { _ => res } // this would wait for e-mail to be sent, we can just put it onto threadpool
-        }.map {
-          jsonResult(_)
-        }.recover {
-          case t =>
-            Logger.error("Failed to send email on application submission", t)
-            Ok(res) // we return OK, as the application was submitted
+        val fs = Seq(
+          ("Manager", notifications.notifyPortfolioManager(submissionRef, from, to)),
+          ("Applicant", notifications.notifyApplicant(submissionRef, DateTime.now(DateTimeZone.UTC), from, to, mgrEmail))
+        ).map {
+          case (who, f) => f.recover { case t =>
+            Logger.error(s"Failed to send email to $who on an application submission", t)
+            None
+          }
         }
-      case None => Future {
-        jsonResult[ApplicationId](None)
-      }
+
+        Future.sequence(fs).map(_ => Ok(JsObject(Seq("applicationRef" -> Json.toJson(submissionRef)))))
+
+      // the required app ID is not found
+      case None =>
+        Logger.warn(s"An attempt to submit a non-existent application $id")
+        Future.successful(jsonResult[ApplicationId](None))
     }
   }
 }
