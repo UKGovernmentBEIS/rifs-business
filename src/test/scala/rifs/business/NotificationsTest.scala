@@ -2,10 +2,10 @@ package rifs.business
 
 import org.scalatest._
 import org.scalatest.concurrent.ScalaFutures
-import play.api.libs.mailer.Email
+import play.api.libs.mailer.{Email, MailerClient}
 import rifs.business.data.ApplicationDetails
 import rifs.business.models._
-import rifs.business.notifications.{EmailNotifications, EmailSender, Notifications}
+import rifs.business.notifications.EmailNotifications
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -16,7 +16,7 @@ class NotificationsTest extends WordSpecLike with Matchers with OptionValues wit
 
   "notification" should {
     "return no notification ID for a missing application ID" in {
-      val notification = new EmailNotifications(new DummyEmailSender(""), new DummyGatherDetails(Future.successful(None)))
+      val notification = new EmailNotifications(new DummyMailer(""), new DummyGatherDetails(Future.successful(None)))
 
       val res = notification.notifyPortfolioManager(APP_ID, "from", "to")
       res.futureValue shouldBe None
@@ -24,7 +24,7 @@ class NotificationsTest extends WordSpecLike with Matchers with OptionValues wit
 
     "create a notification ID upon success" in {
       val MAIL_ID = "yey"
-      val sender = new DummyEmailSender(MAIL_ID)
+      val sender = new DummyMailer(MAIL_ID)
 
       val notification = new EmailNotifications(sender, appOps)
       val res = notification.notifyPortfolioManager(APP_ID, "from", "to")
@@ -32,7 +32,7 @@ class NotificationsTest extends WordSpecLike with Matchers with OptionValues wit
     }
 
     "return error if e-mailer throws" in {
-      val sender = new DummyEmailSender(throw new RuntimeException())
+      val sender = new DummyMailer(throw new RuntimeException())
 
       val notification = new EmailNotifications(sender, appOps)
       val res = notification.notifyPortfolioManager(APP_ID, "from", "to")
@@ -44,7 +44,7 @@ class NotificationsTest extends WordSpecLike with Matchers with OptionValues wit
 object NotificationsTestData {
   val APP_ID = ApplicationId(1)
 
-  class DummyEmailSender(result: => String) extends EmailSender {
+  class DummyMailer(result: => String) extends MailerClient {
     override def send(email: Email): String = result
   }
 

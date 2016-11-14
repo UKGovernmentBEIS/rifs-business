@@ -17,15 +17,6 @@ object Notifications {
   case class EmailId(id: String) extends NotificationId
 }
 
-@ImplementedBy(classOf[EmailSenderImpl])
-trait EmailSender {
-  def send(email: Email): String
-}
-
-class EmailSenderImpl @Inject()(mailerClient: MailerClient) extends EmailSender{
-  override def send(email: Email): String = mailerClient.send(email)
-}
-
 @ImplementedBy(classOf[EmailNotifications])
 trait NotificationService {
 
@@ -34,7 +25,7 @@ trait NotificationService {
   def notifyPortfolioManager(applicationFormId: ApplicationId, from: String, to: String): Future[Option[NotificationId]]
 }
 
-class EmailNotifications @Inject()(sender: EmailSender, applications: ApplicationOps)(implicit ec: ExecutionContext) extends NotificationService {
+class EmailNotifications @Inject()(sender: MailerClient, applications: ApplicationOps)(implicit ec: ExecutionContext) extends NotificationService {
 
   import Notifications._
   import play.api.libs.mailer._
