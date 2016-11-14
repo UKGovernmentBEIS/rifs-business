@@ -3,10 +3,10 @@ package rifs.business.controllers
 import javax.inject.Inject
 
 import org.joda.time.{DateTimeZone, LocalDateTime}
-import play.api.Logger
 import play.api.cache.Cached
 import play.api.libs.json._
 import play.api.mvc.{Action, Controller}
+import play.api.{Configuration, Logger}
 import rifs.business.data.ApplicationOps
 import rifs.business.models.{ApplicationFormId, ApplicationId}
 import rifs.business.notifications.{NotificationService, Notifications}
@@ -14,7 +14,7 @@ import rifs.business.notifications.{NotificationService, Notifications}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Random
 
-class ApplicationController @Inject()(val cached: Cached, applications: ApplicationOps, notifications: NotificationService)
+class ApplicationController @Inject()(val cached: Cached, applications: ApplicationOps, notifications: NotificationService, config: Configuration)
                                      (implicit val ec: ExecutionContext) extends Controller with ControllerUtils {
   def byId(id: ApplicationId) = cacheOk {
     Action.async(applications.byId(id).map(jsonResult(_)))
@@ -153,14 +153,20 @@ class ApplicationController @Inject()(val cached: Cached, applications: Applicat
     applications.deleteSection(id, sectionNumber).map(_ => NoContent)
   }
 
+  val RIFS_EMAIL = "rifs.email"
+  val RIFS_DUMMY_APPLICANT_EMAIL = s"$RIFS_EMAIL.dummyapplicant"
+  val RIFS_REPLY_TO_EMAIL = s"$RIFS_EMAIL.replyto"
+
   def submit(id: ApplicationId) = Action.async { _ =>
 
       applications.submit(id).flatMap {
         case Some(submissionRef) =>
           val res = JsObject( Seq("applicationRef" -> Json.toJson(submissionRef) ) )
+          val from = config.underlying.getString(RIFS_REPLY_TO_EMAIL)
+          val to = config.underlying.getString(RIFS_DUMMY_APPLICANT_EMAIL)
           // now send notifications
           Seq(
-              ("Manager", notifications.notifyPortfolioManager(submissionRef, Notifications.ApplicationSubmitted) ),
+              ("Manager", notifications.notifyPortfolioManager(submissionRef, from, to) ),
               ("Applicant", notifications.notifyApplicant(submissionRef, Notifications.ApplicationSubmitted) )
           )
           .foldLeft(Future.successful(res)) {

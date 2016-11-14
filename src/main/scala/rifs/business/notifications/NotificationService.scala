@@ -2,27 +2,16 @@ package rifs.business.notifications
 
 import javax.inject.Inject
 
-import cats.data.OptionT
-import cats.instances.future._
 import com.google.inject.ImplementedBy
-import play.api.libs.json.{JsObject, JsString, JsValue, Writes}
-import rifs.business.data.{ ApplicationOps}
+import play.api.libs.mailer.{Email, MailerClient}
+import rifs.business.data.ApplicationOps
 import rifs.business.models.{ApplicationFormRow, ApplicationId, OpportunityRow}
 
 import scala.concurrent.{ExecutionContext, Future}
 
 object Notifications {
-
-  sealed trait ApplicationEvent
-
-  case object ApplicationSubmitted extends ApplicationEvent
-
   trait NotificationId {
     def id: String
-  }
-
-  implicit val NotificationIDJSon = new Writes[Notifications.NotificationId] {
-    override def writes(o: Notifications.NotificationId): JsValue = JsObject(Seq(("id", JsString(o.id))))
   }
 
   case class EmailId(id: String) extends NotificationId
@@ -30,26 +19,19 @@ object Notifications {
 
 @ImplementedBy(classOf[EmailNotifications])
 trait NotificationService {
+
   import Notifications._
 
-  def notifyPortfolioManager(applicationFormId: ApplicationId, event: ApplicationEvent): Future[Option[NotificationId]]
-
-  def notifyApplicant(applicationFormId: ApplicationId, event: ApplicationEvent): Future[Option[NotificationId]]
+  def notifyPortfolioManager(applicationFormId: ApplicationId, from: String, to: String): Future[Option[NotificationId]]
+  def notifyApplicant(applicationFormId: ApplicationId, from: String, to: String): Future[Option[NotificationId]]
 }
 
-class EmailNotifications @Inject()(mailerClient: play.api.libs.mailer.MailerClient,
-                                   applicationOps: ApplicationOps,
-                                   configuration: play.api.Configuration)(implicit ec: ExecutionContext) extends NotificationService {
+class EmailNotifications @Inject()(sender: MailerClient, applications: ApplicationOps)(implicit ec: ExecutionContext) extends NotificationService {
 
   import Notifications._
   import play.api.libs.mailer._
 
-  val RIFS_EMAIL = "rifs.email"
-  val RIFS_DUMMY_APPLICANT_EMAIL = s"$RIFS_EMAIL.dummyapplicant"
-  val RIFS_DUMMY_MANAGER_EMAIL = s"$RIFS_EMAIL.dummymanager"
-  val RIFS_REPLY_TO_EMAIL = s"$RIFS_EMAIL.replyto"
-
-  override def notifyApplicant(applicationId: ApplicationId, event: ApplicationEvent): Future[Option[EmailId]] = {
+  override def notifyApplicant(applicationId: ApplicationId, from: String, to: String): Future[Option[EmailId]] = {
 
     import org.joda.time.LocalDateTime
 
@@ -58,7 +40,7 @@ class EmailNotifications @Inject()(mailerClient: play.api.libs.mailer.MailerClie
                     reviewDeadline: LocalDateTime) = {
 
       val emailSubject = "Application submitted"
-      val applicantEMail = configuration.underlying.getString(RIFS_DUMMY_APPLICANT_EMAIL)
+      val applicantEMail = to
       val portFolioMgrEmail = configuration.underlying.getString(RIFS_DUMMY_MANAGER_EMAIL)
       val applicantLastName = "Ericsson"
       val applicantFirstName = "Eric"
@@ -131,8 +113,8 @@ class EmailNotifications @Inject()(mailerClient: play.api.libs.mailer.MailerClie
       )
     }
 
-    applicationOps.gatherDetails(applicationId).map {
-      _.map(d => EmailId(mailerClient.send(createEmail(d.form, d.opp))))
+    applications.gatherDetails(applicationId).map {
+      _.map(d => EmailId(sender.send(createEmail(d.form, d.opp))))
     }
   }
 }
