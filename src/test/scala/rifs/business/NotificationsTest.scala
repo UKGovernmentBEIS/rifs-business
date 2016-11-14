@@ -16,7 +16,7 @@ class NotificationsTest extends WordSpecLike with Matchers with OptionValues wit
 
   "notification" should {
     "return no notification ID for a missing application ID" in {
-      val notification = new EmailNotifications(new DummyEmailSender(""), new DummyApplicationOps(Future.successful(None)))
+      val notification = new EmailNotifications(new DummyEmailSender(""), new DummyGatherDetails(Future.successful(None)))
 
       val res = notification.notifyPortfolioManager(APP_ID, "from", "to")
       res.futureValue shouldBe None
@@ -57,10 +57,10 @@ object NotificationsTestData {
       ApplicationRow(Some(APP_ID), APP_FORM_ID),
       ApplicationFormRow(APP_FORM_ID, OPPORTUNITY_ID), opp)
 
-    new DummyApplicationOps(Future.successful(Some(appDetails)))
+    new DummyGatherDetails(Future.successful(Some(appDetails)))
   }
 
-  class DummyApplicationOps(result: => Future[Option[ApplicationDetails]]) extends StubApplicationOps {
+  class DummyGatherDetails(result: => Future[Option[ApplicationDetails]]) extends StubApplicationOps {
     override def gatherDetails(id: SubmittedApplicationRef): Future[Option[ApplicationDetails]] = result
   }
 
