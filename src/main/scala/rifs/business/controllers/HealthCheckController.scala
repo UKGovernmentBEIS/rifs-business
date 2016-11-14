@@ -12,6 +12,6 @@ class HealthCheckController extends Controller {
   def version = Action {
     // need to convert the Anys to Strings so play json knows how to
     // convert it
-    Ok(Json.toJson(BuildInfo.toMap.map(e => e._1 -> e._2.toString)))
+    Ok(Json.toJson(BuildInfo.toMap.mapValues(_.toString)))
   }
 }
