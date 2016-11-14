@@ -9,7 +9,7 @@ import play.api.mvc.{Action, Controller}
 import play.api.{Configuration, Logger}
 import rifs.business.data.ApplicationOps
 import rifs.business.models.{ApplicationFormId, ApplicationId}
-import rifs.business.notifications.{NotificationService, Notifications}
+import rifs.business.notifications.NotificationService
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Random
@@ -166,33 +166,28 @@ class ApplicationController @Inject()(val cached: Cached, applications: Applicat
 
   def submit(id: ApplicationId) = Action.async { _ =>
 
-      applications.submit(id).flatMap {
-        case Some(submissionRef) =>
-          val res = JsObject( Seq("applicationRef" -> Json.toJson(submissionRef) ) )
-          val from = config.underlying.getString(RIFS_REPLY_TO_EMAIL)
-          val to = config.underlying.getString(RIFS_DUMMY_APPLICANT_EMAIL)
-          val mgrEmail = config.underlying.getString(RIFS_DUMMY_MANAGER_EMAIL)
-          // now send notifications
-          Seq(
-              ("Manager", notifications.notifyPortfolioManager(submissionRef, from, to) ),
-              ("Applicant", notifications.notifyApplicant(submissionRef, DateTime.now(DateTimeZone.UTC), from, to, mgrEmail) )
-          )
-          .foldLeft(Future.successful(res)) {
-            case (resFut, (who, nF)) =>
-              resFut.flatMap { resJson =>
-                nF.map{ s => resJson }
-                  .recover {
-                    case t =>
-                      Logger.error(s"Failed to send email to $who on an application submission", t)
-                      resJson // we return OK, as the application was submitted
-                  }
-              }
+    applications.submit(id).flatMap {
+      case Some(submissionRef) =>
+        val from = config.underlying.getString(RIFS_REPLY_TO_EMAIL)
+        val to = config.underlying.getString(RIFS_DUMMY_APPLICANT_EMAIL)
+        val mgrEmail = config.underlying.getString(RIFS_DUMMY_MANAGER_EMAIL)
+
+        val fs = Seq(
+          ("Manager", notifications.notifyPortfolioManager(submissionRef, from, to)),
+          ("Applicant", notifications.notifyApplicant(submissionRef, DateTime.now(DateTimeZone.UTC), from, to, mgrEmail))
+        ).map {
+          case (who, f) => f.recover { case t =>
+            Logger.error(s"Failed to send email to $who on an application submission", t)
+            None
           }
-          .map{ Ok(_) }
-          // the required app ID is not found
-        case None =>
-          Logger.warn(s"An attempt to submit a non-existent application $id")
-          Future.successful(jsonResult[ApplicationId]( None ) )
+        }
+
+        Future.sequence(fs).map(_ => Ok(JsObject(Seq("applicationRef" -> Json.toJson(submissionRef)))))
+
+      // the required app ID is not found
+      case None =>
+        Logger.warn(s"An attempt to submit a non-existent application $id")
+        Future.successful(jsonResult[ApplicationId](None))
     }
   }
 }
