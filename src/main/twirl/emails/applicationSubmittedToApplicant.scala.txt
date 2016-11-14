@@ -8,13 +8,13 @@
   portFolioMgrName: String,
   portFolioMgrEmail: String,
   portFolioMgrPhone: String,
-  reviewDeadline: org.joda.time.LocalDateTime)
+  reviewDeadline: org.joda.time.DateTime)
 
 Dear @applicantTitle @applicantLastName
 Thank you for submitting your application @applicationTitle for our opportunity @opportunityTitle, @opportunityRefNumber
 We'll now check to see if your application meets the eligibility criteria for this opportunity. If successful, your application will proceed to assessment.
 You can also view the progress of your application on @submissionLink.
-We'll let you know the outcome of our assessment by @reviewDeadline
+We'll let you know the outcome of our assessment by @{ org.joda.time.format.DateTimeFormat.forPattern("dd/MM/yyyy").print(reviewDeadline) }
 If you have any questions, please contact me using the details below.
 
 Kind regards,
