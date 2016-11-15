@@ -9,31 +9,9 @@ trait OpportunityModule {
 
   import driver.api._
 
-  implicit def ParagraphIdMapper: BaseColumnType[ParagraphId] = MappedColumnType.base[ParagraphId, Long](_.id, ParagraphId)
-
   implicit def SectionIdMapper: BaseColumnType[SectionId] = MappedColumnType.base[SectionId, Long](_.id, SectionId)
 
   implicit def OpportunityIdMapper: BaseColumnType[OpportunityId] = MappedColumnType.base[OpportunityId, Long](_.id, OpportunityId)
-
-  type ParagraphQuery = Query[ParagraphTable, ParagraphRow, Seq]
-
-  class ParagraphTable(tag: Tag) extends Table[ParagraphRow](tag, "paragraph") {
-    def id = column[ParagraphId]("id", O.Length(IdType.length), O.PrimaryKey)
-
-    def paragraphNumber = column[Int]("paragraph_number")
-
-    def sectionId = column[SectionId]("section_id", O.Length(IdType.length))
-
-    def sectionIdFK = foreignKey("paragraph_section_fk", sectionId, sectionTable)(_.id, onDelete = ForeignKeyAction.Cascade)
-
-    def sectionIdIndex = index("paragraph_section_idx", sectionId)
-
-    def text = column[String]("text", O.Length(255))
-
-    def * = (id, paragraphNumber, sectionId, text) <> (ParagraphRow.tupled, ParagraphRow.unapply)
-  }
-
-  lazy val paragraphTable = TableQuery[ParagraphTable]
 
   type SectionQuery = Query[SectionTable, SectionRow, Seq]
 
@@ -50,7 +28,9 @@ trait OpportunityModule {
 
     def title = column[String]("title", O.Length(255))
 
-    def * = (id, sectionNumber, opportunityId, title) <> (SectionRow.tupled, SectionRow.unapply)
+    def text = column[Option[String]]("text", O.Length(4096))
+
+    def * = (id, sectionNumber, opportunityId, title, text) <> (SectionRow.tupled, SectionRow.unapply)
   }
 
   lazy val sectionTable = TableQuery[SectionTable]

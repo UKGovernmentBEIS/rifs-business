@@ -42,12 +42,8 @@ class OpportunityTables @Inject()(dbConfigProvider: DatabaseConfigProvider)(impl
 
   val byIdC = Compiled(byIdQ _)
 
-  val joinedSectionsWithParas = for {
-    sp <- sectionTable joinLeft paragraphTable on (_.id === _.sectionId)
-  } yield sp
-
   val joinedOppsWithSections = for {
-    os <- opportunityTable joinLeft joinedSectionsWithParas on (_.id === _._1.opportunityId)
+    os <- opportunityTable joinLeft sectionTable on (_.id === _.opportunityId)
   } yield os
 
   val joinedOppsWithSectionsC = Compiled(joinedOppsWithSections)
