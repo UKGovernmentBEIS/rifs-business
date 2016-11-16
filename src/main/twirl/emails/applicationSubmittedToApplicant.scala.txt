@@ -5,7 +5,8 @@
   opportunityRefNumber: String,
   opportunityTitle: String,
   submissionLink: String,
-  portFolioMgrName: String,
+  portFolioMgrFirstName: String,
+  portFolioMgrLastName: String,
   portFolioMgrEmail: String,
   portFolioMgrPhone: String,
   reviewDeadline: org.joda.time.DateTime)
@@ -18,7 +19,7 @@ We'll let you know the outcome of our assessment by @{ org.joda.time.format.Date
 If you have any questions, please contact me using the details below.
 
 Kind regards,
-@portFolioMgrName
+@portFolioMgrFirstName @portFolioMgrLastName
 @portFolioMgrEmail
 @portFolioMgrPhone
 
