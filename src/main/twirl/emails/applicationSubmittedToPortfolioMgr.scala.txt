@@ -9,7 +9,7 @@
   submissionLink: String)
 
 Dear portfolio manager @portFolioMgrName,
-This is to let you know that @applicantTitle @applicantFirstName @applicantLastName of @applicantOrg has submitted an application @applicationRefNum for your opportunity @opportunityTitle opportunity reference number @opportunityRefNumber.
+This is to let you know that @applicantTitle @applicantLastName of @applicantOrg has submitted an application @applicationRefNum for your opportunity @opportunityTitle opportunity reference number @opportunityRefNumber.
 You can view this application on RIFS @submissionLink.
 Kind regards
 RIFS

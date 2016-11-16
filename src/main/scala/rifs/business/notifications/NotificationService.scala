@@ -42,7 +42,7 @@ class EmailNotifications @Inject()(sender: MailerClient, applications: Applicati
 
       val emailSubject = "Application submitted"
       val applicantEMail = to
-      val applicantLastName = "Ericsson"
+      val applicantLastName = "Eric"
       val applicantFirstName = "Eric"
 
       val text = emails.txt.applicationSubmittedToApplicant(
@@ -52,7 +52,8 @@ class EmailNotifications @Inject()(sender: MailerClient, applications: Applicati
         opportunityRefNumber = opportunity.id.id.toString,
         opportunityTitle = opportunity.title,
         submissionLink = "http://todo.link",
-        portFolioMgrName = "Portfolio Peter",
+        portFolioMgrFirstName = "Portfolio",
+        portFolioMgrLastName = "Peter",
         mgrEmail,
         portFolioMgrPhone = "01896 000000",
         reviewDeadline
@@ -86,12 +87,12 @@ class EmailNotifications @Inject()(sender: MailerClient, applications: Applicati
     def createEmail(appForm: ApplicationFormRow, opportunity: OpportunityRow) = {
 
       val emailSubject = "Application submitted"
-      val portFolioMgrName = "Peter Portfolio"
+      val portFolioMgrName = "Portfolio"
 
       val text = emails.txt.applicationSubmittedToPortfolioMgr(
         portFolioMgrName,
         applicantTitle = "Mr",
-        applicantLastName = "Ericsson",
+        applicantLastName = "Eric",
         applicantFirstName = "Eric",
         applicantOrg = "Association of Medical Research Charities",
         applicationRefNum = appForm.id.id.toString,
