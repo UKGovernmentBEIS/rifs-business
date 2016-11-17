@@ -1,7 +1,5 @@
 package rifs.business.models
 
-import play.api.libs.json.JsObject
-
 case class ApplicationFormId(id: Long) extends AnyVal
 
 case class ApplicationFormSectionId(id: Long) extends AnyVal
