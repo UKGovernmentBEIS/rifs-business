@@ -5,7 +5,7 @@ set fields = '[{"name": "title", "type": "text", "isNumeric": false}]'
 where "section_number" = 1;
 
 update "application_form_section"
-set fields = '[{"name": "provisionalDate", "type": "dateWithDays", "allowPast":false, "minValue":1, "maxValue":2}]'
+set fields = '[{"name": "provisionalDate", "type": "dateWithDays", "allowPast":false, "minValue":1, "maxValue":9}]'
 where "section_number" = 2;
 
 update "application_form_section"
