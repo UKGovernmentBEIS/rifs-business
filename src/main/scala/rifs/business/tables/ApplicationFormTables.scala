@@ -2,11 +2,12 @@ package rifs.business.tables
 
 import javax.inject.Inject
 
+import com.github.tminglei.slickpg.{ExPostgresDriver, PgDateSupportJoda, PgPlayJsonSupport}
 import play.api.db.slick.DatabaseConfigProvider
 import rifs.business.data.ApplicationFormOps
 import rifs.business.models._
 import rifs.business.restmodels.{ApplicationForm, ApplicationFormSection, Question}
-import rifs.business.slicks.modules.{ApplicationFormModule, OpportunityModule}
+import rifs.business.slicks.modules.{ApplicationFormModule, OpportunityModule, PlayJsonMappers}
 import rifs.business.slicks.support.DBBinding
 import slick.backend.DatabaseConfig
 import slick.driver.JdbcProfile
@@ -17,6 +18,10 @@ class ApplicationFormTables @Inject()(dbConfigProvider: DatabaseConfigProvider)(
   extends ApplicationFormModule
     with OpportunityModule
     with DBBinding
+    with ExPostgresDriver
+    with PgPlayJsonSupport
+    with PgDateSupportJoda
+    with PlayJsonMappers
     with ApplicationFormOps {
 
   override val dbConfig: DatabaseConfig[JdbcProfile] = dbConfigProvider.get[JdbcProfile]
@@ -74,7 +79,7 @@ object ApplicationFormExtractors {
     val (sections, questions) = sectionRows.unzip
     val ps = sections.distinct.map { s =>
       val qs = questions.flatten.filter(_.applicationFormSectionId == s.id).map(q => Question(q.key, q.text, q.description, q.helpText))
-      s.id -> ApplicationFormSection(s.sectionNumber, s.title, qs)
+      s.id -> ApplicationFormSection(s.sectionNumber, s.title, qs, s.fields)
     }
     Map(ps: _*)
   }
