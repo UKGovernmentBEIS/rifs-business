@@ -1,13 +1,19 @@
 package rifs.business.slicks.modules
 
+import com.github.tminglei.slickpg.{ExPostgresDriver, PgDateSupportJoda, PgPlayJsonSupport}
+import play.api.libs.json.JsArray
 import rifs.business.models._
 import rifs.business.slicks.support.DBBinding
 import rifs.slicks.gen.IdType
 
 trait ApplicationFormModule {
-  self: DBBinding with OpportunityModule =>
+  self:  ExPostgresDriver with PgPlayJsonSupport with PgDateSupportJoda with DBBinding with PlayJsonMappers with OpportunityModule =>
 
-  import driver.api._
+  object pgApi extends API with JsonImplicits with JodaDateTimeImplicits
+
+  override val pgjson = "jsonb"
+
+  import pgApi._
 
   implicit def ApplicationFormQuestionIdMapper: BaseColumnType[ApplicationFormQuestionId] = MappedColumnType.base[ApplicationFormQuestionId, Long](_.id, ApplicationFormQuestionId)
 
@@ -54,7 +60,9 @@ trait ApplicationFormModule {
 
     def title = column[String]("title", O.Length(255))
 
-    def * = (id, applicationFormId, sectionNumber, title) <> (ApplicationFormSectionRow.tupled, ApplicationFormSectionRow.unapply)
+    def fields = column[JsArray]("fields")
+
+    def * = (id, applicationFormId, sectionNumber, title, fields) <> (ApplicationFormSectionRow.tupled, ApplicationFormSectionRow.unapply)
   }
 
   lazy val applicationFormSectionTable = TableQuery[ApplicationFormSectionTable]
@@ -75,5 +83,5 @@ trait ApplicationFormModule {
 
   lazy val applicationFormTable = TableQuery[ApplicationFormTable]
 
-  def schema: driver.DDL = applicationFormQuestionTable.schema ++ applicationFormSectionTable.schema ++ applicationFormTable.schema
+  //def schema: driver.DDL = applicationFormQuestionTable.schema ++ applicationFormSectionTable.schema ++ applicationFormTable.schema
 }

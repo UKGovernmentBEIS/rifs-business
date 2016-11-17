@@ -12,15 +12,23 @@ import rifs.business.controllers.JsonHelpers
 import rifs.business.data.{ApplicationDetails, ApplicationOps}
 import rifs.business.models._
 import rifs.business.restmodels.{Application, ApplicationSection}
-import rifs.business.slicks.modules.{ApplicationFormModule, ApplicationModule, OpportunityModule}
+import rifs.business.slicks.modules.{ApplicationFormModule, ApplicationModule, OpportunityModule, PlayJsonMappers}
 import rifs.business.slicks.support.DBBinding
 import slick.backend.DatabaseConfig
 import slick.driver.JdbcProfile
 
-import scala.concurrent.{ExecutionContext, Future, Promise}
+import scala.concurrent.{ExecutionContext, Future}
 
 class ApplicationTables @Inject()(dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext)
-  extends ApplicationOps with ApplicationModule with DBBinding with ApplicationFormModule with OpportunityModule with ExPostgresDriver with PgPlayJsonSupport with PgDateSupportJoda {
+  extends ApplicationOps
+    with ApplicationModule
+    with DBBinding
+    with ApplicationFormModule
+    with OpportunityModule
+    with ExPostgresDriver
+    with PgPlayJsonSupport
+    with PgDateSupportJoda
+    with PlayJsonMappers {
   override val dbConfig: DatabaseConfig[JdbcProfile] = dbConfigProvider.get[JdbcProfile]
 
   import PostgresAPI._
@@ -121,7 +129,7 @@ class ApplicationTables @Inject()(dbConfigProvider: DatabaseConfigProvider)(impl
 
   override def clearSectionCompletedDate(id: ApplicationId, sectionNumber: Int): Future[Int] = {
     fetchAppWithSection(id, sectionNumber).flatMap {
-      case Some((app, Some(section))) =>  db.run(appSectionC(id, sectionNumber).update(section.copy(completedAt = None)))
+      case Some((app, Some(section))) => db.run(appSectionC(id, sectionNumber).update(section.copy(completedAt = None)))
       case _ => Future.successful(0)
     }
   }
