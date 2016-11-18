@@ -7,3 +7,5 @@ import rifs.business.models.{ApplicationFormId, ApplicationId}
 case class ApplicationSection(sectionNumber: Int, answers: JsObject, completedAt: Option[LocalDateTime])
 
 case class Application(id: ApplicationId, applicationFormId: ApplicationFormId, sections: Seq[ApplicationSection])
+
+case class ApplicationDetail(id: ApplicationId, opportunity: Opportunity, applicationForm: ApplicationForm, sections: Seq[ApplicationSection])

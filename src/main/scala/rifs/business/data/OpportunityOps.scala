@@ -11,7 +11,7 @@ import scala.concurrent.Future
 trait OpportunityOps {
   def byId(id: OpportunityId): Future[Option[OpportunityRow]]
 
-  def byIdWithDescription(opportunityId: OpportunityId): Future[Option[Opportunity]]
+  def opportunity(opportunityId: OpportunityId): Future[Option[Opportunity]]
 
   def open: Future[Set[Opportunity]]
 

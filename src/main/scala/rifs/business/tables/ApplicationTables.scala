@@ -11,7 +11,7 @@ import play.api.libs.json.JsObject
 import rifs.business.controllers.JsonHelpers
 import rifs.business.data.{ApplicationDetails, ApplicationOps}
 import rifs.business.models._
-import rifs.business.restmodels.{Application, ApplicationSection}
+import rifs.business.restmodels.{Application, ApplicationDetail, ApplicationSection}
 import rifs.business.slicks.modules.{ApplicationFormModule, ApplicationModule, OpportunityModule, PlayJsonMappers}
 import rifs.business.slicks.support.DBBinding
 import slick.backend.DatabaseConfig
@@ -155,9 +155,10 @@ class ApplicationTables @Inject()(dbConfigProvider: DatabaseConfigProvider)(impl
   override def submit(id: ApplicationId): Future[Option[SubmittedApplicationRef]] = {
     // dummy method
     play.api.Logger.info(s"Dummy application submission for $id")
-    byId(id).flatMap { appRow => Future {
-      appRow.flatMap { ar => ar.id }
-    }
+    byId(id).flatMap { appRow =>
+      Future {
+        appRow.flatMap { ar => ar.id }
+      }
     }
   }
 

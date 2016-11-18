@@ -2,19 +2,22 @@ package rifs.business.controllers
 
 import javax.inject.Inject
 
+import cats.data.OptionT
+import cats.instances.future._
 import org.joda.time.{DateTime, DateTimeZone, LocalDateTime}
 import play.api.cache.Cached
 import play.api.libs.json._
 import play.api.mvc.{Action, Controller}
 import play.api.{Configuration, Logger}
-import rifs.business.data.ApplicationOps
+import rifs.business.data.{ApplicationFormOps, ApplicationOps, OpportunityOps}
 import rifs.business.models.{ApplicationFormId, ApplicationId}
 import rifs.business.notifications.NotificationService
+import rifs.business.restmodels.ApplicationDetail
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Random
 
-class ApplicationController @Inject()(val cached: Cached, applications: ApplicationOps, notifications: NotificationService, config: Configuration)
+class ApplicationController @Inject()(val cached: Cached, applications: ApplicationOps, appForms: ApplicationFormOps, opps: OpportunityOps, notifications: NotificationService, config: Configuration)
                                      (implicit val ec: ExecutionContext) extends Controller with ControllerUtils {
   def byId(id: ApplicationId) = cacheOk {
     Action.async(applications.byId(id).map(jsonResult(_)))
@@ -26,6 +29,18 @@ class ApplicationController @Inject()(val cached: Cached, applications: Applicat
 
   def application(applicationId: ApplicationId) =
     Action.async(applications.application(applicationId).map(jsonResult(_)))
+
+  def detail(applicationId: ApplicationId) = Action.async {
+    val ft = for {
+      a <- OptionT(applications.application(applicationId))
+      f <- OptionT(appForms.byId(a.applicationFormId))
+      o <- OptionT(opps.opportunity(f.opportunityId))
+    } yield {
+      ApplicationDetail(a.id, o, f, a.sections)
+    }
+
+    ft.value.map(jsonResult(_))
+  }
 
   val emptyJsObject: JsObject = JsObject(Seq())
 

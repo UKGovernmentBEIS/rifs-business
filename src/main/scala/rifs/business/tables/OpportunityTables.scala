@@ -24,7 +24,7 @@ class OpportunityTables @Inject()(dbConfigProvider: DatabaseConfigProvider)(impl
 
   override def byId(opportunityId: OpportunityId): Future[Option[OpportunityRow]] = db.run(byIdC(opportunityId).result.headOption)
 
-  override def byIdWithDescription(id: OpportunityId): Future[Option[Opportunity]] = db.run(oppWithDescC(id).result.map(extractOpportunities(_).headOption))
+  override def opportunity(id: OpportunityId): Future[Option[Opportunity]] = db.run(oppWithDescC(id).result.map(extractOpportunities(_).headOption))
 
   override def open: Future[Set[Opportunity]] = db.run {
     joinedOppsWithSectionsC.result.map(extractOpportunities)

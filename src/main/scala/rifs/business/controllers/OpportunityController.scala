@@ -14,7 +14,7 @@ class OpportunityController @Inject()(val cached: Cached, opportunities: Opportu
 
   def byId(id: OpportunityId) = cacheOk {
     Action.async {
-      opportunities.byIdWithDescription(id).map(jsonResult(_))
+      opportunities.opportunity(id).map(jsonResult(_))
     }
   }
 
