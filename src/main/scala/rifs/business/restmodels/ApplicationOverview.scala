@@ -8,4 +8,9 @@ case class ApplicationSection(sectionNumber: Int, answers: JsObject, completedAt
 
 case class Application(id: ApplicationId, applicationFormId: ApplicationFormId, sections: Seq[ApplicationSection])
 
-case class ApplicationDetail(id: ApplicationId, opportunity: Opportunity, applicationForm: ApplicationForm, sections: Seq[ApplicationSection])
+case class ApplicationDetail(
+                              id: ApplicationId,
+                              sectionCount: Int,
+                              opportunity: OpportunitySummary,
+                              applicationForm: ApplicationForm,
+                              sections: Seq[ApplicationSection])

@@ -14,6 +14,7 @@ DELETE        /application/:id                                      rifs.busines
 DELETE        /application                                          rifs.business.controllers.ApplicationController.deleteAll
 
 GET           /application/:id/section/:num                         rifs.business.controllers.ApplicationController.section(id: ApplicationId, num:Int)
+GET           /application/:id/section/:num/detail                  rifs.business.controllers.ApplicationController.sectionDetail(id: ApplicationId, num:Int)
 POST          /application/:id/section/:num                         rifs.business.controllers.ApplicationController.saveSection(id: ApplicationId, num:Int)
 POST          /application/:id/section/:num/complete                rifs.business.controllers.ApplicationController.completeSection(id: ApplicationId, num:Int)
 PUT           /application/:id/section/:num/markNotCompleted        rifs.business.controllers.ApplicationController.clearSectionCompletedDate(id: ApplicationId, num:Int)

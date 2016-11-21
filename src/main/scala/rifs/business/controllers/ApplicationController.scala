@@ -36,7 +36,7 @@ class ApplicationController @Inject()(val cached: Cached, applications: Applicat
       f <- OptionT(appForms.byId(a.applicationFormId))
       o <- OptionT(opps.opportunity(f.opportunityId))
     } yield {
-      ApplicationDetail(a.id, o, f, a.sections)
+      ApplicationDetail(a.id, f.sections.length, o.summary, f, a.sections)
     }
 
     ft.value.map(jsonResult(_))
@@ -65,6 +65,23 @@ class ApplicationController @Inject()(val cached: Cached, applications: Applicat
 
   def section(id: ApplicationId, sectionNumber: Int) =
     Action.async(applications.fetchSection(id, sectionNumber).map(jsonResult(_)))
+
+  def sectionDetail(id: ApplicationId, sectionNumber: Int) = Action.async {
+    val ft = for {
+      a <- OptionT(applications.application(id))
+      f <- OptionT(appForms.byId(a.applicationFormId))
+      o <- OptionT(opps.opportunity(f.opportunityId))
+    } yield {
+      ApplicationDetail(
+        a.id,
+        f.sections.length,
+        o.summary,
+        f.copy(sections = f.sections.filter(_.sectionNumber == sectionNumber)),
+        a.sections.filter(_.sectionNumber == sectionNumber))
+    }
+
+    ft.value.map(jsonResult(_))
+  }
 
   def sections(id: ApplicationId) =
     Action.async(applications.fetchSections(id).map(os => Ok(Json.toJson(os))))

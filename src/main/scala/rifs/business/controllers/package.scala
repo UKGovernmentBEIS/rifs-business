@@ -32,6 +32,7 @@ package object controllers extends ValueClassFormats {
   implicit val oppDurFormat = Json.format[OpportunityDuration]
   implicit val oppValueFormat = Json.format[OpportunityValue]
   implicit val oppDescFormat = Json.format[OpportunityDescriptionSection]
+  implicit val oppSummaryFormat = Json.format[OpportunitySummary]
   implicit val oppFormat = Json.format[Opportunity]
 
   implicit val appFormSecFormat = Json.format[ApplicationFormSection]
