@@ -34,20 +34,15 @@ class OpportunityTables @Inject()(dbConfigProvider: DatabaseConfigProvider)(impl
     os.map(o => Opportunity(o.id, o.title, o.startDate, durationFor(o), OpportunityValue(o.value, o.valueUnits), Set())).toSet
   }
 
-  /*
- ******************************
- * Queries and compiled queries
-  */
+  /** ****************************
+    * Queries and compiled queries
+    */
   def byIdQ(id: Rep[OpportunityId]) = opportunityTable.filter(_.id === id)
 
   val byIdC = Compiled(byIdQ _)
 
-  val joinedSectionsWithParas = for {
-    sp <- sectionTable joinLeft paragraphTable on (_.id === _.sectionId)
-  } yield sp
-
   val joinedOppsWithSections = for {
-    os <- opportunityTable joinLeft joinedSectionsWithParas on (_.id === _._1.opportunityId)
+    os <- opportunityTable joinLeft sectionTable on (_.id === _.opportunityId)
   } yield os
 
   val joinedOppsWithSectionsC = Compiled(joinedOppsWithSections)
