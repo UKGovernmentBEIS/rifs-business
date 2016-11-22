@@ -36,7 +36,7 @@ class ApplicationController @Inject()(val cached: Cached, applications: Applicat
       f <- OptionT(appForms.byId(a.applicationFormId))
       o <- OptionT(opps.opportunity(f.opportunityId))
     } yield {
-      ApplicationDetail(a.id, f.sections.length, o.summary, f, a.sections)
+      ApplicationDetail(a.id, f.sections.length, a.sections.count(_.completedAt.isDefined), o.summary, f, a.sections)
     }
 
     ft.value.map(jsonResult(_))
@@ -75,6 +75,7 @@ class ApplicationController @Inject()(val cached: Cached, applications: Applicat
       ApplicationDetail(
         a.id,
         f.sections.length,
+        a.sections.count(_.completedAt.isDefined),
         o.summary,
         f.copy(sections = f.sections.filter(_.sectionNumber == sectionNumber)),
         a.sections.filter(_.sectionNumber == sectionNumber))
