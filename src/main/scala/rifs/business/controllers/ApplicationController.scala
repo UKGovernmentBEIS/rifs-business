@@ -12,7 +12,7 @@ import play.api.{Configuration, Logger}
 import rifs.business.data.{ApplicationFormOps, ApplicationOps, OpportunityOps}
 import rifs.business.models.{ApplicationFormId, ApplicationId}
 import rifs.business.notifications.NotificationService
-import rifs.business.restmodels.ApplicationDetail
+import rifs.business.restmodels.{ApplicationDetail, ApplicationSectionDetail}
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Random
@@ -71,14 +71,15 @@ class ApplicationController @Inject()(val cached: Cached, applications: Applicat
       a <- OptionT(applications.application(id))
       f <- OptionT(appForms.byId(a.applicationFormId))
       o <- OptionT(opps.opportunity(f.opportunityId))
+      fs <- OptionT.fromOption(f.sections.find(_.sectionNumber == sectionNumber))
     } yield {
-      ApplicationDetail(
+      ApplicationSectionDetail(
         a.id,
         f.sections.length,
         a.sections.count(_.completedAt.isDefined),
         o.summary,
-        f.copy(sections = f.sections.filter(_.sectionNumber == sectionNumber)),
-        a.sections.filter(_.sectionNumber == sectionNumber))
+        fs,
+        a.sections.find(_.sectionNumber == sectionNumber))
     }
 
     ft.value.map(jsonResult(_))

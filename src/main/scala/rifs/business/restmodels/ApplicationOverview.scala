@@ -21,6 +21,6 @@ case class ApplicationSectionDetail(
                                      sectionCount: Int,
                                      completedSectionCount: Int,
                                      opportunity: OpportunitySummary,
-                                     applicationFormSection: ApplicationFormSection,
-                                     applicationSection: Option[ApplicationSection]
+                                     formSection: ApplicationFormSection,
+                                     section: Option[ApplicationSection]
                                    )
