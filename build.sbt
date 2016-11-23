@@ -61,7 +61,7 @@ lazy val `rifs-business` = (project in file("."))
     ),
     buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion),
     buildInfoPackage := "rifs.business.buildinfo",
-    buildInfoOptions += BuildInfoOption.ToJson
+    buildInfoOptions ++= Seq(BuildInfoOption.ToJson, BuildInfoOption.BuildTime)
   )
   .enablePlugins(AutomateHeaderPlugin)
 
