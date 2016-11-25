@@ -1,6 +1,6 @@
 # --- !Ups
 
-# --- Add maxWords values to the text and textArea fields
+--- Add maxWords values to the text and textArea fields
 
 update "application_form_section"
 set fields = '[{"name": "title", "type": "text", "isNumeric": false, "maxWords": 20}]'
@@ -20,4 +20,4 @@ where "section_number" = 5;
 
 # --- !Downs
 
-# --- No need for any downs - the extra maxWords attributes will be ignored
+--- No need for any downs - the extra maxWords attributes will be ignored
