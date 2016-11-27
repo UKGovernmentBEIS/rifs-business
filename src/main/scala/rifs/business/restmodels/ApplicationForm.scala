@@ -9,6 +9,7 @@ case class ApplicationFormSection(
                                    sectionNumber: Int,
                                    title: String,
                                    questions: Seq[Question],
+                                   sectionType: String,
                                    fields: JsArray)
 
 case class ApplicationForm(id: ApplicationFormId, opportunityId: OpportunityId, sections: Seq[ApplicationFormSection])

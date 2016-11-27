@@ -7,7 +7,7 @@ import rifs.business.slicks.support.DBBinding
 import rifs.slicks.gen.IdType
 
 trait ApplicationFormModule {
-  self:  ExPostgresDriver with PgPlayJsonSupport with PgDateSupportJoda with DBBinding with PlayJsonMappers with OpportunityModule =>
+  self: ExPostgresDriver with PgPlayJsonSupport with PgDateSupportJoda with DBBinding with PlayJsonMappers with OpportunityModule =>
 
   object pgApi extends API with JsonImplicits with JodaDateTimeImplicits
 
@@ -60,9 +60,11 @@ trait ApplicationFormModule {
 
     def title = column[String]("title", O.Length(255))
 
+    def sectionType = column[String]("section_type", O.Length(50))
+
     def fields = column[JsArray]("fields")
 
-    def * = (id, applicationFormId, sectionNumber, title, fields) <> (ApplicationFormSectionRow.tupled, ApplicationFormSectionRow.unapply)
+    def * = (id, applicationFormId, sectionNumber, title, sectionType, fields) <> (ApplicationFormSectionRow.tupled, ApplicationFormSectionRow.unapply)
   }
 
   lazy val applicationFormSectionTable = TableQuery[ApplicationFormSectionTable]

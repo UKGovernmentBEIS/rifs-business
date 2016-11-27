@@ -18,6 +18,18 @@ update "application_form_section"
 set fields = '[{"name": "eventAudience", "type": "textArea", "maxWords": 500}]'
 where "section_number" = 5;
 
+alter table "application_form_section" drop column "started";
+
+alter table "application_form_section" add column "section_type" varchar(50) not null default 'form';
+update "application_form_section" set "section_type" = 'list' where "section_number" = 6;
+update "application_form_section" set "fields" = '[]' where "section_number" = 6;
+
 # --- !Downs
 
---- No need for any downs - the extra maxWords attributes will be ignored
+--- the extra maxWords attributes will be ignored
+--- the started column was never used to no need to restore it
+
+alter table "application_form_section" drop column "section_type";
+update "application_form_section"
+set fields = '[{"name": "", "type": "costList"}]'
+where "section_number" = 6;

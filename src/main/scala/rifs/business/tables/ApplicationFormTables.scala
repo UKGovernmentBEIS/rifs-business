@@ -79,7 +79,7 @@ object ApplicationFormExtractors {
     val (sections, questions) = sectionRows.unzip
     val ps = sections.distinct.map { s =>
       val qs = questions.flatten.filter(_.applicationFormSectionId == s.id).map(q => Question(q.key, q.text, q.description, q.helpText))
-      s.id -> ApplicationFormSection(s.sectionNumber, s.title, qs, s.fields)
+      s.id -> ApplicationFormSection(s.sectionNumber, s.title, qs, s.sectionType, s.fields)
     }
     Map(ps: _*)
   }
