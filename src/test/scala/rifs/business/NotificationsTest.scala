@@ -72,7 +72,7 @@ object NotificationsTestData {
   val (appOpsAndSection, appOps) = {
     val APP_FORM_ID = ApplicationFormId(1)
     val OPPORTUNITY_ID = OpportunityId(1)
-    val opp = OpportunityRow(OPPORTUNITY_ID, "oz1", "", None, None, 0, "")
+    val opp = OpportunityRow(OPPORTUNITY_ID, "oz1", "", None, 0, "")
 
     val appDetails = ApplicationDetails(
       ApplicationRow(Some(APP_ID), APP_FORM_ID),

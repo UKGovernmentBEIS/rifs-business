@@ -2,6 +2,7 @@
 GET           /opportunity/open                                     rifs.business.controllers.OpportunityController.getOpen
 GET           /opportunity/open/summaries                           rifs.business.controllers.OpportunityController.getOpenSummaries
 GET           /opportunity/:id                                      rifs.business.controllers.OpportunityController.byId(id: OpportunityId)
+PUT           /opportunity/:id/summary                              rifs.business.controllers.OpportunityController.updateSummary(id: OpportunityId)
 GET           /opportunity/:id/application_form                     rifs.business.controllers.ApplicationFormController.forOpportunity(id: OpportunityId)
 GET           /application_form/:id                                 rifs.business.controllers.ApplicationFormController.byId(id: ApplicationFormId)
 

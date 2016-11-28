@@ -12,17 +12,17 @@ case class Opportunity(
                         id: OpportunityId,
                         title: String,
                         startDate: String,
-                        duration: Option[OpportunityDuration],
+                        endDate: Option[String],
                         value: OpportunityValue,
                         description: Set[OpportunityDescriptionSection]
                       ) {
-  def summary: OpportunitySummary = OpportunitySummary(id, title, startDate, duration, value)
+  def summary: OpportunitySummary = OpportunitySummary(id, title, startDate, endDate, value)
 }
 
 case class OpportunitySummary(
                                id: OpportunityId,
                                title: String,
                                startDate: String,
-                               duration: Option[OpportunityDuration],
+                               endDate: Option[String],
                                value: OpportunityValue
                              )

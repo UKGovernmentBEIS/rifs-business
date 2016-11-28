@@ -13,6 +13,7 @@ case class ApplicationFormSectionRow(
                                       applicationFormId: ApplicationFormId,
                                       sectionNumber: Int,
                                       title: String,
+                                      sectionType: String,
                                       fields: JsArray
                                     )
 

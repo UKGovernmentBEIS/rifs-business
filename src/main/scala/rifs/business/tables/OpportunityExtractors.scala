@@ -20,7 +20,7 @@ object OpportunityExtractors {
         o.id,
         o.title,
         o.startDate,
-        durationFor(o),
+        o.endDate,
         OpportunityValue(o.value, o.valueUnits),
         sectionsFor(o, sectionRows.toSet))
     }.toSet
@@ -34,9 +34,6 @@ object OpportunityExtractors {
     OpportunityDescriptionSection(s.sectionNumber, s.title, s.text)
   }
 
-  def durationFor(opp: OpportunityRow): Option[OpportunityDuration] = {
-    (opp.duration |@| opp.durationUnits).map(OpportunityDuration.apply)
-  }
 
   /**
     * useful for extracting from leftJoin results where the second item in the pair is represented as

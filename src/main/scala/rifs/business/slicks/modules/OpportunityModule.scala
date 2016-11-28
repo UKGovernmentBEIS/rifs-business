@@ -44,15 +44,13 @@ trait OpportunityModule {
 
     def startDate = column[String]("start_date", O.Length(255))
 
-    def duration = column[Option[Int]]("duration")
-
-    def durationUnits = column[Option[String]]("duration_units", O.Length(255))
+    def endDate = column[Option[String]]("end_date", O.Length(255))
 
     def value = column[BigDecimal]("value", O.SqlType("decimal(9, 2)"))
 
     def valueUnits = column[String]("value_units", O.Length(255))
 
-    def * = (id, title, startDate, duration, durationUnits, value, valueUnits) <> (OpportunityRow.tupled, OpportunityRow.unapply)
+    def * = (id, title, startDate, endDate, value, valueUnits) <> (OpportunityRow.tupled, OpportunityRow.unapply)
   }
 
   lazy val opportunityTable = TableQuery[OpportunityTable]
