@@ -14,8 +14,7 @@ case class OpportunityRow(
                            id: OpportunityId,
                            title: String,
                            startDate: String,
-                           duration: Option[Int],
-                           durationUnits: Option[String],
+                           endDate: Option[String],
                            value: BigDecimal,
                            valueUnits: String
                          )

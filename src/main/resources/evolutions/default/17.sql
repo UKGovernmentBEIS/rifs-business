@@ -24,6 +24,10 @@ alter table "application_form_section" add column "section_type" varchar(50) not
 update "application_form_section" set "section_type" = 'list' where "section_number" = 6;
 update "application_form_section" set "fields" = '[]' where "section_number" = 6;
 
+alter table "opportunity" drop column duration;
+alter table "opportunity" drop column duration_units;
+alter table "opportunity" add column end_date varchar(255);
+
 # --- !Downs
 
 --- the extra maxWords attributes will be ignored
