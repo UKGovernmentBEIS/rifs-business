@@ -98,10 +98,7 @@ class ApplicationController @Inject()(val cached: Cached, applications: Applicat
     }
   }
 
-  def hasItemNumber(o: JsObject, num: Int) = o \ "itemNumber" match {
-    case JsDefined(JsNumber(n)) if n == num => true
-    case _ => false
-  }
+
 
   def deleteSectionItem(id: ApplicationId, sectionNumber: Int, itemNumber: Int) = Action.async { implicit request =>
     applications.fetchAppWithSection(id, sectionNumber).flatMap {
@@ -123,14 +120,23 @@ class ApplicationController @Inject()(val cached: Cached, applications: Applicat
     applications.fetchAppWithSection(id, sectionNumber).map {
       case Some((app, os)) =>
         val doc = os.map(_.answers).getOrElse(JsObject(Seq()))
-        val items = doc \ "items" match {
-          case JsDefined(JsArray(is)) => is.collect { case o: JsObject => o }
-          case _ => Seq()
-        }
-        jsonResult(items.find(o => hasItemNumber(o, itemNumber)))
+        jsonResult(findItem(doc, itemNumber))
 
       case None => NotFound
     }
+  }
+
+  private def hasItemNumber(o: JsObject, num: Int) = o \ "itemNumber" match {
+    case JsDefined(JsNumber(n)) if n == num => true
+    case _ => false
+  }
+
+  private def findItem(doc: JsObject, itemNumber: Int) = {
+    val items = doc \ "items" match {
+      case JsDefined(JsArray(is)) => is.collect { case o: JsObject => o }
+      case _ => Seq()
+    }
+    items.find(o => hasItemNumber(o, itemNumber))
   }
 
   def putSectionItem(id: ApplicationId, sectionNumber: Int, itemNumber: Int) = Action.async(parse.json[JsObject]) { implicit request =>
