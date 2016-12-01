@@ -4,8 +4,8 @@ import javax.inject.Inject
 
 import play.api.db.slick.DatabaseConfigProvider
 import rifs.business.data.OpportunityOps
-import rifs.business.models.{OpportunityId, OpportunityRow}
-import rifs.business.restmodels.{Opportunity, OpportunitySummary, OpportunityValue}
+import rifs.business.models.{OpportunityId, OpportunityRow, SectionRow}
+import rifs.business.restmodels.{Opportunity, OpportunityDescriptionSection, OpportunitySummary, OpportunityValue}
 import rifs.business.slicks.modules.OpportunityModule
 import rifs.business.slicks.support.DBBinding
 import slick.backend.DatabaseConfig
@@ -61,4 +61,11 @@ class OpportunityTables @Inject()(dbConfigProvider: DatabaseConfigProvider)(impl
 
   val opportunityTableC = Compiled(opportunityTable.pack)
 
+  def sectionQ(id: Rep[OpportunityId], sectionNumber: Rep[Int]) = sectionTable.filter(s => s.opportunityId === id && s.sectionNumber === sectionNumber)
+
+  lazy val sectionC = Compiled(sectionQ _)
+
+  override def saveSectionDescription(id: OpportunityId, sectionNo: Int, description: Option[String]): Future[Int] = db.run {
+    sectionQ(id, sectionNo).map(r=> r.text).update(description)
+  }
 }

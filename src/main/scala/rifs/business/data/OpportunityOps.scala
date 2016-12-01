@@ -18,5 +18,7 @@ trait OpportunityOps {
   def openSummaries: Future[Set[Opportunity]]
 
   def updateSummary(summary: OpportunitySummary): Future[Int]
+
+  def saveSectionDescription(id: OpportunityId, sectionNo: Int, description: Option[String]): Future[Int]
 }
 
