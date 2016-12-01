@@ -6,14 +6,10 @@ import rifs.business.models._
 import rifs.business.slicks.support.DBBinding
 import rifs.slicks.gen.IdType
 
-trait ApplicationFormModule {
-  self: ExPostgresDriver with PgPlayJsonSupport with PgDateSupportJoda with DBBinding with PlayJsonMappers with OpportunityModule =>
+trait ApplicationFormModule extends PlayJsonMappers{
+  self:  DBBinding with ExPostgresDriver with PgDateSupportJoda with PgPlayJsonSupport with OpportunityModule =>
 
-  object pgApi extends API with JsonImplicits with JodaDateTimeImplicits
-
-  override val pgjson = "jsonb"
-
-  import pgApi._
+  import api._
 
   implicit def ApplicationFormQuestionIdMapper: BaseColumnType[ApplicationFormQuestionId] = MappedColumnType.base[ApplicationFormQuestionId, Long](_.id, ApplicationFormQuestionId)
 

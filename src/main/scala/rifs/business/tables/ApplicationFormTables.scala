@@ -7,24 +7,17 @@ import play.api.db.slick.DatabaseConfigProvider
 import rifs.business.data.ApplicationFormOps
 import rifs.business.models._
 import rifs.business.restmodels.{ApplicationForm, ApplicationFormSection, Question}
-import rifs.business.slicks.modules.{ApplicationFormModule, OpportunityModule, PlayJsonMappers}
+import rifs.business.slicks.modules.{ApplicationFormModule, OpportunityModule, PgSupport}
 import rifs.business.slicks.support.DBBinding
-import slick.backend.DatabaseConfig
-import slick.driver.JdbcProfile
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class ApplicationFormTables @Inject()(dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext)
+class ApplicationFormTables @Inject()(override val dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext)
   extends ApplicationFormModule
     with OpportunityModule
+    with ApplicationFormOps
     with DBBinding
-    with ExPostgresDriver
-    with PgPlayJsonSupport
-    with PgDateSupportJoda
-    with PlayJsonMappers
-    with ApplicationFormOps {
-
-  override val dbConfig: DatabaseConfig[JdbcProfile] = dbConfigProvider.get[JdbcProfile]
+    with PgSupport {
 
   import ApplicationFormExtractors._
   import driver.api._

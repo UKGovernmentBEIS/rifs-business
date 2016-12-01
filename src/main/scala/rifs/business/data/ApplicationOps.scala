@@ -1,7 +1,7 @@
 package rifs.business.data
 
 import com.google.inject.ImplementedBy
-import org.joda.time.LocalDateTime
+import org.joda.time.DateTime
 import play.api.libs.json.JsObject
 import rifs.business.models._
 import rifs.business.restmodels.Application
@@ -45,7 +45,7 @@ trait ApplicationOps {
 
   def fetchSections(id: ApplicationId): Future[Set[ApplicationSectionRow]]
 
-  def saveSection(id: ApplicationId, sectionNumber: Int, answers: JsObject, completedAt: Option[LocalDateTime] = None): Future[Int]
+  def saveSection(id: ApplicationId, sectionNumber: Int, answers: JsObject, completedAt: Option[DateTime] = None): Future[Int]
 
   def deleteSection(id: ApplicationId, sectionNumber: Int): Future[Int]
 

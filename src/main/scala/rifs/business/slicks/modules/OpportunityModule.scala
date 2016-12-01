@@ -1,5 +1,7 @@
 package rifs.business.slicks.modules
 
+import com.github.tminglei.slickpg.{ExPostgresDriver, PgDateSupportJoda}
+import org.joda.time.DateTime
 import rifs.business.models._
 import rifs.business.slicks.support.DBBinding
 import rifs.slicks.gen.IdType
@@ -7,7 +9,7 @@ import rifs.slicks.gen.IdType
 trait OpportunityModule {
   self: DBBinding =>
 
-  import driver.api._
+  import api._
 
   implicit def SectionIdMapper: BaseColumnType[SectionId] = MappedColumnType.base[SectionId, Long](_.id, SectionId)
 
@@ -50,7 +52,16 @@ trait OpportunityModule {
 
     def valueUnits = column[String]("value_units", O.Length(255))
 
-    def * = (id, title, startDate, endDate, value, valueUnits) <> (OpportunityRow.tupled, OpportunityRow.unapply)
+    def publishedAt = column[Option[DateTime]]("published_at_dtime")
+
+    def duplicatedFrom = column[Option[OpportunityId]]("duplicated_from_id")
+
+    def duplicatedFromIdFK = foreignKey("duplicated_opportunity_fk", duplicatedFrom, opportunityTable)(_.id.?, onDelete = ForeignKeyAction.Cascade)
+
+    def opportunityIdIndex = index("duplicated_opportunity_idx", duplicatedFrom)
+
+
+    def * = (id, title, startDate, endDate, value, valueUnits, publishedAt, duplicatedFrom) <> (OpportunityRow.tupled, OpportunityRow.unapply)
   }
 
   lazy val opportunityTable = TableQuery[OpportunityTable]

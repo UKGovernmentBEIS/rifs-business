@@ -6,21 +6,16 @@ import play.api.db.slick.DatabaseConfigProvider
 import rifs.business.data.OpportunityOps
 import rifs.business.models.{OpportunityId, OpportunityRow}
 import rifs.business.restmodels.{Opportunity, OpportunitySummary, OpportunityValue}
-import rifs.business.slicks.modules.OpportunityModule
+import rifs.business.slicks.modules.{OpportunityModule, PgSupport}
 import rifs.business.slicks.support.DBBinding
-import slick.backend.DatabaseConfig
-import slick.driver.JdbcProfile
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class OpportunityTables @Inject()(dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext)
-  extends OpportunityModule with DBBinding with OpportunityOps {
+class OpportunityTables @Inject()(val dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext)
+  extends OpportunityModule with DBBinding with OpportunityOps with PgSupport {
 
   import OpportunityExtractors._
-
-  override val dbConfig: DatabaseConfig[JdbcProfile] = dbConfigProvider.get[JdbcProfile]
-
-  import driver.api._
+  import api._
 
   override def byId(opportunityId: OpportunityId): Future[Option[OpportunityRow]] = db.run(byIdC(opportunityId).result.headOption)
 
@@ -31,12 +26,12 @@ class OpportunityTables @Inject()(dbConfigProvider: DatabaseConfigProvider)(impl
   }
 
   override def openSummaries: Future[Set[Opportunity]] = db.run(opportunityTableC.result).map { os =>
-    os.map(o => Opportunity(o.id, o.title, o.startDate, o.endDate, OpportunityValue(o.value, o.valueUnits), Set())).toSet
+    os.map(o => Opportunity(o.id, o.title, o.startDate, o.endDate, OpportunityValue(o.value, o.valueUnits), o.publishedAt, o.duplicatedFrom, Set())).toSet
   }
 
 
   override def updateSummary(summary: OpportunitySummary): Future[Int] = db.run {
-    val row = OpportunityRow(summary.id, summary.title, summary.startDate, summary.endDate, summary.value.amount, summary.value.unit)
+    val row = OpportunityRow(summary.id, summary.title, summary.startDate, summary.endDate, summary.value.amount, summary.value.unit, summary.publishedAt, summary.duplicatedFrom)
     byIdC(summary.id).update(row)
   }
 

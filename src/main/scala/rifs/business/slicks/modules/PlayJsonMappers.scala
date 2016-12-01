@@ -25,3 +25,4 @@ trait PlayJsonMappers {
       hasLiteralForm = false
     )
 }
+

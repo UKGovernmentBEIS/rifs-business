@@ -22,6 +22,8 @@ object OpportunityExtractors {
         o.startDate,
         o.endDate,
         OpportunityValue(o.value, o.valueUnits),
+        o.publishedAt,
+        o.duplicatedFrom,
         sectionsFor(o, sectionRows.toSet))
     }.toSet
   }

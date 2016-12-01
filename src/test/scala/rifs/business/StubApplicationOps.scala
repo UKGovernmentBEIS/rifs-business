@@ -1,6 +1,6 @@
 package rifs.business
 
-import org.joda.time.LocalDateTime
+import org.joda.time.DateTime
 import play.api.libs.json.JsObject
 import rifs.business.data.{ApplicationDetails, ApplicationOps}
 import rifs.business.models._
@@ -27,7 +27,7 @@ class StubApplicationOps extends ApplicationOps{
 
   override def fetchSections(id: ApplicationId): Future[Set[ApplicationSectionRow]] = ???
 
-  override def saveSection(id: ApplicationId, sectionNumber: Int, answers: JsObject, completedAt: Option[LocalDateTime]): Future[Int] = ???
+  override def saveSection(id: ApplicationId, sectionNumber: Int, answers: JsObject, completedAt: Option[DateTime]): Future[Int] = ???
 
   override def deleteSection(id: ApplicationId, sectionNumber: Int): Future[Int] = ???
 
