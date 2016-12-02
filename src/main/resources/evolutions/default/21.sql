@@ -7,8 +7,13 @@ alter table "opportunity" add constraint "duplicated_opportunity_fk" foreign key
 
 update "opportunity" set "published_at_dtime" = '2016-11-28 00:00:00' where id = 1;
 
+CREATE SEQUENCE opportunity_id_seq START WITH 2;
+ALTER TABLE "opportunity" ALTER column "id" SET DEFAULT NEXTVAL('opportunity_id_seq');
+
 # --- !Downs
 
+ALTER TABLE "opportunity" ALTER column "id" SET DEFAULT null;
+drop sequence "opportunity_id_seq";
 alter table "opportunity" drop constraint "duplicated_opportunity_fk";
 alter table "opportunity" drop column "duplicated_from_id";
 alter table "opportunity" drop column "published_at_dtime";
