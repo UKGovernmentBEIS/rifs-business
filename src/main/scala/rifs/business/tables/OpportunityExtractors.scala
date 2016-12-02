@@ -27,7 +27,7 @@ object OpportunityExtractors {
   }
 
   def sectionsFor(o: OpportunityRow, ss: Set[SectionRow]): Set[OpportunityDescriptionSection] = {
-    ss.filter(_.opportunityId == o.id).map(s => buildSection(s))
+    ss.filter(_.opportunityId == o.id.get).map(s => buildSection(s))
   }
 
   def buildSection(s: SectionRow): OpportunityDescriptionSection = {

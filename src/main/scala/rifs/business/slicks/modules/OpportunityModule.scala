@@ -18,7 +18,7 @@ trait OpportunityModule {
   type SectionQuery = Query[SectionTable, SectionRow, Seq]
 
   class SectionTable(tag: Tag) extends Table[SectionRow](tag, "section") {
-    def id = column[SectionId]("id", O.Length(IdType.length), O.PrimaryKey)
+    def id = column[SectionId]("id", O.Length(IdType.length), O.PrimaryKey, O.AutoInc)
 
     def sectionNumber = column[Int]("section_number")
 
@@ -32,7 +32,7 @@ trait OpportunityModule {
 
     def text = column[Option[String]]("text", O.Length(8192))
 
-    def * = (id, sectionNumber, opportunityId, title, text) <> (SectionRow.tupled, SectionRow.unapply)
+    def * = (id.?, sectionNumber, opportunityId, title, text) <> (SectionRow.tupled, SectionRow.unapply)
   }
 
   lazy val sectionTable = TableQuery[SectionTable]
@@ -40,7 +40,7 @@ trait OpportunityModule {
   type OpportunityQuery = Query[OpportunityTable, OpportunityRow, Seq]
 
   class OpportunityTable(tag: Tag) extends Table[OpportunityRow](tag, "opportunity") {
-    def id = column[OpportunityId]("id", O.Length(IdType.length), O.PrimaryKey)
+    def id = column[OpportunityId]("id", O.Length(IdType.length), O.PrimaryKey, O.AutoInc)
 
     def title = column[String]("title", O.Length(255))
 
@@ -61,7 +61,7 @@ trait OpportunityModule {
     def opportunityIdIndex = index("duplicated_opportunity_idx", duplicatedFrom)
 
 
-    def * = (id, title, startDate, endDate, value, valueUnits, publishedAt, duplicatedFrom) <> (OpportunityRow.tupled, OpportunityRow.unapply)
+    def * = (id.?, title, startDate, endDate, value, valueUnits, publishedAt, duplicatedFrom) <> (OpportunityRow.tupled, OpportunityRow.unapply)
   }
 
   lazy val opportunityTable = TableQuery[OpportunityTable]

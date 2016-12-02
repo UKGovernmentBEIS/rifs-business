@@ -72,11 +72,11 @@ object NotificationsTestData {
   val (appOpsAndSection, appOps) = {
     val APP_FORM_ID = ApplicationFormId(1)
     val OPPORTUNITY_ID = OpportunityId(1)
-    val opp = OpportunityRow(OPPORTUNITY_ID, "oz1", "", None, 0, "", None, None)
+    val opp = OpportunityRow(Some(OPPORTUNITY_ID), "oz1", "", None, 0, "", None, None)
 
     val appDetails = ApplicationDetails(
       ApplicationRow(Some(APP_ID), APP_FORM_ID),
-      ApplicationFormRow(APP_FORM_ID, OPPORTUNITY_ID), opp)
+      ApplicationFormRow(Some(APP_FORM_ID), OPPORTUNITY_ID), opp)
 
     val details = Future.successful(Some(appDetails))
     val appSectRow = ApplicationSectionRow(None, APP_ID, rifs.business.models.APP_TITLE_SECTION_NO,

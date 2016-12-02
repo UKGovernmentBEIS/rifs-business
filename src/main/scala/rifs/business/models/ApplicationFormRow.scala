@@ -9,7 +9,7 @@ case class ApplicationFormSectionId(id: Long) extends AnyVal
 case class ApplicationFormQuestionId(id: Long) extends AnyVal
 
 case class ApplicationFormSectionRow(
-                                      id: ApplicationFormSectionId,
+                                      id: Option[ApplicationFormSectionId],
                                       applicationFormId: ApplicationFormId,
                                       sectionNumber: Int,
                                       title: String,
@@ -17,10 +17,10 @@ case class ApplicationFormSectionRow(
                                       fields: JsArray
                                     )
 
-case class ApplicationFormRow(id: ApplicationFormId, opportunityId: OpportunityId)
+case class ApplicationFormRow(id: Option[ApplicationFormId], opportunityId: OpportunityId)
 
 case class ApplicationFormQuestionRow(
-                                       id: ApplicationFormQuestionId,
+                                       id: Option[ApplicationFormQuestionId],
                                        applicationFormSectionId: ApplicationFormSectionId,
                                        key: String,
                                        text: String,

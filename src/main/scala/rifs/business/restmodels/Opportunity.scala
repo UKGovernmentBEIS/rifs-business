@@ -10,7 +10,7 @@ case class OpportunityValue(amount: BigDecimal, unit: String)
 case class OpportunityDuration(duration: Int, units: String)
 
 case class Opportunity(
-                        id: OpportunityId,
+                        id: Option[OpportunityId],
                         title: String,
                         startDate: String,
                         endDate: Option[String],
@@ -23,7 +23,7 @@ case class Opportunity(
 }
 
 case class OpportunitySummary(
-                               id: OpportunityId,
+                               id: Option[OpportunityId],
                                title: String,
                                startDate: String,
                                endDate: Option[String],
