@@ -18,7 +18,6 @@ case class Opportunity(
                         publishedAt : Option[DateTime],
                         duplicatedFrom:Option[OpportunityId],
                         description: Set[OpportunityDescriptionSection]
-
                       ) {
   def summary: OpportunitySummary = OpportunitySummary(id, title, startDate, endDate, value, publishedAt, duplicatedFrom)
 }

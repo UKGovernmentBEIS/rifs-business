@@ -2,6 +2,7 @@ package rifs.business.tables
 
 import javax.inject.Inject
 
+import org.joda.time.DateTime
 import play.api.db.slick.DatabaseConfigProvider
 import rifs.business.data.OpportunityOps
 import rifs.business.models.{OpportunityId, OpportunityRow}
@@ -21,7 +22,7 @@ class OpportunityTables @Inject()(val dbConfigProvider: DatabaseConfigProvider)(
 
   override def opportunity(id: OpportunityId): Future[Option[Opportunity]] = db.run(oppWithDescC(id).result.map(extractOpportunities(_).headOption))
 
-  override def open: Future[Set[Opportunity]] = db.run {
+  override def findOpen: Future[Set[Opportunity]] = db.run {
     joinedOppsWithSectionsC.result.map(extractOpportunities)
   }
 
@@ -34,6 +35,10 @@ class OpportunityTables @Inject()(val dbConfigProvider: DatabaseConfigProvider)(
     val row = OpportunityRow(summary.id, summary.title, summary.startDate, summary.endDate, summary.value.amount, summary.value.unit, summary.publishedAt, summary.duplicatedFrom)
     byIdC(summary.id).update(row)
   }
+
+  override def publish(id: OpportunityId): Future[Option[DateTime]] = ???
+
+  override def duplicate(id: OpportunityId): Future[Option[OpportunityId]] = ???
 
   /** ****************************
     * Queries and compiled queries
@@ -55,5 +60,6 @@ class OpportunityTables @Inject()(val dbConfigProvider: DatabaseConfigProvider)(
   val oppWithDescC = Compiled(oppWithDescQ _)
 
   val opportunityTableC = Compiled(opportunityTable.pack)
+
 
 }
