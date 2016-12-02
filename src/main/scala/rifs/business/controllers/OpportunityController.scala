@@ -27,7 +27,7 @@ class OpportunityController @Inject()(opportunities: OpportunityOps, Opportunity
 
   def updateSummary(id: OpportunityId) = Action.async(parse.json[OpportunitySummary]) { implicit request =>
     val summary = request.body
-    if (!summary.id.contains(id)) Future.successful(BadRequest(s"id provided on url was ${id.id}, but does not match id of body: ${summary.id.map(_.id)}"))
+    if (summary.id != id) Future.successful(BadRequest(s"id provided on url was ${id.id}, but does not match id of body: ${summary.id.id}"))
     else opportunities.updateSummary(request.body).map(_ => NoContent)
   }
 

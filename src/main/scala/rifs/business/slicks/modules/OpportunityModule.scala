@@ -32,7 +32,7 @@ trait OpportunityModule {
 
     def text = column[Option[String]]("text", O.Length(8192))
 
-    def * = (id.?, sectionNumber, opportunityId, title, text) <> (SectionRow.tupled, SectionRow.unapply)
+    def * = (id, sectionNumber, opportunityId, title, text) <> (SectionRow.tupled, SectionRow.unapply)
   }
 
   lazy val sectionTable = TableQuery[SectionTable]
@@ -61,7 +61,7 @@ trait OpportunityModule {
     def opportunityIdIndex = index("duplicated_opportunity_idx", duplicatedFrom)
 
 
-    def * = (id.?, title, startDate, endDate, value, valueUnits, publishedAt, duplicatedFrom) <> (OpportunityRow.tupled, OpportunityRow.unapply)
+    def * = (id, title, startDate, endDate, value, valueUnits, publishedAt, duplicatedFrom) <> (OpportunityRow.tupled, OpportunityRow.unapply)
   }
 
   lazy val opportunityTable = TableQuery[OpportunityTable]

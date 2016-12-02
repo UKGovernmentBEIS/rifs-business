@@ -36,7 +36,7 @@ trait ApplicationModule extends PlayJsonMappers {
 
     def completedAt = column[Option[DateTime]]("completed_at_dt")
 
-    def * = (id.?, applicationId, sectionNumber, answers, completedAt) <> (ApplicationSectionRow.tupled, ApplicationSectionRow.unapply)
+    def * = (id, applicationId, sectionNumber, answers, completedAt) <> (ApplicationSectionRow.tupled, ApplicationSectionRow.unapply)
   }
 
   lazy val applicationSectionTable = TableQuery[ApplicationSectionTable]
@@ -52,7 +52,7 @@ trait ApplicationModule extends PlayJsonMappers {
 
     def applicationFormIdIndex = index("application_application_form_idx", applicationFormId)
 
-    def * = (id.?, applicationFormId) <> (ApplicationRow.tupled, ApplicationRow.unapply)
+    def * = (id, applicationFormId) <> (ApplicationRow.tupled, ApplicationRow.unapply)
   }
 
   lazy val applicationTable = TableQuery[ApplicationTable]

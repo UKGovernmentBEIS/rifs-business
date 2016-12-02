@@ -49,7 +49,7 @@ class EmailNotifications @Inject()(sender: MailerClient, applications: Applicati
         applicantTitle = "Mr",
         applicantLastName,
         applicationTitle,
-        opportunityRefNumber = opportunity.id.map(_.id.toString).getOrElse("no reference number"),
+        opportunityRefNumber = opportunity.id.id.toString,
         opportunityTitle = opportunity.title,
         submissionLink = "http://todo.link",
         portFolioMgrFirstName = "Portfolio",
@@ -95,7 +95,7 @@ class EmailNotifications @Inject()(sender: MailerClient, applications: Applicati
         applicantLastName = "Eric",
         applicantFirstName = "Eric",
         applicantOrg = "Association of Medical Research Charities",
-        applicationRefNum = appForm.id.map(_.id.toString).getOrElse(""),
+        applicationRefNum = appForm.id.id.toString,
         opportunityRefNumber = appForm.opportunityId.id.toString,
         opportunityTitle = opportunity.title,
         submissionLink = "http://todo.link"

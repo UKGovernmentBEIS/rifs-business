@@ -10,7 +10,6 @@ package object controllers extends ValueClassFormats {
   implicit val dtReads = Reads.jodaDateReads(dtPattern)
   implicit val dtWrites = Writes.jodaDateWrites(dtPattern)
 
-  implicit val paragraphFormat = Json.format[ParagraphRow]
   implicit val sectionFormat = Json.format[SectionRow]
   implicit val opportunityFormat = Json.format[OpportunityRow]
   implicit val questionFormat = Json.format[Question]

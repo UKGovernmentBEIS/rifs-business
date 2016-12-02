@@ -25,14 +25,14 @@ class ApplicationFormTables @Inject()(override val dbConfigProvider: DatabaseCon
   override def byId(id: ApplicationFormId): Future[Option[ApplicationForm]] = db.run {
     byIdWithSectionsC(id).result.map { rs =>
       val (as, ss) = rs.unzip
-      as.map(a => ApplicationForm(a.id, a.opportunityId, a.id.map(sectionsFor(_, ss)).getOrElse(List.empty)))
+      as.map(a => ApplicationForm(a.id, a.opportunityId, sectionsFor(a.id, ss)))
     }.map(_.headOption)
   }
 
   override def forOpportunity(opportunityId: OpportunityId): Future[Option[ApplicationForm]] = db.run {
     applicationByOppIdC(opportunityId).result.map { rs =>
       val (as, ss) = rs.unzip
-      as.map(a => ApplicationForm(a.id, a.opportunityId, a.id.map(sectionsFor(_, ss)).getOrElse(List.empty)))
+      as.map(a => ApplicationForm(a.id, a.opportunityId, sectionsFor(a.id, ss)))
     }.map(_.headOption)
   }
 
@@ -64,7 +64,7 @@ class ApplicationFormTables @Inject()(override val dbConfigProvider: DatabaseCon
 object ApplicationFormExtractors {
   def sectionsFor(applicationFormId: ApplicationFormId, sectionRows: Seq[(ApplicationFormSectionRow, Option[ApplicationFormQuestionRow])]): Seq[ApplicationFormSection] = {
     val sections = buildSections(sectionRows)
-    val sectionIds = sectionRows.filter(_._1.applicationFormId == applicationFormId).map(_._1.id.get)
+    val sectionIds = sectionRows.filter(_._1.applicationFormId == applicationFormId).map(_._1.id)
     sectionIds.distinct.flatMap(sections.get)
   }
 
@@ -72,7 +72,7 @@ object ApplicationFormExtractors {
     val (sections, questions) = sectionRows.unzip
     val ps = sections.distinct.map { s =>
       val qs = questions.flatten.filter(_.applicationFormSectionId == s.id).map(q => Question(q.key, q.text, q.description, q.helpText))
-      s.id.get -> ApplicationFormSection(s.sectionNumber, s.title, qs, s.sectionType, s.fields)
+      s.id -> ApplicationFormSection(s.sectionNumber, s.title, qs, s.sectionType, s.fields)
     }
     Map(ps: _*)
   }

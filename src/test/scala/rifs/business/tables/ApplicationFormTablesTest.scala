@@ -10,9 +10,9 @@ class ApplicationFormTablesTest extends WordSpecLike with Matchers with OptionVa
     "build a section with two questions" in {
       val afId = ApplicationFormId(1)
       val afsId = ApplicationFormSectionId(1)
-      val afs = ApplicationFormSectionRow(Some(afsId), afId, 1, "x", "form", JsArray())
-      val q1 = ApplicationFormQuestionRow(Some(ApplicationFormQuestionId(1)), afsId, "x.a", "text 1", None, None)
-      val q2 = ApplicationFormQuestionRow(Some(ApplicationFormQuestionId(2)), afsId, "x.a", "text 1", None, None)
+      val afs = ApplicationFormSectionRow(afsId, afId, 1, "x", "form", JsArray())
+      val q1 = ApplicationFormQuestionRow(ApplicationFormQuestionId(1), afsId, "x.a", "text 1", None, None)
+      val q2 = ApplicationFormQuestionRow(ApplicationFormQuestionId(2), afsId, "x.a", "text 1", None, None)
 
       val input = Seq((afs, Some(q1)), (afs, Some(q2)))
       val output = ApplicationFormExtractors.buildSections(input)

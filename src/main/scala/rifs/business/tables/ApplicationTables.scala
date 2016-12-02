@@ -44,7 +44,7 @@ class ApplicationTables @Inject()(val dbConfigProvider: DatabaseConfigProvider)(
     for {
       _ <- OptionT(appFormF)
       app <- OptionT.liftF(fetchOrCreate(applicationFormId))
-    } yield ApplicationRow(Some(app.id), app.applicationFormId)
+    } yield ApplicationRow(app.id, app.applicationFormId)
   }.value
 
   override def application(applicationId: ApplicationId): Future[Option[Application]] = db.run {
@@ -92,11 +92,11 @@ class ApplicationTables @Inject()(val dbConfigProvider: DatabaseConfigProvider)(
       ApplicationSection(s.sectionNumber, s.answers, s.completedAt)
     }
 
-    Application(app.id.get, app.applicationFormId, sectionOverviews)
+    Application(app.id, app.applicationFormId, sectionOverviews)
   }
 
   private def createApplicationForForm(applicationFormId: ApplicationFormId): Future[ApplicationId] = db.run {
-    (applicationTable returning applicationTable.map(_.id)) += ApplicationRow(None, applicationFormId)
+    (applicationTable returning applicationTable.map(_.id)) += ApplicationRow(ApplicationId(0), applicationFormId)
   }
 
   override def fetchAppWithSection(id: ApplicationId, sectionNumber: Int): Future[Option[(ApplicationRow, Option[ApplicationSectionRow])]] = db.run {
@@ -116,7 +116,7 @@ class ApplicationTables @Inject()(val dbConfigProvider: DatabaseConfigProvider)(
       } else {
         Future.successful(1)
       }
-      case Some((app, None)) => db.run(applicationSectionTable += ApplicationSectionRow(None, id, sectionNumber, answers, completedAt))
+      case Some((app, None)) => db.run(applicationSectionTable += ApplicationSectionRow(ApplicationSectionId(0), id, sectionNumber, answers, completedAt))
       case None => Future.successful(0)
     }
   }
@@ -149,11 +149,7 @@ class ApplicationTables @Inject()(val dbConfigProvider: DatabaseConfigProvider)(
   override def submit(id: ApplicationId): Future[Option[SubmittedApplicationRef]] = {
     // dummy method
     play.api.Logger.info(s"Dummy application submission for $id")
-    byId(id).flatMap { appRow =>
-      Future {
-        appRow.flatMap { ar => ar.id }
-      }
-    }
+    byId(id).flatMap(appRow => Future.successful(appRow.map(_.id)))
   }
 
   def appSectionQ(id: Rep[ApplicationId], sectionNumber: Rep[Int]) = applicationSectionTable.filter(a => a.applicationId === id && a.sectionNumber === sectionNumber)

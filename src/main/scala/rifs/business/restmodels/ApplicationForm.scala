@@ -12,4 +12,4 @@ case class ApplicationFormSection(
                                    sectionType: String,
                                    fields: JsArray)
 
-case class ApplicationForm(id: Option[ApplicationFormId], opportunityId: OpportunityId, sections: Seq[ApplicationFormSection])
+case class ApplicationForm(id: ApplicationFormId, opportunityId: OpportunityId, sections: Seq[ApplicationFormSection])

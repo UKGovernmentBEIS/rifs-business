@@ -36,7 +36,7 @@ trait ApplicationFormModule extends PlayJsonMappers{
 
     def helpText = column[Option[String]]("help_text", O.Length(255))
 
-    def * = (id.?, applicationFormSectionId, key, text, description, helpText) <> (ApplicationFormQuestionRow.tupled, ApplicationFormQuestionRow.unapply)
+    def * = (id, applicationFormSectionId, key, text, description, helpText) <> (ApplicationFormQuestionRow.tupled, ApplicationFormQuestionRow.unapply)
   }
 
   lazy val applicationFormQuestionTable = TableQuery[ApplicationFormQuestionTable]
@@ -60,7 +60,7 @@ trait ApplicationFormModule extends PlayJsonMappers{
 
     def fields = column[JsArray]("fields")
 
-    def * = (id.?, applicationFormId, sectionNumber, title, sectionType, fields) <> (ApplicationFormSectionRow.tupled, ApplicationFormSectionRow.unapply)
+    def * = (id, applicationFormId, sectionNumber, title, sectionType, fields) <> (ApplicationFormSectionRow.tupled, ApplicationFormSectionRow.unapply)
   }
 
   lazy val applicationFormSectionTable = TableQuery[ApplicationFormSectionTable]
@@ -76,7 +76,7 @@ trait ApplicationFormModule extends PlayJsonMappers{
 
     def opportunityIdIndex = index("applicationform_opportunity_idx", opportunityId)
 
-    def * = (id.?, opportunityId) <> (ApplicationFormRow.tupled, ApplicationFormRow.unapply)
+    def * = (id, opportunityId) <> (ApplicationFormRow.tupled, ApplicationFormRow.unapply)
   }
 
   lazy val applicationFormTable = TableQuery[ApplicationFormTable]

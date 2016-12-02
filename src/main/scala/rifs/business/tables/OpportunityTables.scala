@@ -37,7 +37,7 @@ class OpportunityTables @Inject()(val dbConfigProvider: DatabaseConfigProvider)(
 
   override def updateSummary(summary: OpportunitySummary): Future[Int] = db.run {
     val row = OpportunityRow(summary.id, summary.title, summary.startDate, summary.endDate, summary.value.amount, summary.value.unit, summary.publishedAt, summary.duplicatedFrom)
-    summary.id.map(byIdC(_).update(row)).getOrElse(DBIO.successful(0))
+    byIdC(summary.id).update(row)
   }
 
   override def publish(id: OpportunityId): Future[Option[DateTime]] = ???
@@ -49,31 +49,31 @@ class OpportunityTables @Inject()(val dbConfigProvider: DatabaseConfigProvider)(
 
         case Some(opp) =>
           for {
-          newId <- duplicateOpportunity(id, opp)
-          _ <- duplicateOpportunitySections(id, newId)
-          _ <- duplicateApplicationForms(id, newId)
-        } yield Some(newId)
+            newId <- duplicateOpportunity(id, opp)
+            _ <- duplicateOpportunitySections(id, newId)
+            _ <- duplicateApplicationForms(id, newId)
+          } yield Some(newId)
       }
     }
     db.run(action.transactionally)
   }
 
   private def duplicateOpportunity(id: OpportunityId, opp: OpportunityRow): DBIO[OpportunityId] = {
-    val newOpp = opp.copy(id = None, duplicatedFrom = Some(id), publishedAt = None)
+    val newOpp = opp.copy(duplicatedFrom = Some(id), publishedAt = None)
     (opportunityTable returning opportunityTable.map(_.id)) += newOpp
   }
 
   private def duplicateOpportunitySections(oldId: OpportunityId, newId: OpportunityId): DBIO[Unit] = {
     sectionTable.filter(_.opportunityId === oldId).result.flatMap { sections =>
-      (sectionTable ++= sections.map(_.copy(id = None, opportunityId = newId))).map(_ => ())
+      (sectionTable ++= sections.map(_.copy(opportunityId = newId))).map(_ => ())
     }
   }
 
   private def duplicateApplicationForms(oldId: OpportunityId, newId: OpportunityId): DBIO[Unit] = {
     val afIdio = for {
       afs <- applicationFormTable.filter(_.opportunityId === oldId).result
-      newIds <- (applicationFormTable returning applicationFormTable.map(_.id)) ++= afs.map(_.copy(id = None, opportunityId = newId))
-    } yield afs.map(_.id.get).zip(newIds)
+      newIds <- (applicationFormTable returning applicationFormTable.map(_.id)) ++= afs.map(_.copy(opportunityId = newId))
+    } yield afs.map(_.id).zip(newIds)
 
     afIdio.flatMap { afIds =>
       DBIO.sequence {
@@ -85,8 +85,8 @@ class OpportunityTables @Inject()(val dbConfigProvider: DatabaseConfigProvider)(
   private def duplicateAppFormSections(oldId: ApplicationFormId, newId: ApplicationFormId): DBIO[Unit] = {
     val afsIdio = for {
       afss <- applicationFormSectionTable.filter(_.applicationFormId === oldId).result
-      newIds <- (applicationFormSectionTable returning applicationFormSectionTable.map(_.id)) ++= afss.map(_.copy(id = None, applicationFormId = newId))
-    } yield afss.map(_.id.get).zip(newIds)
+      newIds <- (applicationFormSectionTable returning applicationFormSectionTable.map(_.id)) ++= afss.map(_.copy(applicationFormId = newId))
+    } yield afss.map(_.id).zip(newIds)
 
     afsIdio.flatMap { afsIds =>
       DBIO.sequence {
@@ -98,7 +98,7 @@ class OpportunityTables @Inject()(val dbConfigProvider: DatabaseConfigProvider)(
   private def duplicateAppFormQuestions(oldId: ApplicationFormSectionId, newId: ApplicationFormSectionId): DBIO[Unit] = {
     val afqIdio = for {
       afqs <- applicationFormQuestionTable.filter(_.applicationFormSectionId === oldId).result
-      newIds <- (applicationFormQuestionTable returning applicationFormQuestionTable.map(_.id)) ++= afqs.map(_.copy(id = None, applicationFormSectionId = newId))
+      newIds <- (applicationFormQuestionTable returning applicationFormQuestionTable.map(_.id)) ++= afqs.map(_.copy(applicationFormSectionId = newId))
     } yield afqs.map(_.id).zip(newIds)
 
     afqIdio.map(_ => ())
