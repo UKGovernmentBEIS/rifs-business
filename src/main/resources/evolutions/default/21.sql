@@ -7,6 +7,8 @@ alter table "opportunity" add constraint "duplicated_opportunity_fk" foreign key
 
 update "opportunity" set "published_at_dtime" = '2016-11-28 00:00:00' where id = 1;
 
+ALTER TABLE "application_section" ALTER COLUMN "completed_at_dt" TYPE TIMESTAMPTZ;
+
 CREATE SEQUENCE opportunity_id_seq START WITH 2;
 ALTER TABLE "opportunity" ALTER column "id" SET DEFAULT NEXTVAL('opportunity_id_seq');
 
