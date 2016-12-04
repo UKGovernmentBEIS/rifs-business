@@ -44,4 +44,16 @@ class OpportunityController @Inject()(opportunities: OpportunityOps, Opportunity
   def duplicate(id: OpportunityId) = Action.async { implicit request =>
     opportunities.duplicate(id).map(jsonResult(_))
   }
+
+  def saveDescription(id: OpportunityId, sectionNum: Int) = Action.async(parse.json[String]) { implicit request =>
+    val description = request.body.trim match {
+      case "" => None
+      case s => Some(s)
+    }
+
+    opportunities.saveSectionDescription(id, sectionNum, description).map {
+      case 0 => NotFound
+      case _ => NoContent
+    }
+  }
 }
