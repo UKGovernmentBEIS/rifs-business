@@ -23,5 +23,7 @@ trait OpportunityOps {
   def publish(id: OpportunityId): Future[Option[DateTime]]
 
   def duplicate(id: OpportunityId): Future[Option[OpportunityId]]
+
+  def saveSectionDescription(id: OpportunityId, sectionNo: Int, description: Option[String]): Future[Int]
 }
 

@@ -101,5 +101,11 @@ class OpportunityTables @Inject()(val dbConfigProvider: DatabaseConfigProvider, 
 
   val opportunityTableC = Compiled(opportunityTable.pack)
 
+  def sectionQ(id: Rep[OpportunityId], sectionNumber: Rep[Int]) = sectionTable.filter(s => s.opportunityId === id && s.sectionNumber === sectionNumber)
 
+  lazy val sectionC = Compiled(sectionQ _)
+
+  override def saveSectionDescription(id: OpportunityId, sectionNo: Int, description: Option[String]): Future[Int] = db.run {
+    sectionQ(id, sectionNo).map(r=> r.text).update(description)
+  }
 }
