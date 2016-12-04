@@ -5,6 +5,7 @@ GET           /opportunity/:id                                      rifs.busines
 PUT           /opportunity/:id/summary                              rifs.business.controllers.OpportunityController.updateSummary(id: OpportunityId)
 GET           /opportunity/:id/application_form                     rifs.business.controllers.ApplicationFormController.forOpportunity(id: OpportunityId)
 POST          /opportunity/:id/duplicate                            rifs.business.controllers.OpportunityController.duplicate(id: OpportunityId)
+POST          /opportunity/:id/publish                            rifs.business.controllers.OpportunityController.publish(id: OpportunityId)
 
 GET           /application_form/:id                                 rifs.business.controllers.ApplicationFormController.byId(id: ApplicationFormId)
 GET           /application_form/:id/application                     rifs.business.controllers.ApplicationController.applicationForForm(id: ApplicationFormId)

@@ -33,7 +33,10 @@ class OpportunityController @Inject()(opportunities: OpportunityOps, Opportunity
 
   def publish(id: OpportunityId) = OpportunityAction(id).async { implicit request =>
     request.opportunity.publishedAt match {
-      case None => opportunities.publish(id).map(_ => NoContent)
+      case None => opportunities.publish(id).map {
+        case Some(d) => Ok(Json.toJson(d))
+        case None => NotFound
+      }
       case Some(_) => Future.successful(BadRequest(s"Opportunity with id ${id.id} has already been published"))
     }
   }

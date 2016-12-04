@@ -7,7 +7,7 @@ import play.api.db.slick.DatabaseConfigProvider
 import rifs.business.data.OpportunityOps
 import rifs.business.models.{OpportunityId, OpportunityRow}
 import rifs.business.restmodels.{Opportunity, OpportunitySummary, OpportunityValue}
-import rifs.business.slicks.modules.{ApplicationFormModule, OpportunityModule, PgSupport}
+import rifs.business.slicks.modules.{OpportunityModule, PgSupport}
 import rifs.business.slicks.support.DBBinding
 import slick.dbio.DBIOAction
 
@@ -39,7 +39,18 @@ class OpportunityTables @Inject()(val dbConfigProvider: DatabaseConfigProvider, 
     byIdC(summary.id).update(row)
   }
 
-  override def publish(id: OpportunityId): Future[Option[DateTime]] = ???
+  override def publish(id: OpportunityId): Future[Option[DateTime]] = db.run {
+    byIdC(id).result.headOption.flatMap {
+      case Some(opp) =>
+        if (opp.publishedAt.isDefined) {
+          DBIO.successful(opp.publishedAt)
+        } else {
+          val publishedAt = Some(DateTime.now())
+          byIdC(id).update(opp.copy(publishedAt = publishedAt)).map { _ => publishedAt }
+        }
+      case None => DBIO.successful(None)
+    }.transactionally
+  }
 
   override def duplicate(id: OpportunityId): Future[Option[OpportunityId]] = {
     val action: DBIO[Option[OpportunityId]] = byIdC(id).result.flatMap {
@@ -63,8 +74,9 @@ class OpportunityTables @Inject()(val dbConfigProvider: DatabaseConfigProvider, 
   }
 
   private def duplicateOpportunitySections(oldId: OpportunityId, newId: OpportunityId): DBIO[Unit] = {
-    sectionTable.filter(_.opportunityId === oldId).result.flatMap { sections =>
-      (sectionTable ++= sections.map(_.copy(opportunityId = newId))).map(_ => ())
+    sectionTable.filter(_.opportunityId === oldId).result.flatMap {
+      sections =>
+        (sectionTable ++= sections.map(_.copy(opportunityId = newId))).map(_ => ())
     }
   }
 
