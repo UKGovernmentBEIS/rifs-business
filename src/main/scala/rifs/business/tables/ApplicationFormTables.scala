@@ -36,6 +36,41 @@ class ApplicationFormTables @Inject()(override val dbConfigProvider: DatabaseCon
     }.map(_.headOption)
   }
 
+   def duplicateApplicationForms(oldId: OpportunityId, newId: OpportunityId): DBIO[Unit] = {
+    val afIdio = for {
+      afs <- applicationFormTable.filter(_.opportunityId === oldId).result
+      newIds <- (applicationFormTable returning applicationFormTable.map(_.id)) ++= afs.map(_.copy(opportunityId = newId))
+    } yield afs.map(_.id).zip(newIds)
+
+    afIdio.flatMap { afIds =>
+      DBIO.sequence {
+        afIds.map { case (o, n) => duplicateAppFormSections(o, n) }
+      }.map(_ => ())
+    }
+  }
+
+  private def duplicateAppFormSections(oldId: ApplicationFormId, newId: ApplicationFormId): DBIO[Unit] = {
+    val afsIdio = for {
+      afss <- applicationFormSectionTable.filter(_.applicationFormId === oldId).result
+      newIds <- (applicationFormSectionTable returning applicationFormSectionTable.map(_.id)) ++= afss.map(_.copy(applicationFormId = newId))
+    } yield afss.map(_.id).zip(newIds)
+
+    afsIdio.flatMap { afsIds =>
+      DBIO.sequence {
+        afsIds.map { case (o, n) => duplicateAppFormQuestions(o, n) }
+      }.map(_ => ())
+    }
+  }
+
+  private def duplicateAppFormQuestions(oldId: ApplicationFormSectionId, newId: ApplicationFormSectionId): DBIO[Unit] = {
+    val afqIdio = for {
+      afqs <- applicationFormQuestionTable.filter(_.applicationFormSectionId === oldId).result
+      newIds <- (applicationFormQuestionTable returning applicationFormQuestionTable.map(_.id)) ++= afqs.map(_.copy(applicationFormSectionId = newId))
+    } yield afqs.map(_.id).zip(newIds)
+
+    afqIdio.map(_ => ())
+  }
+
   /*
     ******************************
     * Queries and compiled queries
