@@ -27,5 +27,7 @@ trait OpportunityOps {
   def duplicate(id: OpportunityId): Future[Option[OpportunityId]]
 
   def saveSectionDescription(id: OpportunityId, sectionNo: Int, description: Option[String]): Future[Int]
+
+  def reset(): Future[Unit]
 }
 
