@@ -110,6 +110,15 @@ class OpportunityTables @Inject()(val dbConfigProvider: DatabaseConfigProvider, 
   lazy val sectionC = Compiled(sectionQ _)
 
   override def saveSectionDescription(id: OpportunityId, sectionNo: Int, description: Option[String]): Future[Int] = db.run {
-    sectionQ(id, sectionNo).map(r=> r.text).update(description)
+    sectionQ(id, sectionNo).map(r => r.text).update(description)
+  }
+
+  override def reset(): Future[Unit] = {
+    val action = for {
+      _ <- opportunityTable.filter(_.id > OpportunityId(1)).delete
+      _ <- sqlu"alter sequence opportunity_id_seq restart with 2"
+    } yield ()
+
+    db.run(action.transactionally)
   }
 }

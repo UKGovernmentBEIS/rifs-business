@@ -38,6 +38,9 @@ DELETE        /application/:id/section/:num/item/:itemNum            rifs.busine
 # Submit application
 POST          /application/:id/submit                                rifs.business.controllers.ApplicationController.submit(id: ApplicationId)
 
+# utility endpoints for testing
+POST          /reset                                                 rifs.business.controllers.UtilityController.reset()
+
 # Health check
 GET           /ping                                                  rifs.business.controllers.HealthCheckController.ping()
 GET           /version                                               rifs.business.controllers.HealthCheckController.version()
