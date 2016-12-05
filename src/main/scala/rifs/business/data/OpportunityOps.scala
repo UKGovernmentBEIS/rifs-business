@@ -16,6 +16,8 @@ trait OpportunityOps {
 
   def findOpen: Future[Set[Opportunity]]
 
+  def summaries: Future[Set[Opportunity]]
+
   def openSummaries: Future[Set[Opportunity]]
 
   def updateSummary(summary: OpportunitySummary): Future[Int]

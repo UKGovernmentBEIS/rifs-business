@@ -30,6 +30,10 @@ class OpportunityTables @Inject()(val dbConfigProvider: DatabaseConfigProvider, 
     joinedOppsWithSectionsC.result.map(extractOpportunities)
   }
 
+  override def summaries: Future[Set[Opportunity]] = db.run(opportunityTableC.result).map { os =>
+    os.map(o => Opportunity(o.id, o.title, o.startDate, o.endDate, OpportunityValue(o.value, o.valueUnits), o.publishedAt, o.duplicatedFrom, Set())).toSet
+  }
+
   override def openSummaries: Future[Set[Opportunity]] = db.run(opportunityTable.filter(_.publishedAt.isDefined).result).map { os =>
     os.map(o => Opportunity(o.id, o.title, o.startDate, o.endDate, OpportunityValue(o.value, o.valueUnits), o.publishedAt, o.duplicatedFrom, Set())).toSet
   }

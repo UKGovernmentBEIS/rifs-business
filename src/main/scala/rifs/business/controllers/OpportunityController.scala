@@ -13,17 +13,13 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class OpportunityController @Inject()(opportunities: OpportunityOps, OpportunityAction: OpportunityAction)(implicit val ec: ExecutionContext) extends Controller with ControllerUtils {
 
-  def byId(id: OpportunityId) = OpportunityAction(id) { request =>
-    Ok(Json.toJson(request.opportunity))
-  }
+  def byId(id: OpportunityId) = OpportunityAction(id)(request => Ok(Json.toJson(request.opportunity)))
 
-  def getOpenSummaries = Action.async {
-    opportunities.openSummaries.map(os => Ok(Json.toJson(os)))
-  }
+  def getSummaries = Action.async(opportunities.summaries.map(os => Ok(Json.toJson(os))))
 
-  def getOpen = Action.async {
-    opportunities.findOpen.map(os => Ok(Json.toJson(os)))
-  }
+  def getOpenSummaries = Action.async(opportunities.openSummaries.map(os => Ok(Json.toJson(os))))
+
+  def getOpen = Action.async(opportunities.findOpen.map(os => Ok(Json.toJson(os))))
 
   def updateSummary(id: OpportunityId) = Action.async(parse.json[OpportunitySummary]) { implicit request =>
     val summary = request.body
@@ -41,9 +37,7 @@ class OpportunityController @Inject()(opportunities: OpportunityOps, Opportunity
     }
   }
 
-  def duplicate(id: OpportunityId) = Action.async { implicit request =>
-    opportunities.duplicate(id).map(jsonResult(_))
-  }
+  def duplicate(id: OpportunityId) = Action.async(opportunities.duplicate(id).map(jsonResult(_)))
 
   def saveDescription(id: OpportunityId, sectionNum: Int) = Action.async(parse.json[String]) { implicit request =>
     val description = request.body.trim match {
