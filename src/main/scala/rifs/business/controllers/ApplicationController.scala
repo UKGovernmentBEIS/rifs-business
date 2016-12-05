@@ -17,11 +17,9 @@ import rifs.business.restmodels.{ApplicationDetail, ApplicationSectionDetail}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Random
 
-class ApplicationController @Inject()(val cached: Cached, applications: ApplicationOps, appForms: ApplicationFormOps, opps: OpportunityOps, notifications: NotificationService, config: Configuration)
+class ApplicationController @Inject()( applications: ApplicationOps, appForms: ApplicationFormOps, opps: OpportunityOps, notifications: NotificationService, config: Configuration)
                                      (implicit val ec: ExecutionContext) extends Controller with ControllerUtils {
-  def byId(id: ApplicationId) = cacheOk {
-    Action.async(applications.byId(id).map(jsonResult(_)))
-  }
+  def byId(id: ApplicationId) = Action.async(applications.byId(id).map(jsonResult(_)))
 
   def applicationForForm(applicationFormId: ApplicationFormId) = Action.async {
     applications.forForm(applicationFormId).map(jsonResult(_))
@@ -192,7 +190,7 @@ class ApplicationController @Inject()(val cached: Cached, applications: Applicat
   }
 
   def completeSection(id: ApplicationId, sectionNumber: Int) = Action.async(parse.json[JsObject]) { implicit request =>
-    applications.saveSection(id, sectionNumber, request.body, Some(LocalDateTime.now(DateTimeZone.UTC))).map(_ => NoContent)
+    applications.saveSection(id, sectionNumber, request.body, Some(DateTime.now(DateTimeZone.UTC))).map(_ => NoContent)
   }
 
   def deleteSection(id: ApplicationId, sectionNumber: Int) = Action.async { implicit request =>

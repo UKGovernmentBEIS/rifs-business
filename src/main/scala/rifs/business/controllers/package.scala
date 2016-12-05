@@ -1,30 +1,15 @@
 package rifs.business
 
 import com.wellfactored.playbindings.ValueClassFormats
-import org.joda.time.LocalDateTime
-import org.joda.time.format.DateTimeFormat
 import play.api.libs.json._
 import rifs.business.models._
 import rifs.business.restmodels._
 
-import scala.util.Try
-
 package object controllers extends ValueClassFormats {
-  implicit val ldtfmt = new Format[LocalDateTime] {
-    val dtf = DateTimeFormat.forPattern("dd MMM yyyy HH:mm:ss")
+  private val dtPattern = "dd MMM yyyy HH:mm:ss"
+  implicit val dtReads = Reads.jodaDateReads(dtPattern)
+  implicit val dtWrites = Writes.jodaDateWrites(dtPattern)
 
-    override def writes(o: LocalDateTime): JsValue = JsString(dtf.print(o))
-
-    override def reads(json: JsValue): JsResult[LocalDateTime] =
-      implicitly[Reads[JsString]].reads(json).flatMap { js =>
-        Try(dtf.parseLocalDateTime(js.value))
-          .map(JsSuccess(_))
-          .recover {
-            case t: Throwable => JsError(t.getMessage)
-          }.get
-      }
-  }
-  implicit val paragraphFormat = Json.format[ParagraphRow]
   implicit val sectionFormat = Json.format[SectionRow]
   implicit val opportunityFormat = Json.format[OpportunityRow]
   implicit val questionFormat = Json.format[Question]

@@ -4,34 +4,27 @@ import javax.inject.Inject
 
 import cats.data.OptionT
 import cats.instances.future._
-import com.github.tminglei.slickpg.{ExPostgresDriver, PgDateSupportJoda, PgPlayJsonSupport}
-import org.joda.time.LocalDateTime
+import org.joda.time.DateTime
 import play.api.db.slick.DatabaseConfigProvider
 import play.api.libs.json.JsObject
 import rifs.business.controllers.JsonHelpers
 import rifs.business.data.{ApplicationDetails, ApplicationOps}
 import rifs.business.models._
-import rifs.business.restmodels.{Application, ApplicationDetail, ApplicationSection}
-import rifs.business.slicks.modules.{ApplicationFormModule, ApplicationModule, OpportunityModule, PlayJsonMappers}
+import rifs.business.restmodels.{Application, ApplicationSection}
+import rifs.business.slicks.modules.{ApplicationFormModule, ApplicationModule, OpportunityModule, PgSupport}
 import rifs.business.slicks.support.DBBinding
-import slick.backend.DatabaseConfig
-import slick.driver.JdbcProfile
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class ApplicationTables @Inject()(dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext)
+class ApplicationTables @Inject()(val dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext)
   extends ApplicationOps
     with ApplicationModule
-    with DBBinding
     with ApplicationFormModule
     with OpportunityModule
-    with ExPostgresDriver
-    with PgPlayJsonSupport
-    with PgDateSupportJoda
-    with PlayJsonMappers {
-  override val dbConfig: DatabaseConfig[JdbcProfile] = dbConfigProvider.get[JdbcProfile]
+    with DBBinding
+    with PgSupport {
 
-  import PostgresAPI._
+  import driver.api._
 
   override def byId(id: ApplicationId): Future[Option[ApplicationRow]] = db.run(applicationTable.filter(_.id === id).result.headOption)
 
@@ -51,7 +44,7 @@ class ApplicationTables @Inject()(dbConfigProvider: DatabaseConfigProvider)(impl
     for {
       _ <- OptionT(appFormF)
       app <- OptionT.liftF(fetchOrCreate(applicationFormId))
-    } yield ApplicationRow(Some(app.id), app.applicationFormId)
+    } yield ApplicationRow(app.id, app.applicationFormId)
   }.value
 
   override def application(applicationId: ApplicationId): Future[Option[Application]] = db.run {
@@ -99,11 +92,11 @@ class ApplicationTables @Inject()(dbConfigProvider: DatabaseConfigProvider)(impl
       ApplicationSection(s.sectionNumber, s.answers, s.completedAt)
     }
 
-    Application(app.id.get, app.applicationFormId, sectionOverviews)
+    Application(app.id, app.applicationFormId, sectionOverviews)
   }
 
   private def createApplicationForForm(applicationFormId: ApplicationFormId): Future[ApplicationId] = db.run {
-    (applicationTable returning applicationTable.map(_.id)) += ApplicationRow(None, applicationFormId)
+    (applicationTable returning applicationTable.map(_.id)) += ApplicationRow(ApplicationId(0), applicationFormId)
   }
 
   override def fetchAppWithSection(id: ApplicationId, sectionNumber: Int): Future[Option[(ApplicationRow, Option[ApplicationSectionRow])]] = db.run {
@@ -116,13 +109,14 @@ class ApplicationTables @Inject()(dbConfigProvider: DatabaseConfigProvider)(impl
 
   override def fetchSections(id: ApplicationId): Future[Set[ApplicationSectionRow]] = db.run(appSectionsC(id).result).map(_.toSet)
 
-  override def saveSection(id: ApplicationId, sectionNumber: Int, answers: JsObject, completedAt: Option[LocalDateTime] = None): Future[Int] = {
+  override def saveSection(id: ApplicationId, sectionNumber: Int, answers: JsObject, completedAt: Option[DateTime] = None): Future[Int] = {
     fetchAppWithSection(id, sectionNumber).flatMap {
-      case Some((app, Some(section))) => areDifferent(section.answers, answers) || completedAt.isDefined match {
-        case true => db.run(appSectionC(id, sectionNumber).update(section.copy(answers = answers, completedAt = completedAt)))
-        case false => Future.successful(1)
+      case Some((app, Some(section))) => if (areDifferent(section.answers, answers) || completedAt.isDefined) {
+        db.run(appSectionC(id, sectionNumber).update(section.copy(answers = answers, completedAt = completedAt)))
+      } else {
+        Future.successful(1)
       }
-      case Some((app, None)) => db.run(applicationSectionTable += ApplicationSectionRow(None, id, sectionNumber, answers, completedAt))
+      case Some((app, None)) => db.run(applicationSectionTable += ApplicationSectionRow(ApplicationSectionId(0), id, sectionNumber, answers, completedAt))
       case None => Future.successful(0)
     }
   }
@@ -155,11 +149,7 @@ class ApplicationTables @Inject()(dbConfigProvider: DatabaseConfigProvider)(impl
   override def submit(id: ApplicationId): Future[Option[SubmittedApplicationRef]] = {
     // dummy method
     play.api.Logger.info(s"Dummy application submission for $id")
-    byId(id).flatMap { appRow =>
-      Future {
-        appRow.flatMap { ar => ar.id }
-      }
-    }
+    byId(id).flatMap(appRow => Future.successful(appRow.map(_.id)))
   }
 
   def appSectionQ(id: Rep[ApplicationId], sectionNumber: Rep[Int]) = applicationSectionTable.filter(a => a.applicationId === id && a.sectionNumber === sectionNumber)

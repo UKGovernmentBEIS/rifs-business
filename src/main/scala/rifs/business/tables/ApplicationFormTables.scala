@@ -7,24 +7,17 @@ import play.api.db.slick.DatabaseConfigProvider
 import rifs.business.data.ApplicationFormOps
 import rifs.business.models._
 import rifs.business.restmodels.{ApplicationForm, ApplicationFormSection, Question}
-import rifs.business.slicks.modules.{ApplicationFormModule, OpportunityModule, PlayJsonMappers}
+import rifs.business.slicks.modules.{ApplicationFormModule, OpportunityModule, PgSupport}
 import rifs.business.slicks.support.DBBinding
-import slick.backend.DatabaseConfig
-import slick.driver.JdbcProfile
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class ApplicationFormTables @Inject()(dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext)
+class ApplicationFormTables @Inject()(override val dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext)
   extends ApplicationFormModule
     with OpportunityModule
+    with ApplicationFormOps
     with DBBinding
-    with ExPostgresDriver
-    with PgPlayJsonSupport
-    with PgDateSupportJoda
-    with PlayJsonMappers
-    with ApplicationFormOps {
-
-  override val dbConfig: DatabaseConfig[JdbcProfile] = dbConfigProvider.get[JdbcProfile]
+    with PgSupport {
 
   import ApplicationFormExtractors._
   import driver.api._
@@ -41,6 +34,41 @@ class ApplicationFormTables @Inject()(dbConfigProvider: DatabaseConfigProvider)(
       val (as, ss) = rs.unzip
       as.map(a => ApplicationForm(a.id, a.opportunityId, sectionsFor(a.id, ss)))
     }.map(_.headOption)
+  }
+
+   def duplicateApplicationForms(oldId: OpportunityId, newId: OpportunityId): DBIO[Unit] = {
+    val afIdio = for {
+      afs <- applicationFormTable.filter(_.opportunityId === oldId).result
+      newIds <- (applicationFormTable returning applicationFormTable.map(_.id)) ++= afs.map(_.copy(opportunityId = newId))
+    } yield afs.map(_.id).zip(newIds)
+
+    afIdio.flatMap { afIds =>
+      DBIO.sequence {
+        afIds.map { case (o, n) => duplicateAppFormSections(o, n) }
+      }.map(_ => ())
+    }
+  }
+
+  private def duplicateAppFormSections(oldId: ApplicationFormId, newId: ApplicationFormId): DBIO[Unit] = {
+    val afsIdio = for {
+      afss <- applicationFormSectionTable.filter(_.applicationFormId === oldId).result
+      newIds <- (applicationFormSectionTable returning applicationFormSectionTable.map(_.id)) ++= afss.map(_.copy(applicationFormId = newId))
+    } yield afss.map(_.id).zip(newIds)
+
+    afsIdio.flatMap { afsIds =>
+      DBIO.sequence {
+        afsIds.map { case (o, n) => duplicateAppFormQuestions(o, n) }
+      }.map(_ => ())
+    }
+  }
+
+  private def duplicateAppFormQuestions(oldId: ApplicationFormSectionId, newId: ApplicationFormSectionId): DBIO[Unit] = {
+    val afqIdio = for {
+      afqs <- applicationFormQuestionTable.filter(_.applicationFormSectionId === oldId).result
+      newIds <- (applicationFormQuestionTable returning applicationFormQuestionTable.map(_.id)) ++= afqs.map(_.copy(applicationFormSectionId = newId))
+    } yield afqs.map(_.id).zip(newIds)
+
+    afqIdio.map(_ => ())
   }
 
   /*

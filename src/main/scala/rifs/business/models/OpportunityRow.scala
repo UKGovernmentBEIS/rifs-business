@@ -1,8 +1,6 @@
 package rifs.business.models
 
-case class ParagraphId(id: Long) extends AnyVal
-
-case class ParagraphRow(id: ParagraphId, paragraphNumber: Int, sectionId: SectionId, text: String)
+import org.joda.time.DateTime
 
 case class SectionId(id: Long) extends AnyVal
 
@@ -16,5 +14,7 @@ case class OpportunityRow(
                            startDate: String,
                            endDate: Option[String],
                            value: BigDecimal,
-                           valueUnits: String
+                           valueUnits: String,
+                           publishedAt: Option[DateTime],
+                           duplicatedFrom: Option[OpportunityId]
                          )

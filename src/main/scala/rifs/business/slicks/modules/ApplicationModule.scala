@@ -1,7 +1,7 @@
 package rifs.business.slicks.modules
 
 import com.github.tminglei.slickpg.{ExPostgresDriver, PgDateSupportJoda, PgPlayJsonSupport}
-import org.joda.time.LocalDateTime
+import org.joda.time.DateTime
 import play.api.libs.json.JsObject
 import rifs.business.models._
 import rifs.business.slicks.support.DBBinding
@@ -9,14 +9,11 @@ import rifs.slicks.gen.IdType
 
 import scala.language.implicitConversions
 
-trait ApplicationModule {
-  self: ExPostgresDriver with PgPlayJsonSupport with PgDateSupportJoda with DBBinding with ApplicationFormModule with PlayJsonMappers =>
+trait ApplicationModule extends PlayJsonMappers {
+  self: DBBinding with ExPostgresDriver with PgDateSupportJoda with PgPlayJsonSupport with ApplicationFormModule =>
 
-  object PostgresAPI extends API with JsonImplicits with JodaDateTimeImplicits
+  import api._
 
-  override val pgjson = "jsonb"
-
-  import PostgresAPI._
 
   implicit def ApplicationSectionIdMapper: BaseColumnType[ApplicationSectionId] = MappedColumnType.base[ApplicationSectionId, Long](_.id, ApplicationSectionId)
 
@@ -37,9 +34,9 @@ trait ApplicationModule {
 
     def answers = column[JsObject]("answers")
 
-    def completedAt = column[Option[LocalDateTime]]("completed_at_dt")
+    def completedAt = column[Option[DateTime]]("completed_at_dt")
 
-    def * = (id.?, applicationId, sectionNumber, answers, completedAt) <> (ApplicationSectionRow.tupled, ApplicationSectionRow.unapply)
+    def * = (id, applicationId, sectionNumber, answers, completedAt) <> (ApplicationSectionRow.tupled, ApplicationSectionRow.unapply)
   }
 
   lazy val applicationSectionTable = TableQuery[ApplicationSectionTable]
@@ -55,7 +52,7 @@ trait ApplicationModule {
 
     def applicationFormIdIndex = index("application_application_form_idx", applicationFormId)
 
-    def * = (id.?, applicationFormId) <> (ApplicationRow.tupled, ApplicationRow.unapply)
+    def * = (id, applicationFormId) <> (ApplicationRow.tupled, ApplicationRow.unapply)
   }
 
   lazy val applicationTable = TableQuery[ApplicationTable]

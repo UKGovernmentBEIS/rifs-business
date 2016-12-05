@@ -1,20 +1,12 @@
 package rifs.business.controllers
 
-import play.api.cache.Cached
-import play.api.libs.json.{JsObject, JsValue, Json, Writes}
+import play.api.libs.json.{JsObject, Json, Writes}
 import play.api.mvc._
-import rifs.business.Config
 
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Failure, Success}
-
 
 trait ControllerUtils {
   self: Controller =>
-
-  val cacheTimeout = Config.config.cache.timeout.getOrElse(10)
-
-  def cached: Cached
 
   implicit def ec: ExecutionContext
 
@@ -30,8 +22,4 @@ trait ControllerUtils {
         NotFound(JsObject(Seq("errors" -> Json.toJson(Seq(ErrorResult(nf.getMessage, Seq("", "", "404")))))))
     }
   }
-
-  def cacheOk[T](action: Action[T]) =
-    if (cacheTimeout > 0) cached.status(rh => rh.uri, 200, cacheTimeout)(action)
-    else action
 }

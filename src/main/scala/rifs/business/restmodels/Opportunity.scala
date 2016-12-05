@@ -1,5 +1,6 @@
 package rifs.business.restmodels
 
+import org.joda.time.DateTime
 import rifs.business.models.OpportunityId
 
 case class OpportunityDescriptionSection(sectionNumber: Int, title: String, text: Option[String])
@@ -14,9 +15,11 @@ case class Opportunity(
                         startDate: String,
                         endDate: Option[String],
                         value: OpportunityValue,
+                        publishedAt : Option[DateTime],
+                        duplicatedFrom:Option[OpportunityId],
                         description: Set[OpportunityDescriptionSection]
                       ) {
-  def summary: OpportunitySummary = OpportunitySummary(id, title, startDate, endDate, value)
+  def summary: OpportunitySummary = OpportunitySummary(id, title, startDate, endDate, value, publishedAt, duplicatedFrom)
 }
 
 case class OpportunitySummary(
@@ -24,5 +27,7 @@ case class OpportunitySummary(
                                title: String,
                                startDate: String,
                                endDate: Option[String],
-                               value: OpportunityValue
+                               value: OpportunityValue,
+                               publishedAt : Option[DateTime],
+                               duplicatedFrom:Option[OpportunityId]
                              )

@@ -6,14 +6,10 @@ import rifs.business.models._
 import rifs.business.slicks.support.DBBinding
 import rifs.slicks.gen.IdType
 
-trait ApplicationFormModule {
-  self: ExPostgresDriver with PgPlayJsonSupport with PgDateSupportJoda with DBBinding with PlayJsonMappers with OpportunityModule =>
+trait ApplicationFormModule extends PlayJsonMappers{
+  self:  DBBinding with ExPostgresDriver with PgDateSupportJoda with PgPlayJsonSupport with OpportunityModule =>
 
-  object pgApi extends API with JsonImplicits with JodaDateTimeImplicits
-
-  override val pgjson = "jsonb"
-
-  import pgApi._
+  import api._
 
   implicit def ApplicationFormQuestionIdMapper: BaseColumnType[ApplicationFormQuestionId] = MappedColumnType.base[ApplicationFormQuestionId, Long](_.id, ApplicationFormQuestionId)
 
@@ -24,7 +20,7 @@ trait ApplicationFormModule {
   type ApplicationFormQuestionQuery = Query[ApplicationFormQuestionTable, ApplicationFormQuestionRow, Seq]
 
   class ApplicationFormQuestionTable(tag: Tag) extends Table[ApplicationFormQuestionRow](tag, "application_form_question") {
-    def id = column[ApplicationFormQuestionId]("id", O.Length(IdType.length), O.PrimaryKey)
+    def id = column[ApplicationFormQuestionId]("id", O.Length(IdType.length), O.PrimaryKey, O.AutoInc)
 
     def applicationFormSectionId = column[ApplicationFormSectionId]("application_form_section_id", O.Length(IdType.length))
 
@@ -48,7 +44,7 @@ trait ApplicationFormModule {
   type ApplicationFormSectionQuery = Query[ApplicationFormSectionTable, ApplicationFormSectionRow, Seq]
 
   class ApplicationFormSectionTable(tag: Tag) extends Table[ApplicationFormSectionRow](tag, "application_form_section") {
-    def id = column[ApplicationFormSectionId]("id", O.Length(IdType.length), O.PrimaryKey)
+    def id = column[ApplicationFormSectionId]("id", O.Length(IdType.length), O.PrimaryKey, O.AutoInc)
 
     def applicationFormId = column[ApplicationFormId]("application_form_id", O.Length(IdType.length))
 
@@ -72,7 +68,7 @@ trait ApplicationFormModule {
   type ApplicationFormQuery = Query[ApplicationFormTable, ApplicationFormRow, Seq]
 
   class ApplicationFormTable(tag: Tag) extends Table[ApplicationFormRow](tag, "application_form") {
-    def id = column[ApplicationFormId]("id", O.Length(IdType.length), O.PrimaryKey)
+    def id = column[ApplicationFormId]("id", O.Length(IdType.length), O.PrimaryKey, O.AutoInc)
 
     def opportunityId = column[OpportunityId]("opportunity_id", O.Length(IdType.length))
 
