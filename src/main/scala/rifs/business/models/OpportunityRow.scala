@@ -4,7 +4,15 @@ import org.joda.time.DateTime
 
 case class SectionId(id: Long) extends AnyVal
 
-case class SectionRow(id: SectionId, sectionNumber: Int, opportunityId: OpportunityId, title: String, text: Option[String])
+case class SectionRow(
+                       id: SectionId,
+                       sectionNumber: Int,
+                       opportunityId: OpportunityId,
+                       title: String,
+                       text: Option[String],
+                       description: Option[String],
+                       helpText: Option[String]
+                     )
 
 case class OpportunityId(id: Long) extends AnyVal
 
