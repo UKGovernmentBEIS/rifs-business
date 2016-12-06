@@ -1,6 +1,5 @@
 package rifs.business.slicks.modules
 
-import com.github.tminglei.slickpg.{ExPostgresDriver, PgDateSupportJoda}
 import org.joda.time.DateTime
 import rifs.business.models._
 import rifs.business.slicks.support.DBBinding
@@ -32,7 +31,11 @@ trait OpportunityModule {
 
     def text = column[Option[String]]("text", O.Length(8192))
 
-    def * = (id, sectionNumber, opportunityId, title, text) <> (SectionRow.tupled, SectionRow.unapply)
+    def description = column[Option[String]]("description", O.Length(8192))
+
+    def helpText = column[Option[String]]("help_text", O.Length(8192))
+
+    def * = (id, sectionNumber, opportunityId, title, text, description, helpText) <> (SectionRow.tupled, SectionRow.unapply)
   }
 
   lazy val sectionTable = TableQuery[SectionTable]
