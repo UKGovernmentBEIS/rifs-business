@@ -50,4 +50,11 @@ class OpportunityController @Inject()(opportunities: OpportunityOps, Opportunity
       case _ => NoContent
     }
   }
+
+  def updateGrantValue(id: OpportunityId) = Action.async(parse.json[BigDecimal]) { implicit request =>
+    opportunities.updateGrantValue(id, request.body).map {
+      case 0 => NotFound
+      case _ => NoContent
+    }
+  }
 }

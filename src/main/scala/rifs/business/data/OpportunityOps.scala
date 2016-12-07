@@ -28,6 +28,8 @@ trait OpportunityOps {
 
   def saveSectionDescription(id: OpportunityId, sectionNo: Int, description: Option[String]): Future[Int]
 
+  def updateGrantValue(id: OpportunityId, value: BigDecimal) : Future[Int]
+
   def reset(): Future[Unit]
 }
 

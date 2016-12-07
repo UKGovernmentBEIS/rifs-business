@@ -10,6 +10,7 @@ POST          /opportunity/:id/duplicate                             rifs.busine
 POST          /opportunity/:id/publish                               rifs.business.controllers.OpportunityController.publish(id: OpportunityId)
 
 POST          /manage/opportunity/:id/description/:sectionNum        rifs.business.controllers.OpportunityController.saveDescription(id: OpportunityId, sectionNum:Int)
+POST          /manage/opportunity/:id/grant_value                    rifs.business.controllers.OpportunityController.updateGrantValue(id: OpportunityId)
 
 GET           /application_form/:id                                  rifs.business.controllers.ApplicationFormController.byId(id: ApplicationFormId)
 

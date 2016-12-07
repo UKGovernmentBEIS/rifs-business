@@ -121,4 +121,8 @@ class OpportunityTables @Inject()(val dbConfigProvider: DatabaseConfigProvider, 
 
     db.run(action.transactionally)
   }
+
+  override def updateGrantValue(id: OpportunityId, value: BigDecimal): Future[Int] = db.run {
+    byIdQ(id).map( _.value ).update( value )
+  }
 }
