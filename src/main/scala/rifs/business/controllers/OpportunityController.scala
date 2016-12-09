@@ -2,16 +2,21 @@ package rifs.business.controllers
 
 import javax.inject.Inject
 
+import play.api.{Configuration, Logger}
 import play.api.libs.json.Json
 import play.api.mvc.{Action, Controller}
 import rifs.business.actions.OpportunityAction
 import rifs.business.data.OpportunityOps
 import rifs.business.models.OpportunityId
+import rifs.business.notifications.NotificationService
 import rifs.business.restmodels.OpportunitySummary
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class OpportunityController @Inject()(opportunities: OpportunityOps, OpportunityAction: OpportunityAction)(implicit val ec: ExecutionContext) extends Controller with ControllerUtils {
+class OpportunityController @Inject()(opportunities: OpportunityOps, OpportunityAction: OpportunityAction,
+                                      notifications: NotificationService, config: Configuration)
+                                      (implicit val ec: ExecutionContext) extends Controller
+  with ControllerUtils with EmailUtils {
 
   def byId(id: OpportunityId) = OpportunityAction(id)(request => Ok(Json.toJson(request.opportunity)))
 
@@ -29,9 +34,20 @@ class OpportunityController @Inject()(opportunities: OpportunityOps, Opportunity
 
   def publish(id: OpportunityId) = OpportunityAction(id).async { implicit request =>
     request.opportunity.publishedAt match {
-      case None => opportunities.publish(id).map {
-        case Some(d) => Ok(Json.toJson(d))
-        case None => NotFound
+      case None => opportunities.publish(id).flatMap {
+        case Some(d) =>
+          val mgrMail = managerEmail(config)
+          notifications.notifyManager(id, fromAddress(config), mgrMail).
+            map { em =>
+              if (em.isEmpty) Logger.warn("Failed to find the published opportunity")
+            }.
+            recover { case t =>
+              Logger.error(s"Failed to send email to $mgrMail on an opportunity publishing", t)
+              None
+          }.
+            map{_ => Ok(Json.toJson(d))}
+
+        case None => Future.successful(NotFound)
       }
       case Some(_) => Future.successful(BadRequest(s"Opportunity with id ${id.id} has already been published"))
     }

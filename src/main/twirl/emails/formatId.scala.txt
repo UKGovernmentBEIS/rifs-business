@@ -1,0 +1,3 @@
+@(
+    id: rifs.business.models.OpportunityId
+) @{f"RIFS ${id.id}%04d"}

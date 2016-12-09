@@ -17,8 +17,9 @@ import rifs.business.restmodels.{ApplicationDetail, ApplicationSectionDetail}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Random
 
-class ApplicationController @Inject()( applications: ApplicationOps, appForms: ApplicationFormOps, opps: OpportunityOps, notifications: NotificationService, config: Configuration)
-                                     (implicit val ec: ExecutionContext) extends Controller with ControllerUtils {
+class ApplicationController @Inject()( applications: ApplicationOps, appForms: ApplicationFormOps, opps: OpportunityOps,
+                                       notifications: NotificationService, config: Configuration)
+                                     (implicit val ec: ExecutionContext) extends Controller with ControllerUtils with EmailUtils {
   def byId(id: ApplicationId) = Action.async(applications.byId(id).map(jsonResult(_)))
 
   def applicationForForm(applicationFormId: ApplicationFormId) = Action.async {
@@ -197,18 +198,15 @@ class ApplicationController @Inject()( applications: ApplicationOps, appForms: A
     applications.deleteSection(id, sectionNumber).map(_ => NoContent)
   }
 
-  val RIFS_EMAIL = "rifs.email"
-  val RIFS_DUMMY_APPLICANT_EMAIL = s"$RIFS_EMAIL.dummyapplicant"
-  val RIFS_REPLY_TO_EMAIL = s"$RIFS_EMAIL.replyto"
-  val RIFS_DUMMY_MANAGER_EMAIL = s"$RIFS_EMAIL.dummymanager"
+
 
   def submit(id: ApplicationId) = Action.async { _ =>
 
     applications.submit(id).flatMap {
       case Some(submissionRef) =>
-        val from = config.underlying.getString(RIFS_REPLY_TO_EMAIL)
+        val from = fromAddress(config)
         val to = config.underlying.getString(RIFS_DUMMY_APPLICANT_EMAIL)
-        val mgrEmail = config.underlying.getString(RIFS_DUMMY_MANAGER_EMAIL)
+        val mgrEmail = managerEmail(config)
 
         val fs = Seq(
           ("Manager", notifications.notifyPortfolioManager(submissionRef, from, to)),
