@@ -16,8 +16,8 @@ import scala.concurrent.{ExecutionContext, Future}
 class OpportunityController @Inject()(opportunities: OpportunityOps,
                                       OpportunityAction: OpportunityAction,
                                       notifications: NotificationService)
-                                     (implicit val ec: ExecutionContext) extends Controller
-  with ControllerUtils with EmailUtils {
+                                     (implicit val ec: ExecutionContext)
+  extends Controller with ControllerUtils {
 
   def byId(id: OpportunityId) = OpportunityAction(id)(request => Ok(Json.toJson(request.opportunity)))
 
