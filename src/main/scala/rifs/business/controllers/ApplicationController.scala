@@ -4,11 +4,11 @@ import javax.inject.Inject
 
 import cats.data.OptionT
 import cats.instances.future._
-import org.joda.time.{DateTime, DateTimeZone, LocalDateTime}
-import play.api.cache.Cached
+import org.joda.time.{DateTime, DateTimeZone}
+import play.api.Logger
 import play.api.libs.json._
 import play.api.mvc.{Action, Controller}
-import play.api.{Configuration, Logger}
+import rifs.business.Config
 import rifs.business.data.{ApplicationFormOps, ApplicationOps, OpportunityOps}
 import rifs.business.models.{ApplicationFormId, ApplicationId}
 import rifs.business.notifications.NotificationService
@@ -17,9 +17,11 @@ import rifs.business.restmodels.{ApplicationDetail, ApplicationSectionDetail}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Random
 
-class ApplicationController @Inject()( applications: ApplicationOps, appForms: ApplicationFormOps, opps: OpportunityOps,
-                                       notifications: NotificationService, config: Configuration)
-                                     (implicit val ec: ExecutionContext) extends Controller with ControllerUtils with EmailUtils {
+class ApplicationController @Inject()(applications: ApplicationOps,
+                                      appForms: ApplicationFormOps,
+                                      opps: OpportunityOps,
+                                      notifications: NotificationService)
+                                     (implicit val ec: ExecutionContext) extends Controller with ControllerUtils {
   def byId(id: ApplicationId) = Action.async(applications.byId(id).map(jsonResult(_)))
 
   def applicationForForm(applicationFormId: ApplicationFormId) = Action.async {
@@ -96,7 +98,6 @@ class ApplicationController @Inject()( applications: ApplicationOps, appForms: A
       if (count > 0) NoContent else NotFound
     }
   }
-
 
 
   def deleteSectionItem(id: ApplicationId, sectionNumber: Int, itemNumber: Int) = Action.async { implicit request =>
@@ -199,14 +200,14 @@ class ApplicationController @Inject()( applications: ApplicationOps, appForms: A
   }
 
 
-
   def submit(id: ApplicationId) = Action.async { _ =>
+    import Config.config.rifs.{email => emailConfig}
 
     applications.submit(id).flatMap {
       case Some(submissionRef) =>
-        val from = fromAddress(config)
-        val to = config.underlying.getString(RIFS_DUMMY_APPLICANT_EMAIL)
-        val mgrEmail = managerEmail(config)
+        val from = emailConfig.replyto
+        val to = emailConfig.dummyapplicant
+        val mgrEmail = emailConfig.dummymanager
 
         val fs = Seq(
           ("Manager", notifications.notifyPortfolioManager(submissionRef, from, to)),
