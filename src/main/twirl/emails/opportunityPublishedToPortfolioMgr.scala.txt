@@ -1,0 +1,10 @@
+@(portFolioMgrName: String,
+  opportunityRefNumber: rifs.business.models.OpportunityId,
+  opportunityTitle: String
+  )
+
+Dear portfolio manager @portFolioMgrName,
+The new opportunity - @opportunityTitle @formatId(opportunityRefNumber), has now been set up and published.
+It will be available for use during the dates specified.
+Kind regards
+RIFS

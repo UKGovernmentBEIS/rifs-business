@@ -6,9 +6,9 @@ import cats.data.OptionT
 import cats.instances.future._
 import com.google.inject.ImplementedBy
 import org.joda.time.DateTime
-import play.api.libs.mailer.{MailerClient}
-import rifs.business.data.ApplicationOps
-import rifs.business.models.{ApplicationFormRow, ApplicationId, OpportunityRow}
+import play.api.libs.mailer.MailerClient
+import rifs.business.data.{ApplicationOps, OpportunityOps}
+import rifs.business.models.{ApplicationFormRow, ApplicationId, OpportunityId, OpportunityRow}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -27,9 +27,11 @@ trait NotificationService {
 
   def notifyPortfolioManager(applicationFormId: ApplicationId, from: String, to: String): Future[Option[NotificationId]]
   def notifyApplicant(applicationFormId: ApplicationId, submittedAt: DateTime, from: String, to: String, mgrEmail: String): Future[Option[NotificationId]]
+  def notifyManager(id: OpportunityId, from: String, mgrEmail: String): Future[Option[NotificationId]]
 }
 
-class EmailNotifications @Inject()(sender: MailerClient, applications: ApplicationOps)(implicit ec: ExecutionContext) extends NotificationService {
+class EmailNotifications @Inject()(sender: MailerClient, applications: ApplicationOps, opportunities: OpportunityOps)
+                                    (implicit ec: ExecutionContext) extends NotificationService {
 
   import Notifications._
   import play.api.libs.mailer._
@@ -49,7 +51,7 @@ class EmailNotifications @Inject()(sender: MailerClient, applications: Applicati
         applicantTitle = "Mr",
         applicantLastName,
         applicationTitle,
-        opportunityRefNumber = opportunity.id.id.toString,
+        opportunityRefNumber = opportunity.id,
         opportunityTitle = opportunity.title,
         submissionLink = "http://todo.link",
         portFolioMgrFirstName = "Portfolio",
@@ -96,7 +98,7 @@ class EmailNotifications @Inject()(sender: MailerClient, applications: Applicati
         applicantFirstName = "Eric",
         applicantOrg = "Association of Medical Research Charities",
         applicationRefNum = appForm.id.id.toString,
-        opportunityRefNumber = appForm.opportunityId.id.toString,
+        opportunityRefNumber = appForm.opportunityId,
         opportunityTitle = opportunity.title,
         submissionLink = "http://todo.link"
       )
@@ -115,6 +117,36 @@ class EmailNotifications @Inject()(sender: MailerClient, applications: Applicati
 
     applications.gatherDetails(applicationId).map {
       _.map(d => EmailId(sender.send(createEmail(d.form, d.opp))))
+    }
+  }
+
+  override def notifyManager(id: OpportunityId, from: String, mgrEmail: String): Future[Option[NotificationId]] = {
+
+    def createEmail(opportunity: OpportunityRow) = {
+
+      val emailSubject = "Opportunity published"
+      val portFolioMgrName = "Portfolio"
+
+      val text = emails.txt.opportunityPublishedToPortfolioMgr(
+        portFolioMgrName,
+        opportunityRefNumber = opportunity.id,
+        opportunityTitle = opportunity.title
+      )
+
+      Email(
+        subject = emailSubject,
+        from,
+        to = Seq(s"$portFolioMgrName <$mgrEmail>"),
+        // adds attachment
+        attachments = Nil,
+        // sends text, HTML or both...
+        bodyText = Some(text.body),
+        bodyHtml = None
+      )
+    }
+
+    opportunities.byId(id).map {
+      _.map(opp => EmailId(sender.send( createEmail(opp) )))
     }
   }
 }

@@ -1,8 +1,10 @@
 package rifs.business
 
-case class Config(cache: CacheConfig)
+case class Config(rifs: RifsConfig)
 
-case class CacheConfig(timeout: Option[Int])
+case class RifsConfig(email: EmailConfig)
+
+case class EmailConfig(dummyapplicant: String, replyto: String, dummymanager: String)
 
 object Config {
 

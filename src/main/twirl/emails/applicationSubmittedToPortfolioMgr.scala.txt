@@ -4,12 +4,12 @@
   applicantFirstName: String,
   applicantOrg: String,
   applicationRefNum: String,
-  opportunityRefNumber: String,
+  opportunityRefNumber: rifs.business.models.OpportunityId,
   opportunityTitle: String,
   submissionLink: String)
 
 Dear portfolio manager @portFolioMgrName,
-This is to let you know that @applicantTitle @applicantLastName of @applicantOrg has submitted an application @applicationRefNum for your opportunity @opportunityTitle opportunity reference number @opportunityRefNumber.
+This is to let you know that @applicantTitle @applicantLastName of @applicantOrg has submitted an application @applicationRefNum for your opportunity @opportunityTitle opportunity reference number @formatId(opportunityRefNumber).
 You can view this application on RIFS @submissionLink.
 Kind regards
 RIFS

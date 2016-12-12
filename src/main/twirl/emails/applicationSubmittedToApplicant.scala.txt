@@ -2,7 +2,7 @@
   applicantTitle: String,
   applicantLastName: String,
   applicationTitle: String,
-  opportunityRefNumber: String,
+  opportunityRefNumber: rifs.business.models.OpportunityId,
   opportunityTitle: String,
   submissionLink: String,
   portFolioMgrFirstName: String,
@@ -12,7 +12,7 @@
   reviewDeadline: org.joda.time.DateTime)
 
 Dear @applicantTitle @applicantLastName
-Thank you for submitting your application @applicationTitle for our opportunity @opportunityTitle, @opportunityRefNumber
+Thank you for submitting your application @applicationTitle for our opportunity @opportunityTitle, @formatId(opportunityRefNumber)
 We'll now check to see if your application meets the eligibility criteria for this opportunity. If successful, your application will proceed to assessment.
 You can also view the progress of your application on @submissionLink.
 We'll let you know the outcome of our assessment by @{ org.joda.time.format.DateTimeFormat.forPattern("dd/MM/yyyy").print(reviewDeadline) }
