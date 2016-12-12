@@ -11,7 +11,8 @@ case class SectionRow(
                        title: String,
                        text: Option[String],
                        description: Option[String],
-                       helpText: Option[String]
+                       helpText: Option[String],
+                       sectionType: String
                      )
 
 case class OpportunityId(id: Long) extends AnyVal

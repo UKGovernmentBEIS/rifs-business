@@ -31,7 +31,7 @@ object OpportunityExtractors {
   }
 
   def buildSection(s: SectionRow): OpportunityDescriptionSection = {
-    OpportunityDescriptionSection(s.sectionNumber, s.title, s.text, s.description, s.helpText)
+    OpportunityDescriptionSection(s.sectionNumber, s.title, s.text, s.description, s.helpText, s.sectionType)
   }
 
 

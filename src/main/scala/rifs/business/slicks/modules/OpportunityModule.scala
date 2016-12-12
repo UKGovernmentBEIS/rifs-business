@@ -35,7 +35,9 @@ trait OpportunityModule {
 
     def helpText = column[Option[String]]("help_text", O.Length(8192))
 
-    def * = (id, sectionNumber, opportunityId, title, text, description, helpText) <> (SectionRow.tupled, SectionRow.unapply)
+    def sectionType = column[String]("section_type", O.Length(30))
+
+    def * = (id, sectionNumber, opportunityId, title, text, description, helpText, sectionType) <> (SectionRow.tupled, SectionRow.unapply)
   }
 
   lazy val sectionTable = TableQuery[SectionTable]

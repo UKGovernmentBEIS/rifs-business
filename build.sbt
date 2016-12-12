@@ -12,8 +12,7 @@ scalaVersion in ThisBuild := "2.11.8"
 
 lazy val slickGen = (project in file("slickGen"))
   .settings(libraryDependencies ++= Seq(
-    "com.wellfactored" %% "property-info" % "1.0.0",
-    "com.typesafe.slick" %% "slick" % "3.1.1"
+    "com.wellfactored" %% "property-info" % "1.0.0"
   ))
   .enablePlugins(AutomateHeaderPlugin)
   .enablePlugins(GitVersioning)
@@ -42,7 +41,6 @@ lazy val `rifs-business` = (project in file("."))
       "com.github.melrief" %% "pureconfig" % "0.1.6",
       "org.postgresql" % "postgresql" % "9.4.1211",
       "com.typesafe.slick" %% "slick" % "3.1.1",
-      "com.github.tototoshi" %% "slick-joda-mapper" % "2.2.0",
       "com.typesafe.play" %% "play-slick" % "2.0.0",
       "com.typesafe.play" %% "play-slick-evolutions" % "2.0.0",
       "com.typesafe.play" %% "play-mailer" % "5.0.0",
