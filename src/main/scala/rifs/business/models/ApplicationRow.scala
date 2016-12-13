@@ -9,4 +9,4 @@ case class ApplicationSectionId(id: Long)
 
 case class ApplicationSectionRow(id: ApplicationSectionId, applicationId: ApplicationId, sectionNumber: Int, answers: JsObject, completedAt: Option[DateTime])
 
-case class ApplicationRow(id: ApplicationId, applicationFormId: ApplicationFormId)
+case class ApplicationRow(id: ApplicationId, applicationFormId: ApplicationFormId, personalReference: Option[String])

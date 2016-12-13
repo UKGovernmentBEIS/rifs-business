@@ -44,7 +44,7 @@ class ApplicationTables @Inject()(val dbConfigProvider: DatabaseConfigProvider)(
     for {
       _ <- OptionT(appFormF)
       app <- OptionT.liftF(fetchOrCreate(applicationFormId))
-    } yield ApplicationRow(app.id, app.applicationFormId)
+    } yield ApplicationRow(app.id, app.applicationFormId, app.personalReference)
   }.value
 
   override def application(applicationId: ApplicationId): Future[Option[Application]] = db.run {
@@ -80,7 +80,7 @@ class ApplicationTables @Inject()(val dbConfigProvider: DatabaseConfigProvider)(
 
   private def fetchOrCreate(applicationFormId: ApplicationFormId): Future[Application] = {
     db.run(applicationWithSectionsForFormC(applicationFormId).result).flatMap {
-      case Seq() => createApplicationForForm(applicationFormId).map { id => Application(id, applicationFormId, Seq()) }
+      case Seq() => createApplicationForForm(applicationFormId).map { id => Application(id, applicationFormId, None, Seq()) }
       case ps =>
         val (as, ss) = ps.unzip
         Future.successful(as.map(a => buildApplication(a, ss.flatten)).head)
@@ -92,11 +92,11 @@ class ApplicationTables @Inject()(val dbConfigProvider: DatabaseConfigProvider)(
       ApplicationSection(s.sectionNumber, s.answers, s.completedAt)
     }
 
-    Application(app.id, app.applicationFormId, sectionOverviews)
+    Application(app.id, app.applicationFormId, app.personalReference, sectionOverviews)
   }
 
   private def createApplicationForForm(applicationFormId: ApplicationFormId): Future[ApplicationId] = db.run {
-    (applicationTable returning applicationTable.map(_.id)) += ApplicationRow(ApplicationId(0), applicationFormId)
+    (applicationTable returning applicationTable.map(_.id)) += ApplicationRow(ApplicationId(0), applicationFormId, None)
   }
 
   override def fetchAppWithSection(id: ApplicationId, sectionNumber: Int): Future[Option[(ApplicationRow, Option[ApplicationSectionRow])]] = db.run {

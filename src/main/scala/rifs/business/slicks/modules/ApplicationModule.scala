@@ -48,11 +48,13 @@ trait ApplicationModule extends PlayJsonMappers {
 
     def applicationFormId = column[ApplicationFormId]("application_form_id", O.Length(IdType.length))
 
+    def personalReference = column[Option[String]]("personal_reference", O.Length(255))
+
     def applicationFormIdFK = foreignKey("application_application_form_fk", applicationFormId, applicationFormTable)(_.id, onDelete = ForeignKeyAction.Cascade)
 
     def applicationFormIdIndex = index("application_application_form_idx", applicationFormId)
 
-    def * = (id, applicationFormId) <> (ApplicationRow.tupled, ApplicationRow.unapply)
+    def * = (id, applicationFormId, personalReference) <> (ApplicationRow.tupled, ApplicationRow.unapply)
   }
 
   lazy val applicationTable = TableQuery[ApplicationTable]
