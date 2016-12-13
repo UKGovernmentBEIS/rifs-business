@@ -18,6 +18,7 @@ GET           /application_form/:id/application                      rifs.busine
 GET           /application/:id                                       rifs.business.controllers.ApplicationController.application(id: ApplicationId)
 GET           /application/:id/overview                              rifs.business.controllers.ApplicationController.overview(id: ApplicationId)
 GET           /application/:id/detail                                rifs.business.controllers.ApplicationController.detail(id: ApplicationId)
+POST          /application/:id/personal-ref                          rifs.business.controllers.ApplicationController.savePersonalRef(id: ApplicationId)
 DELETE        /application/:id                                       rifs.business.controllers.ApplicationController.delete(id: ApplicationId)
 DELETE        /application                                           rifs.business.controllers.ApplicationController.deleteAll
 

@@ -227,4 +227,15 @@ class ApplicationController @Inject()(applications: ApplicationOps,
         Future.successful(jsonResult[ApplicationId](None))
     }
   }
+
+  def savePersonalRef(id: ApplicationId) = Action.async(parse.json[JsString]) {implicit request =>
+      val newVal = request.body.as[String] match {
+        case "" => None
+        case s  => Some(s)
+      }
+      applications.updatePersonalReference(id, newVal).map {
+        case 0  => NotFound
+        case _  => NoContent
+      }
+  }
 }
