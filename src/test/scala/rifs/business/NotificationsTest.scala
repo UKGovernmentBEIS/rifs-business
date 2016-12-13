@@ -102,7 +102,7 @@ object NotificationsTestData {
     val opp = OpportunityRow(oppId, "oz1", "", None, 0, "", None, None)
 
     val appDetails = ApplicationDetails(
-      ApplicationRow(APP_ID, appFormId),
+      ApplicationRow(APP_ID, appFormId, None),
       ApplicationFormRow(appFormId, oppId), opp)
 
     val details = Future.successful(Some(appDetails))
