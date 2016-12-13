@@ -37,7 +37,7 @@ class ApplicationController @Inject()(applications: ApplicationOps,
       f <- OptionT(appForms.byId(a.applicationFormId))
       o <- OptionT(opps.opportunity(f.opportunityId))
     } yield {
-      ApplicationDetail(a.id, f.sections.length, a.sections.count(_.completedAt.isDefined), o.summary, f, a.sections)
+      ApplicationDetail(a.id, a.personalReference, f.sections.length, a.sections.count(_.completedAt.isDefined), o.summary, f, a.sections)
     }
 
     ft.value.map(jsonResult(_))
