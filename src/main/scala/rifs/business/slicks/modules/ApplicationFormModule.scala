@@ -1,10 +1,10 @@
 package rifs.business.slicks.modules
 
 import com.github.tminglei.slickpg.{ExPostgresDriver, PgDateSupportJoda, PgPlayJsonSupport}
+import com.wellfactored.slickgen.IdType
 import play.api.libs.json.JsArray
 import rifs.business.models._
 import rifs.business.slicks.support.DBBinding
-import rifs.slicks.gen.IdType
 
 trait ApplicationFormModule extends PlayJsonMappers{
   self:  DBBinding with ExPostgresDriver with PgDateSupportJoda with PgPlayJsonSupport with OpportunityModule =>
