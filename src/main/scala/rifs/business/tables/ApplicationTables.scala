@@ -160,5 +160,8 @@ class ApplicationTables @Inject()(val dbConfigProvider: DatabaseConfigProvider)(
 
   lazy val appSectionsC = Compiled(appSectionsQ _)
 
+  override def updatePersonalReference(id: SubmittedApplicationRef, reference: Option[String]): Future[Int] = {
+    db.run( applicationTable.filter(_.id === id).map(_.personalReference).update(reference) )
+  }
 }
 

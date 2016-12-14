@@ -34,4 +34,6 @@ class StubApplicationOps extends ApplicationOps{
   override def submit(id: ApplicationId): Future[Option[SubmittedApplicationRef]] = ???
 
   override def clearSectionCompletedDate(id: SubmittedApplicationRef, sectionNumber: Int): Future[Int] = ???
+
+  override def updatePersonalReference(id: SubmittedApplicationRef, reference: Option[String]) = ???
 }
