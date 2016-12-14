@@ -3,7 +3,7 @@ package rifs.business.slicks.modules
 import org.joda.time.DateTime
 import rifs.business.models._
 import rifs.business.slicks.support.DBBinding
-import rifs.slicks.gen.IdType
+import com.wellfactored.slickgen.IdType
 
 trait OpportunityModule {
   self: DBBinding =>

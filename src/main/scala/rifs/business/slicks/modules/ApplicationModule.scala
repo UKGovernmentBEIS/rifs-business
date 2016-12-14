@@ -5,7 +5,7 @@ import org.joda.time.DateTime
 import play.api.libs.json.JsObject
 import rifs.business.models._
 import rifs.business.slicks.support.DBBinding
-import rifs.slicks.gen.IdType
+import com.wellfactored.slickgen.IdType
 
 import scala.language.implicitConversions
 

@@ -1,7 +1,7 @@
 package rifs.business.slicks.modulesdefs
 
+import com.wellfactored.slickgen._
 import rifs.business.models.{ApplicationFormQuestionRow, ApplicationFormRow, ApplicationFormSectionRow}
-import rifs.slicks.gen.{ModuleDefinition, ModuleSpec}
 
 object ApplicationFormModuleDef extends ModuleDefinition {
   val spec = ModuleSpec("ApplicationFormModule")
