@@ -31,10 +31,10 @@ PUT           /application/:id/section/:num/markNotCompleted         rifs.busine
 DELETE        /application/:id/section/:num                          rifs.business.controllers.ApplicationController.deleteSection(id: ApplicationId, num:Int)
 GET           /application/:id/sections                              rifs.business.controllers.ApplicationController.sections(id: ApplicationId)
 
-POST          /application/:id/section/:num/items                    rifs.business.controllers.ApplicationController.postSectionItem(id: ApplicationId, num:Int)
-GET           /application/:id/section/:num/item/:itemNum            rifs.business.controllers.ApplicationController.getSectionItem(id: ApplicationId, num:Int, itemNum:Int)
-PUT           /application/:id/section/:num/item/:itemNum            rifs.business.controllers.ApplicationController.putSectionItem(id: ApplicationId, num:Int, itemNum:Int)
-DELETE        /application/:id/section/:num/item/:itemNum            rifs.business.controllers.ApplicationController.deleteSectionItem(id: ApplicationId, num:Int, itemNum:Int)
+POST          /application/:id/section/:num/items                    rifs.business.controllers.ItemController.post(id: ApplicationId, num:Int)
+GET           /application/:id/section/:num/item/:itemNum            rifs.business.controllers.ItemController.get(id: ApplicationId, num:Int, itemNum:Int)
+PUT           /application/:id/section/:num/item/:itemNum            rifs.business.controllers.ItemController.put(id: ApplicationId, num:Int, itemNum:Int)
+DELETE        /application/:id/section/:num/item/:itemNum            rifs.business.controllers.ItemController.delete(id: ApplicationId, num:Int, itemNum:Int)
 
 # Submit application
 POST          /application/:id/submit                                rifs.business.controllers.ApplicationController.submit(id: ApplicationId)
