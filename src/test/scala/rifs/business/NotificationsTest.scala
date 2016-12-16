@@ -6,10 +6,9 @@ import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.time.{Seconds, Span}
 import play.api.libs.json.{JsObject, JsString}
 import play.api.libs.mailer.{Email, MailerClient}
-import rifs.business.data.{ApplicationDetails, OpportunityOps}
+import rifs.business.data.ApplicationDetails
 import rifs.business.models._
 import rifs.business.notifications.EmailNotifications
-import rifs.business.restmodels.{Opportunity, OpportunitySummary}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -56,8 +55,8 @@ class NotificationsTest extends WordSpecLike with Matchers with OptionValues wit
       val res2 = notificationAppl.notifyApplicant(APP_ID, DateTime.now(DateTimeZone.UTC), "from@", "to@", "mgr@")
       res2.futureValue.value.id shouldBe MAIL_ID
 
-      val oppNotify = new EmailNotifications(sender, appOps, OppOps)
-      val res3 = oppNotify.notifyManager(OPP_ID, "from@", "to@")
+      val oppNotify = new EmailNotifications(sender, appOps, oppOps)
+      val res3 = oppNotify.notifyManager(dummyOppId, "from@", "to@")
       res3.futureValue.value.id shouldBe MAIL_ID
     }
 
@@ -72,8 +71,8 @@ class NotificationsTest extends WordSpecLike with Matchers with OptionValues wit
       val res2 = notificationAppl.notifyApplicant(APP_ID, DateTime.now(DateTimeZone.UTC), "from@", "to@", "mgr@")
       whenReady(res2.failed) { ex => ex shouldBe a[RuntimeException] }
 
-      val oppNotify = new EmailNotifications(sender, appOps, OppOps)
-      val res3 = oppNotify.notifyManager(OPP_ID, "from@", "to@")
+      val oppNotify = new EmailNotifications(sender, appOps, oppOps)
+      val res3 = oppNotify.notifyManager(dummyOppId, "from@", "to@")
       whenReady(res3.failed) { ex => ex shouldBe a[RuntimeException] }
     }
   }
@@ -83,14 +82,11 @@ object NotificationsTestData {
   implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
 
   val APP_ID = ApplicationId(1)
-  val OppNotFoundOps = new DummyOpportunityOps(_ =>Future.successful(None))
+  val OppNotFoundOps = new DummySaveDescription(_ => Future.successful(None))
 
-  val OPP_ID = OpportunityId(1399)
-  val OppOps = {
-    new DummyOpportunityOps( {oid=>
-      Future{ if ( oid == OPP_ID ) Some(OpportunityRow(oid, "Op1", "today", None, 2000, "£", None, None)) else None }
-    } )
-  }
+  val dummyOppId = OpportunityId(1399)
+  val dummyOpp = OpportunityRow(dummyOppId, "Op1", "today", None, 2000, "£", None, None)
+  val oppOps = new DummySaveDescription(oid => Future.successful(if (oid == dummyOppId) Some(dummyOpp) else None))
 
   class DummyMailer(result: => String) extends MailerClient {
     override def send(email: Email): String = result
@@ -107,7 +103,7 @@ object NotificationsTestData {
 
     val details = Future.successful(Some(appDetails))
     val appSectRow = ApplicationSectionRow(ApplicationSectionId(0), APP_ID, rifs.business.models.APP_TITLE_SECTION_NO,
-      JsObject(Seq("title"->JsString("app title"))), None)
+      JsObject(Seq("title" -> JsString("app title"))), None)
     (new DummyGatherDetailsAndSect(details, Future.successful(Some(appSectRow))), new DummyGatherDetails(details))
   }
 
@@ -120,27 +116,9 @@ object NotificationsTestData {
     override def fetchSection(id: ApplicationId, sectionNumber: Int): Future[Option[ApplicationSectionRow]] = section
   }
 
-
-  class DummyOpportunityOps(oppRow: OpportunityId => Future[Option[OpportunityRow]]) extends OpportunityOps {
-
+  class DummySaveDescription(oppRow: OpportunityId => Future[Option[OpportunityRow]]) extends StubOpportunityOps {
     override def byId(id: OpportunityId): Future[Option[OpportunityRow]] = oppRow(id)
-
-    override def opportunity(opportunityId: OpportunityId): Future[Option[Opportunity]] = ???
-
-    override def findOpen: Future[Set[Opportunity]] = ???
-
-    override def summaries: Future[Set[Opportunity]] = ???
-
-    override def openSummaries: Future[Set[Opportunity]] = ???
-
-    override def updateSummary(summary: OpportunitySummary): Future[Int] = ???
-
-    override def publish(id: OpportunityId): Future[Option[DateTime]] = ???
-
-    override def duplicate(id: OpportunityId): Future[Option[OpportunityId]] = ???
-
-    override def saveSectionDescription(id: OpportunityId, sectionNo: Int, description: Option[String]): Future[Int] = ???
-
-    override def reset(): Future[Unit] = ???
   }
+
 }
+
