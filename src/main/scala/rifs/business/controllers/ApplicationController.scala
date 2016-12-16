@@ -6,11 +6,12 @@ import cats.data.OptionT
 import cats.instances.future._
 import org.joda.time.{DateTime, DateTimeZone}
 import play.api.Logger
-import play.api.libs.json._
+import play.api.libs.json.{JsObject, _}
 import play.api.mvc.{Action, Controller}
 import rifs.business.Config
+import rifs.business.actions.ApplicationAction
 import rifs.business.data.{ApplicationFormOps, ApplicationOps, OpportunityOps}
-import rifs.business.models.{ApplicationFormId, ApplicationId}
+import rifs.business.models.{ApplicationFormId, ApplicationId, SubmittedApplicationRef}
 import rifs.business.notifications.NotificationService
 import rifs.business.restmodels.ApplicationDetail
 
@@ -19,7 +20,8 @@ import scala.concurrent.{ExecutionContext, Future}
 class ApplicationController @Inject()(applications: ApplicationOps,
                                       appForms: ApplicationFormOps,
                                       opps: OpportunityOps,
-                                      notifications: NotificationService)
+                                      notifications: NotificationService,
+                                      ApplicationAction: ApplicationAction)
                                      (implicit val ec: ExecutionContext) extends Controller with ControllerUtils {
   def byId(id: ApplicationId) = Action.async(applications.byId(id).map(jsonResult(_)))
 
@@ -63,42 +65,43 @@ class ApplicationController @Inject()(applications: ApplicationOps,
     applications.deleteAll.map(_ => NoContent)
   }
 
-  def submit(id: ApplicationId) = Action.async { _ =>
-    import Config.config.rifs.{email => emailConfig}
+  def submit(id: ApplicationId) = ApplicationAction(id).async { request =>
+    val f = for {
+      submissionRef <- OptionT(applications.submit(id))
+      _ <- OptionT.liftF(sendSubmissionNotifications(submissionRef))
+    } yield submissionRef
 
-    applications.submit(id).flatMap {
-      case Some(submissionRef) =>
-        val from = emailConfig.replyto
-        val to = emailConfig.dummyapplicant
-        val mgrEmail = emailConfig.dummymanager
 
-        val fs = Seq(
-          ("Manager", notifications.notifyPortfolioManager(submissionRef, from, to)),
-          ("Applicant", notifications.notifyApplicant(submissionRef, DateTime.now(DateTimeZone.UTC), from, to, mgrEmail))
-        ).map {
-          case (who, f) => f.recover { case t =>
-            Logger.error(s"Failed to send email to $who on an application submission", t)
-            None
-          }
-        }
-
-        Future.sequence(fs).map(_ => Ok(JsObject(Seq("applicationRef" -> Json.toJson(submissionRef)))))
-
-      // the required app ID is not found
-      case None =>
-        Logger.warn(s"An attempt to submit a non-existent application $id")
-        Future.successful(jsonResult[ApplicationId](None))
-    }
+    f.value.map(ref => Ok(JsObject(Seq("applicationRef" -> Json.toJson(ref)))))
   }
 
-  def savePersonalRef(id: ApplicationId) = Action.async(parse.json[JsString]) {implicit request =>
-      val newVal = request.body.as[String] match {
-        case "" => None
-        case s  => Some(s)
+  private def sendSubmissionNotifications(submissionRef: SubmittedApplicationRef) = {
+    import Config.config.rifs.{email => emailConfig}
+
+    val from = emailConfig.replyto
+    val to = emailConfig.dummyapplicant
+    val mgrEmail = emailConfig.dummymanager
+
+    val fs = Seq(
+      ("Manager", notifications.notifyPortfolioManager(submissionRef, from, to)),
+      ("Applicant", notifications.notifyApplicant(submissionRef, DateTime.now(DateTimeZone.UTC), from, to, mgrEmail))
+    ).map {
+      case (who, f) => f.recover { case t =>
+        Logger.error(s"Failed to send email to $who on an application submission", t)
+        None
       }
-      applications.updatePersonalReference(id, newVal).map {
-        case 0  => NotFound
-        case _  => NoContent
-      }
+    }
+    Future.sequence(fs).map(_ => ())
+  }
+
+  def savePersonalRef(id: ApplicationId) = Action.async(parse.json[JsString]) { implicit request =>
+    val newVal = request.body.as[String] match {
+      case "" => None
+      case s => Some(s)
+    }
+    applications.updatePersonalReference(id, newVal).map {
+      case 0 => NotFound
+      case _ => NoContent
+    }
   }
 }
