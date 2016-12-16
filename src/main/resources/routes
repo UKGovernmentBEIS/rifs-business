@@ -22,14 +22,14 @@ POST          /application/:id/personal-ref                          rifs.busine
 DELETE        /application/:id                                       rifs.business.controllers.ApplicationController.delete(id: ApplicationId)
 DELETE        /application                                           rifs.business.controllers.ApplicationController.deleteAll
 
-GET           /application/:id/section/:num                          rifs.business.controllers.ApplicationController.section(id: ApplicationId, num:Int)
-GET           /application/:id/section/:num/detail                   rifs.business.controllers.ApplicationController.sectionDetail(id: ApplicationId, num:Int)
-POST          /application/:id/section/:num                          rifs.business.controllers.ApplicationController.saveSection(id: ApplicationId, num:Int)
-POST          /application/:id/section/:num/complete                 rifs.business.controllers.ApplicationController.completeSection(id: ApplicationId, num:Int)
-PUT           /application/:id/section/:num/markNotCompleted         rifs.business.controllers.ApplicationController.clearSectionCompletedDate(id: ApplicationId, num:Int)
+GET           /application/:id/section/:num                          rifs.business.controllers.AppSectionController.get(id: ApplicationId, num:Int)
+GET           /application/:id/section/:num/detail                   rifs.business.controllers.AppSectionController.sectionDetail(id: ApplicationId, num:Int)
+POST          /application/:id/section/:num                          rifs.business.controllers.AppSectionController.post(id: ApplicationId, num:Int)
+POST          /application/:id/section/:num/complete                 rifs.business.controllers.AppSectionController.completeSection(id: ApplicationId, num:Int)
+PUT           /application/:id/section/:num/markNotCompleted         rifs.business.controllers.AppSectionController.clearSectionCompletedDate(id: ApplicationId, num:Int)
 
-DELETE        /application/:id/section/:num                          rifs.business.controllers.ApplicationController.deleteSection(id: ApplicationId, num:Int)
-GET           /application/:id/sections                              rifs.business.controllers.ApplicationController.sections(id: ApplicationId)
+DELETE        /application/:id/section/:num                          rifs.business.controllers.AppSectionController.delete(id: ApplicationId, num:Int)
+GET           /application/:id/sections                              rifs.business.controllers.AppSectionController.sections(id: ApplicationId)
 
 POST          /application/:id/section/:num/items                    rifs.business.controllers.ItemController.post(id: ApplicationId, num:Int)
 GET           /application/:id/section/:num/item/:itemNum            rifs.business.controllers.ItemController.get(id: ApplicationId, num:Int, itemNum:Int)
