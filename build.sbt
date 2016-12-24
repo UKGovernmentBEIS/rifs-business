@@ -4,7 +4,6 @@ import sbtbuildinfo.BuildInfoPlugin.autoImport._
 
 name := "rifs-business"
 
-headers in ThisBuild := createFrom(MIT, "2016", "Department of Business, Energy and Industrial Strategy")
 git.useGitDescribe in ThisBuild := true
 
 scalaVersion in ThisBuild := "2.11.8"
@@ -14,7 +13,6 @@ disablePlugins(PlayLayoutPlugin)
 enablePlugins(GitVersioning)
 enablePlugins(GitBranchPrompt)
 enablePlugins(BuildInfoPlugin)
-enablePlugins(AutomateHeaderPlugin)
 
 val SLICK_PG_VERSION = "0.14.3"
 
