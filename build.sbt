@@ -36,6 +36,7 @@ libraryDependencies ++= Seq(
   "com.typesafe.play" %% "play-mailer" % "5.0.0",
   "joda-time" % "joda-time" % "2.9.6",
   "org.joda" % "joda-convert" % "1.8.1",
+  "org.typelevel" %% "cats-core" % "0.8.1",
 
   "org.scalatest" %% "scalatest" % "2.2.0" % Test,
   "org.scalatestplus.play" %% "scalatestplus-play" % "1.5.1" % Test)
