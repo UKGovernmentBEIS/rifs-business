@@ -23,8 +23,6 @@ val slickpgDependencies = Seq(
   "com.github.tminglei" %% "slick-pg_joda-time" % SLICK_PG_VERSION
 )
 
-libraryDependencies += "com.wellfactored" %% "play-bindings" % "1.1.0"
-
 libraryDependencies ++= Seq(
   "com.wellfactored" %% "play-bindings" % "2.0.0",
   "com.wellfactored" % "slick-gen_2.11" % "0.0.4",
