@@ -23,20 +23,22 @@ val slickpgDependencies = Seq(
   "com.github.tminglei" %% "slick-pg_joda-time" % SLICK_PG_VERSION
 )
 
+libraryDependencies += "com.wellfactored" %% "play-bindings" % "1.1.0"
+
 libraryDependencies ++= Seq(
-  "com.wellfactored" %% "play-bindings" % "1.1.0",
+  "com.wellfactored" %% "play-bindings" % "2.0.0",
   "com.wellfactored" % "slick-gen_2.11" % "0.0.4",
-  "com.github.melrief" %% "pureconfig" % "0.1.6",
+  "com.github.melrief" %% "pureconfig" % "0.4.0",
   "org.postgresql" % "postgresql" % "9.4.1211",
   "com.typesafe.slick" %% "slick" % "3.1.1",
   "com.typesafe.play" %% "play-slick" % "2.0.0",
   "com.typesafe.play" %% "play-slick-evolutions" % "2.0.0",
   "com.typesafe.play" %% "play-mailer" % "5.0.0",
-  "joda-time" % "joda-time" % "2.9.4",
-  "org.joda" % "joda-convert" % "1.7",
-  "com.wellfactored" %% "value-wrapper" % "1.1.0",
+  "joda-time" % "joda-time" % "2.9.6",
+  "org.joda" % "joda-convert" % "1.8.1",
+
   "org.scalatest" %% "scalatest" % "2.2.0" % Test,
-  "org.scalatestplus.play" %% "scalatestplus-play" % "1.5.1" % "test")
+  "org.scalatestplus.play" %% "scalatestplus-play" % "1.5.1" % Test)
 
 libraryDependencies ++= slickpgDependencies
 
