@@ -27,7 +27,7 @@ case class SectionRow(
                        opportunityId: OpportunityId,
                        title: String,
                        text: Option[String],
-                       description: Option[String],
+                       description: String,
                        helpText: Option[String],
                        sectionType: String
                      )

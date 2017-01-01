@@ -1,7 +1,7 @@
 # --- !Ups
 
 alter table section add column "section_type" varchar(30) not null default 'text';
-update section set text = '', section_type = 'questions' where section_number = 2;
+update section set text = null, section_type = 'questions' where section_number = 2;
 
 # --- !Downs
 

@@ -64,7 +64,7 @@ insert into "section" values (3, 3, 1, 'What events should cover');
 insert into "section" values (4, 4, 1, 'How to get funding');
 insert into "section" values (5, 5, 1, 'Assessment Criteria');
 insert into "section" values (6, 6, 1, 'Further Information');
-"
+
 -- restore the deleted content
 insert into "paragraph" values (6, 1, 2, 'To receive funding for the event, your research organisation must receive funding from the research council and must aim to attract research council supported researchers to the event.');
 insert into "paragraph" values (7, 2, 2, 'We encourage applications that are coordinated across departments within a research organisation or between different research organisations.');
