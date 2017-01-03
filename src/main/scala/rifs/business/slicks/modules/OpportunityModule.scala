@@ -48,7 +48,7 @@ trait OpportunityModule {
 
     def text = column[Option[String]]("text", O.Length(8192))
 
-    def description = column[Option[String]]("description", O.Length(8192))
+    def description = column[String]("description", O.Length(8192))
 
     def helpText = column[Option[String]]("help_text", O.Length(8192))
 

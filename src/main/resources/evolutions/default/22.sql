@@ -1,7 +1,7 @@
 # --- !Ups
 
 ALTER TABLE "section"
-  ADD COLUMN "description" VARCHAR(8192) NULL;
+  ADD COLUMN "description" VARCHAR(8192) NOT NULL default 'no description';
 ALTER TABLE "section"
   ADD COLUMN "help_text" VARCHAR(8192) NULL;
 
@@ -16,13 +16,13 @@ WHERE section_number = 1;
 UPDATE section
 SET
   description = 'Describe the questions the applicant will see on their application form.',
-  help_text = E''
+  help_text = NULL
 WHERE section_number = 2;
 
 UPDATE section
 SET
   description = 'Which criteria will be used to assess applications?',
-  help_text = E'Criteria will depend on the opprotunity, but may include quality, objectives, collaboration between teams and organisations, and value for money. You may weight criteria equally or set priorities.'
+  help_text = E'Criteria will depend on the opportunity, but may include quality, objectives, collaboration between teams and organisations, and value for money. You may weight criteria equally or set priorities.'
 WHERE section_number = 3;
 
 # --- !Downs

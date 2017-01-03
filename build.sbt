@@ -25,7 +25,7 @@ val slickpgDependencies = Seq(
 
 libraryDependencies ++= Seq(
   "com.wellfactored" %% "play-bindings" % "2.0.0",
-  "com.wellfactored" % "slick-gen_2.11" % "0.0.4",
+  "com.wellfactored" %% "slick-gen" % "0.0.4",
   "com.github.melrief" %% "pureconfig" % "0.4.0",
   "org.postgresql" % "postgresql" % "9.4.1211",
   "com.typesafe.slick" %% "slick" % "3.1.1",
