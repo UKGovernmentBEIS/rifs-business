@@ -19,7 +19,6 @@ package rifs.business.tables
 
 import javax.inject.Inject
 
-import com.github.tminglei.slickpg.{ExPostgresDriver, PgDateSupportJoda, PgPlayJsonSupport}
 import play.api.db.slick.DatabaseConfigProvider
 import rifs.business.data.ApplicationFormOps
 import rifs.business.models._

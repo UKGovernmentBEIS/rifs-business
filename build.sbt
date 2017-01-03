@@ -4,6 +4,10 @@ import sbtbuildinfo.BuildInfoPlugin.autoImport._
 
 name := "rifs-business"
 
+startYear := Some(2016)
+
+organization := "uk.gov.beis.digital"
+
 git.useGitDescribe in ThisBuild := true
 
 scalaVersion in ThisBuild := "2.11.8"
