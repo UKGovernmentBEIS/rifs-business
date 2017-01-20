@@ -23,8 +23,8 @@ import play.api.libs.json.JsArray
 import rifs.business.models._
 import rifs.business.slicks.support.DBBinding
 
-trait ApplicationFormModule extends PlayJsonMappers{
-  self:  DBBinding with ExPostgresDriver with PgDateSupportJoda with PgPlayJsonSupport with OpportunityModule =>
+trait ApplicationFormModule extends DBBinding with PlayJsonMappers {
+  self: ExPostgresDriver with PgDateSupportJoda with PgPlayJsonSupport with OpportunityModule =>
 
   import api._
 
@@ -98,5 +98,5 @@ trait ApplicationFormModule extends PlayJsonMappers{
 
   lazy val applicationFormTable = TableQuery[ApplicationFormTable]
 
-  //def schema: driver.DDL = applicationFormQuestionTable.schema ++ applicationFormSectionTable.schema ++ applicationFormTable.schema
+  override def schema = super.schema ++ applicationFormQuestionTable.schema ++ applicationFormSectionTable.schema ++ applicationFormTable.schema
 }

@@ -15,25 +15,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package rifs.business.slicks.support
+import com.google.inject.AbstractModule
+import rifs.business.slicks.modules.DB
 
-import com.github.tminglei.slickpg.{ExPostgresDriver, PgDateSupportJoda, PgPlayJsonSupport}
-import play.api.db.slick.DatabaseConfigProvider
-import slick.backend.DatabaseConfig
-
-trait DBBinding extends ExPostgresDriver with PgDateSupportJoda {
-
-  def dbConfigProvider: DatabaseConfigProvider
-
-  lazy val dbConfig: DatabaseConfig[ExPostgresDriver] = dbConfigProvider.get[ExPostgresDriver]
-
-  lazy val driver = new ExPostgresDriver with PgPlayJsonSupport with PgDateSupportJoda {
-    override val pgjson = "jsonb"
+class Module extends AbstractModule{
+  override def configure() = {
+    bind(classOf[DB]).asEagerSingleton()
   }
-
-  lazy val db: driver.api.Database = dbConfig.db
-
-  override val api = new API with DateTimeImplicits
-
-  def schema: DDL = DDL(Seq(), Seq())
 }

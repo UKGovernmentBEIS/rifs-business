@@ -22,9 +22,7 @@ import rifs.business.models._
 import rifs.business.slicks.support.DBBinding
 import com.wellfactored.slickgen.IdType
 
-trait OpportunityModule {
-  self: DBBinding =>
-
+trait OpportunityModule extends DBBinding {
   import api._
 
   implicit def SectionIdMapper: BaseColumnType[SectionId] = MappedColumnType.base[SectionId, Long](_.id, SectionId)
@@ -87,4 +85,6 @@ trait OpportunityModule {
   }
 
   lazy val opportunityTable = TableQuery[OpportunityTable]
+
+  override def schema = super.schema ++ sectionTable.schema ++ opportunityTable.schema
 }

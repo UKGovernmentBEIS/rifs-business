@@ -18,16 +18,16 @@
 package rifs.business.slicks.modules
 
 import com.github.tminglei.slickpg.{ExPostgresDriver, PgDateSupportJoda, PgPlayJsonSupport}
+import com.wellfactored.slickgen.IdType
 import org.joda.time.DateTime
 import play.api.libs.json.JsObject
 import rifs.business.models._
 import rifs.business.slicks.support.DBBinding
-import com.wellfactored.slickgen.IdType
 
 import scala.language.implicitConversions
 
-trait ApplicationModule extends PlayJsonMappers {
-  self: DBBinding with ExPostgresDriver with PgDateSupportJoda with PgPlayJsonSupport with ApplicationFormModule =>
+trait ApplicationModule extends DBBinding with PlayJsonMappers {
+  self: ExPostgresDriver with PgDateSupportJoda with PgPlayJsonSupport with ApplicationFormModule =>
 
   import api._
 
@@ -48,6 +48,8 @@ trait ApplicationModule extends PlayJsonMappers {
     def applicationIdIndex = index("applicationsection_application_idx", applicationId)
 
     def sectionNumber = column[Int]("section_number")
+
+    def uniqueSectionNumberPerApplication = index("unique_section_number_per_application", (applicationId, sectionNumber), unique = true)
 
     def answers = column[JsObject]("answers")
 
@@ -76,6 +78,6 @@ trait ApplicationModule extends PlayJsonMappers {
 
   lazy val applicationTable = TableQuery[ApplicationTable]
 
-  def create = (applicationSectionTable.schema ++ applicationTable.schema).createStatements
+  override def schema = super.schema ++ applicationSectionTable.schema ++ applicationTable.schema
 
 }
