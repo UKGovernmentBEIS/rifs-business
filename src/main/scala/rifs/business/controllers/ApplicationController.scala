@@ -74,15 +74,11 @@ class ApplicationController @Inject()(applications: ApplicationOps,
     }.map(jsonResult(_))
   }
 
-  def delete(id: ApplicationId) = Action.async { implicit request =>
-    applications.delete(id).map(_ => NoContent)
-  }
+  def delete(id: ApplicationId) = Action.async(applications.delete(id).map(_ => NoContent))
 
-  def deleteAll() = Action.async { implicit request =>
-    applications.deleteAll.map(_ => NoContent)
-  }
+  def deleteAll() = Action.async(applications.deleteAll.map(_ => NoContent))
 
-  def submit(id: ApplicationId) = ApplicationAction(id).async { request =>
+  def submit(id: ApplicationId) = ApplicationAction(id).async {
     val f = for {
       submissionRef <- OptionT(applications.submit(id))
       _ <- OptionT.liftF(sendSubmissionNotifications(submissionRef))

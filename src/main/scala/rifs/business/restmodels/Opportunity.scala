@@ -36,21 +36,21 @@ case class OpportunityDuration(duration: Int, units: String)
 case class Opportunity(
                         id: OpportunityId,
                         title: String,
-                        startDate: String,
-                        endDate: Option[String],
+                        startAt: DateTime,
+                        endAt: Option[DateTime],
                         value: OpportunityValue,
                         publishedAt: Option[DateTime],
                         duplicatedFrom: Option[OpportunityId],
                         description: Set[OpportunityDescriptionSection]
                       ) {
-  def summary: OpportunitySummary = OpportunitySummary(id, title, startDate, endDate, value, publishedAt, duplicatedFrom)
+  def summary: OpportunitySummary = OpportunitySummary(id, title, startAt, endAt, value, publishedAt, duplicatedFrom)
 }
 
 case class OpportunitySummary(
                                id: OpportunityId,
                                title: String,
-                               startDate: String,
-                               endDate: Option[String],
+                               startAt: DateTime,
+                               endAt: Option[DateTime],
                                value: OpportunityValue,
                                publishedAt: Option[DateTime],
                                duplicatedFrom: Option[OpportunityId]

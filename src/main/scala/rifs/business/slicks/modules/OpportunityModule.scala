@@ -17,10 +17,10 @@
 
 package rifs.business.slicks.modules
 
+import com.wellfactored.slickgen.IdType
 import org.joda.time.DateTime
 import rifs.business.models._
 import rifs.business.slicks.support.DBBinding
-import com.wellfactored.slickgen.IdType
 
 trait OpportunityModule extends DBBinding {
   import api._
@@ -42,7 +42,7 @@ trait OpportunityModule extends DBBinding {
 
     def opportunityIdIndex = index("section_opportunity_idx", opportunityId)
 
-    def title = column[String]("title", O.Length(255))
+    def title = column[String]("title", O.Length(100))
 
     def text = column[Option[String]]("text", O.Length(8192))
 
@@ -50,7 +50,7 @@ trait OpportunityModule extends DBBinding {
 
     def helpText = column[Option[String]]("help_text", O.Length(8192))
 
-    def sectionType = column[String]("section_type", O.Length(30))
+    def sectionType = column[String]("section_type", O.Length(50))
 
     def * = (id, sectionNumber, opportunityId, title, text, description, helpText, sectionType) <> (SectionRow.tupled, SectionRow.unapply)
   }
@@ -62,15 +62,15 @@ trait OpportunityModule extends DBBinding {
   class OpportunityTable(tag: Tag) extends Table[OpportunityRow](tag, "opportunity") {
     def id = column[OpportunityId]("id", O.Length(IdType.length), O.PrimaryKey, O.AutoInc)
 
-    def title = column[String]("title", O.Length(255))
+    def title = column[String]("title", O.Length(100))
 
-    def startDate = column[String]("start_date", O.Length(255))
+    def startAt = column[DateTime]("start_at_dtime")
 
-    def endDate = column[Option[String]]("end_date", O.Length(255))
+    def endAt = column[Option[DateTime]]("end_at_dtime", O.Length(255))
 
     def value = column[BigDecimal]("value", O.SqlType("decimal(9, 2)"))
 
-    def valueUnits = column[String]("value_units", O.Length(255))
+    def valueUnits = column[String]("value_units", O.Length(100))
 
     def publishedAt = column[Option[DateTime]]("published_at_dtime")
 
@@ -81,7 +81,7 @@ trait OpportunityModule extends DBBinding {
     def opportunityIdIndex = index("duplicated_opportunity_idx", duplicatedFrom)
 
 
-    def * = (id, title, startDate, endDate, value, valueUnits, publishedAt, duplicatedFrom) <> (OpportunityRow.tupled, OpportunityRow.unapply)
+    def * = (id, title, startAt, endAt, value, valueUnits, publishedAt, duplicatedFrom) <> (OpportunityRow.tupled, OpportunityRow.unapply)
   }
 
   lazy val opportunityTable = TableQuery[OpportunityTable]

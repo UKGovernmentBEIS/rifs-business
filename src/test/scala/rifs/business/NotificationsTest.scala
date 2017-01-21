@@ -102,7 +102,7 @@ object NotificationsTestData {
   val oppNotFoundOps = new DummySaveDescription(_ => Future.successful(None))
 
   val dummyOppId = OpportunityId(1399)
-  val dummyOpp = OpportunityRow(dummyOppId, "Op1", "today", None, 2000, "per event", None, None)
+  val dummyOpp = OpportunityRow(dummyOppId, "Op1", DateTime.now, None, 2000, "per event", None, None)
   val oppOps = new DummySaveDescription(oid => Future.successful(if (oid == dummyOppId) Some(dummyOpp) else None))
 
   class DummyMailer(result: => String) extends MailerClient {
@@ -112,7 +112,7 @@ object NotificationsTestData {
   val (appOpsAndSection, appOps) = {
     val appFormId = ApplicationFormId(1)
     val oppId = OpportunityId(1)
-    val opp = OpportunityRow(oppId, "oz1", "", None, 0, "", None, None)
+    val opp = OpportunityRow(oppId, "oz1", DateTime.now, None, 0, "", None, None)
 
     val appDetails = ApplicationDetails(
       ApplicationRow(dummyAppId, appFormId, None),

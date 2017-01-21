@@ -48,15 +48,15 @@ class OpportunityTables @Inject()(val dbConfigProvider: DatabaseConfigProvider, 
   }
 
   override def summaries: Future[Set[Opportunity]] = db.run(opportunityTableC.result).map { os =>
-    os.map(o => Opportunity(o.id, o.title, o.startDate, o.endDate, OpportunityValue(o.value, o.valueUnits), o.publishedAt, o.duplicatedFrom, Set())).toSet
+    os.map(o => Opportunity(o.id, o.title, o.startAt, o.endAt, OpportunityValue(o.value, o.valueUnits), o.publishedAt, o.duplicatedFrom, Set())).toSet
   }
 
   override def openSummaries: Future[Set[Opportunity]] = db.run(opportunityTable.filter(_.publishedAt.isDefined).result).map { os =>
-    os.map(o => Opportunity(o.id, o.title, o.startDate, o.endDate, OpportunityValue(o.value, o.valueUnits), o.publishedAt, o.duplicatedFrom, Set())).toSet
+    os.map(o => Opportunity(o.id, o.title, o.startAt, o.endAt, OpportunityValue(o.value, o.valueUnits), o.publishedAt, o.duplicatedFrom, Set())).toSet
   }
 
   override def updateSummary(summary: OpportunitySummary): Future[Int] = db.run {
-    val row = OpportunityRow(summary.id, summary.title, summary.startDate, summary.endDate, summary.value.amount, summary.value.unit, summary.publishedAt, summary.duplicatedFrom)
+    val row = OpportunityRow(summary.id, summary.title, summary.startAt, summary.endAt, summary.value.amount, summary.value.unit, summary.publishedAt, summary.duplicatedFrom)
     byIdC(summary.id).update(row)
   }
 

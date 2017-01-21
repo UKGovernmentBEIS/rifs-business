@@ -45,13 +45,13 @@ trait ApplicationFormModule extends DBBinding with PlayJsonMappers {
 
     def applicationFormSectionIdIndex = index("applicationformquestion_application_form_section_idx", applicationFormSectionId)
 
-    def key = column[String]("key", O.Length(255))
+    def key = column[String]("key", O.Length(100))
 
-    def text = column[String]("text", O.Length(255))
+    def text = column[String]("text", O.Length(4000))
 
     def description = column[Option[String]]("description", O.Length(255))
 
-    def helpText = column[Option[String]]("help_text", O.Length(255))
+    def helpText = column[Option[String]]("help_text", O.Length(4000))
 
     def * = (id, applicationFormSectionId, key, text, description, helpText) <> (ApplicationFormQuestionRow.tupled, ApplicationFormQuestionRow.unapply)
   }
@@ -71,7 +71,7 @@ trait ApplicationFormModule extends DBBinding with PlayJsonMappers {
 
     def sectionNumber = column[Int]("section_number")
 
-    def title = column[String]("title", O.Length(255))
+    def title = column[String]("title", O.Length(100))
 
     def sectionType = column[String]("section_type", O.Length(50))
 

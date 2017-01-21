@@ -67,7 +67,7 @@ trait ApplicationModule extends DBBinding with PlayJsonMappers {
 
     def applicationFormId = column[ApplicationFormId]("application_form_id", O.Length(IdType.length))
 
-    def personalReference = column[Option[String]]("personal_reference", O.Length(255))
+    def personalReference = column[Option[String]]("personal_reference", O.Length(100))
 
     def applicationFormIdFK = foreignKey("application_application_form_fk", applicationFormId, applicationFormTable)(_.id, onDelete = ForeignKeyAction.Cascade)
 

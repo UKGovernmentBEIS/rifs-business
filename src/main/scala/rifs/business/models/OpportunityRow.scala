@@ -37,8 +37,8 @@ case class OpportunityId(id: Long) extends AnyVal
 case class OpportunityRow(
                            id: OpportunityId,
                            title: String,
-                           startDate: String,
-                           endDate: Option[String],
+                           startAt: DateTime,
+                           endAt: Option[DateTime],
                            value: BigDecimal,
                            valueUnits: String,
                            publishedAt: Option[DateTime],

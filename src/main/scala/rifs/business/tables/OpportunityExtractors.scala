@@ -34,8 +34,8 @@ object OpportunityExtractors {
       Opportunity(
         o.id,
         o.title,
-        o.startDate,
-        o.endDate,
+        o.startAt,
+        o.endAt,
         OpportunityValue(o.value, o.valueUnits),
         o.publishedAt,
         o.duplicatedFrom,
